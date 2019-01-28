@@ -112,13 +112,6 @@ intrinsic Min(m1::Infty, m2::RngUPolElt) -> .
 	return Min(m2, m1);
 end intrinsic;
 
-intrinsic Swap(~x::., ~y::.)
-{Swaps two variables x and y}
-	temp := x;
-	x := y;
-	y := temp;
-end intrinsic;
-
 intrinsic Max(m1::RngUPolElt, m2::RngUPolElt) -> RngUPolElt
 {Minimum of a two linear polynomials}
 	require Degree(m1) le 1: "Argument 1 must have degree <= 1";
@@ -172,11 +165,6 @@ intrinsic Sign(f::RngUPolElt[FldRat]) -> RngIntElt
 	else
 		return Sign(LeadingCoefficient(f));
 	end if;
-end intrinsic;
-
-intrinsic TupSeq(t::Tup) -> SeqEnum
-{The tuple t as a sequence}
-	return [c : c in t];	
 end intrinsic;
 
 intrinsic Valuation2(P::RngUPolElt) -> <>
@@ -413,14 +401,6 @@ Here F is the factor of P that is considered.}
 	return true, Floor(v + 1);
 end intrinsic;
 
-
-Flatten := function(L)
-	while Type(L[1]) eq SeqEnum do
-		L := &cat L;
-	end while;
-	return L;
-end function;
-
 intrinsic Inside(r1::RngPadElt, r2::RngPadElt) -> BoolElt
 {}
 	return IsZero(r1 - r2);
@@ -567,16 +547,6 @@ isomorphism classes of all fibres}
 
     Isw  := {E : E in L | assigned E`Witness} join samples;
     Isnw := {E : E in L | not assigned E`Witness};
-
-    /*for E in Isnw do
-    	for S in samples do
-    		if IsIsomorphic(E, S) then
-    			Append(~Isw, S);
-    			Exclude(~Isnw, E);
-    			break;
-    		end if;
-    	end for;
-    end for;*/
 
     Isnw diff:= samples;
 
@@ -798,29 +768,3 @@ isomorphism classes of all fibres}
     printf "Computing isomorphism classes\n";
     return Set(IsomorphismClassesEtale(Ls));
 end intrinsic;
-
-
-intrinsic Permutations(L::SeqEnum) -> SeqEnum
-{All permutations of L}
-	S := Set([1..#L]);
-	return [L[p] : p in Permutations(S)];
-end intrinsic;
-
-intrinsic Partitions(M::SetMulti, p::SeqEnum[RngIntElt]) -> SeqEnum
-{All partitions of M in k parts}
-	require #M eq (&+ p): "Argument 2 must be a partition of #Argument 1 elements";
-	L := MultisetToSequence(M);
-	return {[SequenceToMultiset(s[i]) : i in PartitionToIndices(p)] : s in Permutations(L)};
-end intrinsic;
-
-intrinsic PartitionToIndices(P::SeqEnum[RngIntElt]) -> SeqEnum
-{}
-	L := [];
-	c := 1;
-	for p in P do
-		Append(~L, [c..(c+p-1)]);
-		c := c + p;
-	end for;
-	return L;
-end intrinsic;
-
