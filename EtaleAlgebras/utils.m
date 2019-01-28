@@ -45,3 +45,12 @@ intrinsic Swap(~x::., ~y::.)
 	x := y;
 	y := temp;
 end intrinsic;
+
+intrinsic Sign(f::RngUPolElt[FldRat]) -> RngIntElt
+{Sign of the leading coefficient of the univariate integer polynomial f}
+	if f eq 0 then
+		return 0;
+	else
+		return Sign(LeadingCoefficient(f));
+	end if;
+end intrinsic;

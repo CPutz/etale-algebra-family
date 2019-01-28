@@ -28,8 +28,8 @@ intrinsic FamilyOfNewtonPolygons(P::RngUPolElt) -> FamNwtnPgon
 	for i in Support(P) do
 		c := Coefficient(P, i);
 		v := Valuation(c);
-		if v[1] eq v[2] then
-			Append(~V, <i, v[1]>);
+		if Min(v) eq Max(v) then
+			Append(~V, <i, Retrieve(Min(v))>);
 		else
 			Error("Cannot determine Newton polygon (not implemented)");
 		end if;
@@ -186,11 +186,6 @@ end intrinsic;
 
 intrinsic Slope(F::FamNwtnPgonFace) -> RngUPolElt
 {The slope of F}
-	R := PolynomialRing(Q);
-	if assigned BaseRing(NewtonPolygon(F))`PowerRange then
-		range := BaseRing(NewtonPolygon(F))`PowerRange;
-		R := CreateParameterSpace(R, range);
-	end if;
 	return (Qx!P2(F)[2] - P1(F)[2]) / (Q!P2(F)[1] - P1(F)[1]);
 end intrinsic;
 
