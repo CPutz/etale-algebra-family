@@ -1,0 +1,8 @@
+# List of all rational elliptic curves with good reduction outside S, up to Q-isomorphisms,
+# where S = {2, 3, 5, 7, 11}.
+# It contains 592192 pairs (c4,c6).
+# Format: "(c4,c6)".
+# Computing this list took 8893 seconds.
+# Authors: Rafael von Känel and Benjamin Matschke, 2015.
+# License: Creative commons 3.0 by-nc.
+# 
