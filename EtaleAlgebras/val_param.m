@@ -141,20 +141,16 @@ intrinsic Min(v::ValPrmElt) -> CopElt
 	return Value(v)[1];
 end intrinsic;
 
-intrinsic Max(v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
-{The maximum of v1 and v2}
-	r := PowerRange(Parent(v1));
-	return ValuationSpaceElement(Parent(v1),
-		Min(Max(v1), Max(v2), r),
-		Max(Max(v1), Max(v2), r));
-end intrinsic;
-
 intrinsic Min(v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
 {The minimum of v1 and v2}
 	r := PowerRange(Parent(v1));
-	return ValuationSpaceElement(Parent(v1),
-		Min(Min(v1), Min(v2), r),
-		Max(Min(v1), Min(v2), r));
+	if v1 lt v2 then
+		return v1;
+	elif v2 lt v1 then
+		return v2;
+	else
+		return ValuationSpaceElement(Parent(v1), Min(Min(v1), Min(v2), r), Infinity());
+	end if;
 end intrinsic;
 
 intrinsic Max(v1::CopElt, v2::CopElt, r::<>) -> CopElt
@@ -182,7 +178,8 @@ intrinsic Max(v1::CopElt, v2::CopElt, r::<>) -> CopElt
 			f := m1 - m2;
 
 			v := Evaluate(f, r[1]);
-			if Sign(Coefficient(f,1)) * v le 0 then
+			//TODO: correct for negative coefficients
+			if v lt 0 then
 				return P ! (m1 - v);
 			else
 				return P ! m1;
@@ -221,12 +218,30 @@ intrinsic '*'(r::RngIntElt, v::ValPrmElt) -> ValPrmElt
 	end if;
 end intrinsic;
 
-intrinsic Union(v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
-{The union of the confidence intervals v1 and v2}
+intrinsic 'le'(v1::ValPrmElt, v2::ValPrmElt) -> BoolElt
+{v1 le v2}
+	r := PowerRange(Parent(v1));
+	return Min(Max(v1), Min(v2), r) eq Max(v1);
+end intrinsic;
+
+intrinsic 'lt'(v1::ValPrmElt, v2::ValPrmElt) -> BoolElt
+{v1 lt v2}
+	return v1 le v2 and
+		(Type(Retrieve(Max(v1))) ne Type(Retrieve(Min(v2))) or
+		Max(v1) ne Min(v2));
+end intrinsic;
+
+intrinsic 'subset'(v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
+{v1 meet v2}
+	V := Parent(v1);
+	return V!Min(v2) le v1 and v1 le V!Max(v2);
+end intrinsic;
+
+intrinsic 'join' (v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
+{v1 join v2}
 	r := PowerRange(Parent(v1));
 	return ValuationSpaceElement(Parent(v1),
-		Min(Min(v1), Min(v2), r),
-		Max(Max(v1), Max(v2), r));
+		Min(Min(v1),Min(v2),r), Max(Max(v1), Max(v2),r));
 end intrinsic;
 
 
@@ -320,20 +335,12 @@ intrinsic ValuationsOfPolynomial(P::RngUPolElt, D::RngUPolElt, F::FamNwtnPgonFac
 {Returns the valuations of P in the roots of a factor F of D}
 	range := PowerRange(BaseRing(Parent(D)));
 	V := ValuationSpace(range);
-	v := V!<-Infinity(),Infinity()>;
+	v := V!Infinity();
 	vF := -Slope(F);
-	
-	P;
-	F;
 
 	for m in Support(P) do
-		vm := Valuation(Coefficient(P, m));
-		v := Min(v, vm + V!(m * vF));
-
-		m;
-		vm;
-		V!(m * vF);
-		v;
+		vm := Valuation(Coefficient(P, m)) + V!(m * vF);
+		v := Min(v, vm);
 	end for;
 
 	return <v, Length(F)>;

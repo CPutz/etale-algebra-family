@@ -105,8 +105,8 @@ intrinsic MakeMonic(P::RngUPolElt) -> RngUPolElt
 	d := Degree(P);
 
 	v := ValuationE(LeadingCoefficient(P));
-	vp := Coefficient(v, 0);
-	vr := Coefficient(v, 1);
+	vp := Z!Coefficient(v, 0);
+	vr := Z!Coefficient(v, 1);
 
 	M := [Qx!(ValuationE(Coefficient(P,c))-v) / (d-c) : c in Support(P) | c ne d];
 	Mp := Min(0, Floor(Min([Coefficient(m, 0) : m in M])));

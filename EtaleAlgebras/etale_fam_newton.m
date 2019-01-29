@@ -28,6 +28,7 @@ intrinsic FamilyOfNewtonPolygons(P::RngUPolElt) -> FamNwtnPgon
 	for i in Support(P) do
 		c := Coefficient(P, i);
 		v := Valuation(c);
+		<v, c>;
 		if Min(v) eq Max(v) then
 			Append(~V, <i, Retrieve(Min(v))>);
 		else

@@ -49,22 +49,43 @@ intrinsic StructuralStability(P::RngUPolElt:
 {Returns the constant mu (as a valuation) from the structural stability theorem}
 	require ValuationE(LeadingCoefficient(P)) eq 0: "Argument 1 needs to be a monic polynomial:", P;
 
-	vs := ValuationsOfPolynomial(Derivative(P), P);
+	//vs := ValuationsOfPolynomial(Derivative(P), P);
+	t := Name(Parent(P),1);
+	R := PolynomialRing(PolynomialRing(Z,2));
+	vs := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-7*P), P);
 	Mvs := {* v[1]^^v[2] : v in vs *};
 	PMvs := Partitions(Mvs, [Length(F) : F in Fs]);
 
-	for F in Fs do
-		vsF := ValuationsOfPolynomial(Derivative(P), P, F);
+	for i in [1..#Fs] do
+		F := Fs[i];
+		//vsF := ValuationsOfPolynomial(Derivative(P), P, F);
+		vsF := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-7*P), P, F);
 		vsF;
+
+		V := Parent(vsF[1]);
+		vsF := <vsF[1] + V!Slope(F), vsF[2]>;
+
+		PMvsNew := {};
+		for p in PMvs do
+			if forall(t) {v : v in MultisetToSet(p[i]) | v subset vsF[1]} then
+				Include(~PMvsNew, p);
+			end if;
+		end for;
+		PMvs := PMvsNew;
 	end for;
 
 	if #PMvs eq 1 then
+		vals := Rep(PMvs);
+		for i in [1..#Fs] do
+			printf "Face %o has valuations %o\n", Fs[i], vals[i];
+		end for;
+
 		mus := [];
-		for Pvs in Rep(PMvs) do
+		for Pvs in vals do
 			V := Parent(Rep(Pvs));
-			v := V!(-Infinity());
+			v := V!<Infinity(), -Infinity()>;
 			for v1 in MultisetToSet(Pvs) do
-				v := Union(v, v1);
+				v join:= v1;
 			end for;
 			max := Max(v);
 			if not IsConstant(max) then
@@ -78,7 +99,7 @@ intrinsic StructuralStability(P::RngUPolElt:
 		end for;
 		return mus;
 	else
-		Error("not implemented");
+		Error("could not determine valuation of derivative");
 	end if;
 end intrinsic;
 
