@@ -118,7 +118,7 @@ end intrinsic;
 
 intrinsic Print(v::ValPrmElt)
 {Print v}
-	printf "%o", Value(v);
+	printf "v[%o-%o]", Value(v)[1], Value(v)[2];
 end intrinsic;
 
 intrinsic Parent(v::ValPrmElt) -> ValPrm
@@ -242,6 +242,19 @@ intrinsic 'join' (v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
 	r := PowerRange(Parent(v1));
 	return ValuationSpaceElement(Parent(v1),
 		Min(Min(v1),Min(v2),r), Max(Max(v1), Max(v2),r));
+end intrinsic;
+
+intrinsic Evaluate(v::ValPrmElt, r::FldRatElt) -> ValPrmElt
+{Evaluate v at r}
+	vm := Retrieve(Min(v));
+	vM := Retrieve(Max(v));
+	if not ISA(Type(vm), Infty) then
+		vm := Evaluate(vm, r);
+	end if;
+	if not ISA(Type(vM), Infty) then
+		vM := Evaluate(vM, r);
+	end if;
+	return ValuationSpaceElement(Parent(v), vm, vM);
 end intrinsic;
 
 

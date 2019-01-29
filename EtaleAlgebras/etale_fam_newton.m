@@ -29,11 +29,7 @@ intrinsic FamilyOfNewtonPolygons(P::RngUPolElt) -> FamNwtnPgon
 		c := Coefficient(P, i);
 		v := Valuation(c);
 		<v, c>;
-		if Min(v) eq Max(v) then
-			Append(~V, <i, Retrieve(Min(v))>);
-		else
-			Error("Cannot determine Newton polygon (not implemented)");
-		end if;
+		Append(~V, <i, v>);
 	end for;
 	N`Vertices := V;
 	return N;
@@ -66,7 +62,11 @@ end intrinsic;
 intrinsic Evaluate(N::FamNwtnPgon, r::RngIntElt) -> NwtnPgon
 {Returns the fibre at r}
 	Vr := [<v[1], Evaluate(v[2], r)> : v in AllVertices(N)];
-	return NewtonPolygon(Vr);
+	Vr1 := [<v[1], Retrieve(Min(v[2]))> : v in Vr | Type(Retrieve(Min(v))) eq Type(Retrieve(Max(v))) and Min(v) eq Max(v)];
+	Vr2 := [<v[1], Retrieve(Min(v[2]))> : v in Vr];
+	error if AllVertices(NewtonPolygon(Vr1)) ne AllVertices(NewtonPolygon(Vr2)),
+		"Could not evaluate Newton polygon";
+	return NewtonPolygon(Vr1);
 end intrinsic;
 
 intrinsic VerticesXAt(N::FamNwtnPgon, r::RngIntElt) -> SeqEnum
@@ -128,10 +128,8 @@ intrinsic FamNewtonPolygonConverged(N::FamNwtnPgon, r::RngIntElt) -> BoolElt
 	require range[1] le r and r le range[2]:
 		"Argument 2 must lie in range:", range;
 
-	V := AllVertices(N);
-	Vr := [<v[1], Evaluate(v[2],r)> : v in V];
-	Xs := [v[1] : v in AllVertices(NewtonPolygon(Vr))];
-	Dr := [<v[1], Coefficient(v[2],1)> : v in V];
+	Xs := VerticesXAt(N);
+	Dr := [<v[1], Coefficient(Retrieve(Min(v[2])),1)> : v in AllVertices(N)];
 	DXs := [v[1] : v in AllVertices(NewtonPolygon(Dr))];
 	return DXs subset Xs;
 end intrinsic;
@@ -187,7 +185,13 @@ end intrinsic;
 
 intrinsic Slope(F::FamNwtnPgonFace) -> RngUPolElt
 {The slope of F}
-	return (Qx!P2(F)[2] - P1(F)[2]) / (Q!P2(F)[1] - P1(F)[1]);
+	y1 := Retrieve(Min(P1(F)[2]));
+	y2 := Retrieve(Min(P2(F)[2]));
+	error if Type(y1) ne Type(Retrieve(Max(P1(F)[2]))) or y1 ne Retrieve(Max(P1(F)[2])),
+		"Point 1 of face is not fully determined:", F;
+	error if Type(y2) ne Type(Retrieve(Max(P2(F)[2]))) or y2 ne Retrieve(Max(P2(F)[2])),
+		"Point 2 of face is not fully determined:", F;
+	return (Qx!y2 - y1) / (Q!P2(F)[1] - P1(F)[1]);
 end intrinsic;
 
 intrinsic Length(F::FamNwtnPgonFace) -> RngIntElt
