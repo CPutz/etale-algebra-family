@@ -113,3 +113,16 @@ intrinsic MakeMonic(P::RngUPolElt) -> RngUPolElt
 	Mr := Min(0, Floor(Min([Coefficient(m, 1) : m in M])));
 	return ReciprocalScale(P, p^(-Mp) * r^(-Mr)) div (p^vp * r^vr);
 end intrinsic;
+
+intrinsic MakeMonicIntegral(P::RngUPolElt) -> RngUPolElt
+{Scales a polynomial over a local field such that it is monic and
+integral}
+	//TODO: ASSERT: Must be over a local field
+	K := BaseRing(P);
+	p := Prime(K);
+	c := Valuation(LeadingCoefficient(P));
+	P /:= p^c;
+	//TODO: Can me more optimized
+	v := Min([Valuation(a) : a in Coefficients(P)]);
+	return ScaleCoefficients(P, K!p^(-v));
+end intrinsic;

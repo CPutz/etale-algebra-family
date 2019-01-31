@@ -60,47 +60,39 @@ intrinsic StructuralStability(P::RngUPolElt:
 		F := Fs[i];
 		//vsF := ValuationsOfPolynomial(Derivative(P), P, F);
 		vsF := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-7*P), P, F);
-		vsF;
-
-		V := Parent(vsF[1]);
-		vsF := <vsF[1] + V!Slope(F), vsF[2]>;
-
 		PMvsNew := {};
 		for p in PMvs do
-			if forall(t) {v : v in MultisetToSet(p[i]) | v subset vsF[1]} then
+			if forall {v : v in MultisetToSet(p[i]) | v subset vsF[1]} then
 				Include(~PMvsNew, p);
 			end if;
 		end for;
 		PMvs := PMvsNew;
 	end for;
 
-	if #PMvs eq 1 then
-		vals := Rep(PMvs);
-		for i in [1..#Fs] do
-			printf "Face %o has valuations %o\n", Fs[i], vals[i];
-		end for;
+	C := cop<Parent(Infinity()), Integers()>;
+	mus := [C!(-Infinity()) : i in [1..#Fs]];
 
-		mus := [];
-		for Pvs in vals do
-			V := Parent(Rep(Pvs));
+	for vals in PMvs do
+		for i in [1..#Fs] do
+			V := Parent(Rep(vals[i]));
+			printf "Face %o gives valuations %o\n", Fs[i], {* v + V!Slope(Fs[i]) : v in vals[i] *};
+
 			v := V!<Infinity(), -Infinity()>;
-			for v1 in MultisetToSet(Pvs) do
-				v join:= v1;
+			for v1 in MultisetToSet(vals[i]) do
+				//v join:= v1;
+				v join:= v1 + V!Slope(Fs[i]);
 			end for;
 			max := Max(v);
-			if not IsConstant(max) then
-				printf "mu depends on r\n";
-			elif ISA(Type(max), Infty) then
-				printf "mu is unbounded\n";
-			end if;
-			//mu := Q!max;
-			mu := 2 * Q!Retrieve(Max(v));
-			Append(~mus, Floor(mu + 1));
+			if not IsConstant(max) or ISA(Type(max), Infty) then
+				mus[i] := C!Infinity();
+			else
+				mu := 2 * Q!Retrieve(Max(v));
+				mus[i] := Max(mus[i], C!Floor(mu + 1));
+			end if;		
 		end for;
-		return mus;
-	else
-		Error("could not determine valuation of derivative");
-	end if;
+	end for;
+
+	return mus;
 end intrinsic;
 
 intrinsic Inside(r1::RngPadElt, r2::RngPadElt) -> BoolElt
@@ -127,17 +119,12 @@ parameters upto a certain p-adic precision}
 	PSet := ParameterSet(BaseRing(R));
 
     if prec eq 0 then
-    	//B := [Zr!b + Qpr![O(Qp!p^1) : i in [1..rank]] : b in RSpace(Integers(p^1), rank)];
-    	//B := [b : b in B | exists(t) {x : x in PSet | forall(i) {i : i in [1..rank] | Inside(x[i],b[i])}}];
-		//b := B[1];
-		//EvaluateParam(P, [p^r_min] cat Eltseq(b));
-		//ForgetParam(EvaluateParam(P, [p^r_min] cat Eltseq(b)));
-		//return [EtaleAlgebra(ForgetParam(EvaluateParam(P, [p^r_min] cat Eltseq(b))): W := <r_min, b>)];
 		prec := 1;
 	end if;
+
 	vals := [Qx!ValuationE(LeadingCoefficient(a)) : a in Terms(P)];
-	vals_a := [Qx!ValuationE(LeadingCoefficient(a)) : a in Terms(P) |
-		&+ Prune(Reverse(Exponents(LeadingCoefficient(a)))) gt 0];
+	vals_a := [Qx!ValuationE(a2) : a2 in Terms(LeadingCoefficient(a)), a in Terms(P) |
+		&+ Prune(Reverse(Exponents(a2))) gt 0];
 	//max valuation of r needed
 	rs := [Roots(v - prec)[1][1] : v in vals | not IsConstant(v)];
 	if not IsEmpty(rs) then
@@ -152,7 +139,6 @@ parameters upto a certain p-adic precision}
 
     printf "%o <= r <= %o for sufficient p-adic precision\n", min, max;
     for r := min to max do
-    	//
     	prec_r := Max(1, Z!Ceiling(Max([prec - Evaluate(v,r) : v in vals_a])));
     	printf "r = %o and prec = %o\n", r, prec_r;
     	rank := Rank(BaseRing(R)) - 1;
@@ -185,6 +171,7 @@ isomorphism classes of all fibres}
 	end if;
 	samples := Set(IsomorphismClassesFamEtaleUptoPrecision(P, prec: D := D));
 	printf "Found %o etale algebras.\n", #samples;
+
 
 	printf "Trying around 0\n";
 	b, L0 := IsomorphismClassesFamEtale(P, ER!0: D := D);
@@ -326,42 +313,26 @@ isomorphism classes of all fibres}
 			max_disc := valD + s*n*(n-1);
 			Append(~max_discs, max_disc);
 			printf "Valuation of discriminant is <= %o\n", max_disc;
-
-    		/*printf "Factor %o\n", factor; IndentPush();
-    		if n eq 1 then
-    			printf "Factor is linear\n";
-    			SetPrecision(factor, ER!0);
-    			//SetEtalePossibilities(factor, [EtaleAlgebra(UnramifiedExtension(RingOfIntegers(Qp),1))]);
-    		else
-    			b, prec := StructuralStability(Pr, factor);
-    			if b then
-    				printf "Structural stability succeeded with precision = %o\n", prec;
-    				//SetPrecision(factor, ER!prec);
-    				//TODO: this is a hack
-    				//if prec gt 3 then
-    				//	SetPrecision(factor, ER!Infinity());
-    				//	printf "p-adic precision too high for practical computations\n", prec;
-    				//end if;
-    				i := GetIndent();
-    				read compute, "Do you want to compute upto this precision? (y/n)";
-    				SetIndent(i);
-    				//for j in [1..i] do
-    				//	IndentPush();
-    				//end for;
-		    		if compute eq "n" then
-		    			SetPrecision(factor, ER!Infinity());
-		    		else
-		    			SetPrecision(factor, ER!prec);
-		    		end if;
-    			else
-    				printf "Structural stability failed\n";
-    				SetPrecision(factor, ER!Infinity());
-    			end if;
-    		end if;
-    		IndentPop(); printf "\n";*/
     	end for;
 
-
+    	printf "Trying to apply structural stability\n";
+    	SS := StructuralStability(Pr);
+    	for i in [1..#Fs] do
+    		F := Fs[i];
+    		prec := Retrieve(SS[i]);
+    		if ISA(Type(prec), Infty) then 
+    			printf "Structural stability for %o failed\n", F;
+    			SetPrecision(F, ER!Infinity());
+    		else
+	    		printf "Structural stability for %o succeeded with precision = %o\n", F, prec;
+	    		read compute, "Do you want to compute upto this precision? ( /n)";
+	    		if compute eq "n" then
+	    			SetPrecision(F, ER!Infinity());
+	    		else
+	    			SetPrecision(F, ER!prec);
+	    		end if;
+	    	end if;
+    	end for;
     	
     	prec_faces := [F : F in Fs | Precision(F) lt Infinity()];
     	if prec_faces eq Fs then
@@ -454,5 +425,6 @@ isomorphism classes of all fibres}
     end for;
 
     printf "Computing isomorphism classes\n";
-    return Set(IsomorphismClassesEtale(Ls));
+    //return Set(IsomorphismClassesEtale(Ls));
+    return Set(Ls);
 end intrinsic;

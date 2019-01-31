@@ -9,19 +9,7 @@ intrinsic Partitions(M::SetMulti, p::SeqEnum[RngIntElt]) -> SeqEnum
 {All partitions of M in k parts}
 	require #M eq (&+ p): "Argument 2 must be a partition of #Argument 1 elements";
 	L := MultisetToSequence(M);
-	return {[SequenceToMultiset(s[i]) : i in PartitionToIndices(p)] : s in Permutations(L)};
-end intrinsic;
-
-intrinsic PartitionToIndices(P::SeqEnum[RngIntElt]) -> SeqEnum
-{Given a partition of n, splits the sequence [1..n]
-according to this partition}
-	L := [];
-	c := 1;
-	for p in P do
-		Append(~L, [c..(c+p-1)]);
-		c := c + p;
-	end for;
-	return L;
+	return {[SequenceToMultiset(s[i]) : i in Partition([1..#M], p)] : s in Permutations(L)};
 end intrinsic;
 
 //Sequences
@@ -31,6 +19,12 @@ intrinsic Flatten(L::SeqEnum) -> SeqEnum
 		L := &cat L;
 	end while;
 	return L;
+end intrinsic;
+
+intrinsic Zip(L1::SeqEnum, L2::SeqEnum) -> SeqEnum[Tup]
+{Zips two sequences}
+	require #L1 eq #L2: "Argument 1 and Argument 2 must have the same length";
+	return [<L1[i], L2[i]> : i in [1..#L1]];
 end intrinsic;
 
 //Misc
@@ -53,4 +47,14 @@ intrinsic Sign(f::RngUPolElt[FldRat]) -> RngIntElt
 	else
 		return Sign(LeadingCoefficient(f));
 	end if;
+end intrinsic;
+
+intrinsic Evaluate(Q::SeqEnum[RngUPolElt], x::RngElt) -> SeqEnum[RngElt]
+{Evaluates every polynomial in a sequence at x}
+	return [Evaluate(p, x) : p in Q];
+end intrinsic;
+
+intrinsic Evaluate(Q::SeqEnum[RngMPolElt], x::SeqEnum[RngElt]) -> SeqEnum[RngElt]
+{Evaluates every polynomial in a sequence at x}
+	return [Evaluate(p, x) : p in Q];
 end intrinsic;

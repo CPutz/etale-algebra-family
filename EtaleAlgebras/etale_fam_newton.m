@@ -28,7 +28,6 @@ intrinsic FamilyOfNewtonPolygons(P::RngUPolElt) -> FamNwtnPgon
 	for i in Support(P) do
 		c := Coefficient(P, i);
 		v := Valuation(c);
-		<v, c>;
 		Append(~V, <i, v>);
 	end for;
 	N`Vertices := V;
@@ -62,9 +61,9 @@ end intrinsic;
 intrinsic Evaluate(N::FamNwtnPgon, r::RngIntElt) -> NwtnPgon
 {Returns the fibre at r}
 	Vr := [<v[1], Evaluate(v[2], r)> : v in AllVertices(N)];
-	Vr1 := [<v[1], Retrieve(Min(v[2]))> : v in Vr | Type(Retrieve(Min(v))) eq Type(Retrieve(Max(v))) and Min(v) eq Max(v)];
-	Vr2 := [<v[1], Retrieve(Min(v[2]))> : v in Vr];
-	error if AllVertices(NewtonPolygon(Vr1)) ne AllVertices(NewtonPolygon(Vr2)),
+	Vr1 := [<v[1], Q!Retrieve(Min(v[2]))> : v in Vr | Type(Retrieve(Min(v[2]))) eq Type(Retrieve(Max(v[2]))) and Min(v[2]) eq Max(v[2])];
+	Vr2 := [<v[1], Q!Retrieve(Min(v[2]))> : v in Vr];
+	error if LowerVertices(NewtonPolygon(Vr1)) ne LowerVertices(NewtonPolygon(Vr2)),
 		"Could not evaluate Newton polygon";
 	return NewtonPolygon(Vr1);
 end intrinsic;
@@ -128,9 +127,9 @@ intrinsic FamNewtonPolygonConverged(N::FamNwtnPgon, r::RngIntElt) -> BoolElt
 	require range[1] le r and r le range[2]:
 		"Argument 2 must lie in range:", range;
 
-	Xs := VerticesXAt(N);
+	Xs := VerticesXAt(N, r);
 	Dr := [<v[1], Coefficient(Retrieve(Min(v[2])),1)> : v in AllVertices(N)];
-	DXs := [v[1] : v in AllVertices(NewtonPolygon(Dr))];
+	DXs := [v[1] : v in LowerVertices(NewtonPolygon(Dr))];
 	return DXs subset Xs;
 end intrinsic;
 

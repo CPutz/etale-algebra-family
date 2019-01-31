@@ -118,7 +118,13 @@ end intrinsic;
 
 intrinsic Print(v::ValPrmElt)
 {Print v}
-	printf "v[%o-%o]", Value(v)[1], Value(v)[2];
+	v1 :=  Retrieve(Value(v)[1]);
+	v2 :=  Retrieve(Value(v)[2]);
+	if Type(v1) eq Type(v2) and v1 eq v2 then
+		printf "v:%o", v1;
+	else
+		printf "v:%o,%o", v1, v2;
+	end if;
 end intrinsic;
 
 intrinsic Parent(v::ValPrmElt) -> ValPrm
@@ -196,7 +202,29 @@ end intrinsic;
 
 intrinsic '+'(v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
 {The sum of v1 and v2}
-	return ValuationSpaceElement(Parent(v1), Min(v1) + Min(v2), Max(v1) + Max(v2));
+	m1 := Retrieve(Min(v1));
+	M1 := Retrieve(Max(v1));
+	m2 := Retrieve(Min(v2));
+	M2 := Retrieve(Max(v2));
+	if ISA(Type(m1), Infty) then
+		error if ISA(Type(m2), Infty) and Sign(m1) ne Sign(m2),
+			"Result of computation is not well defined";
+		m := m1;
+	elif ISA(Type(m2), Infty) then
+		m := m2;
+	else
+		m := m1 + m2;
+	end if;
+	if ISA(Type(M1), Infty) then
+		error if ISA(Type(M2), Infty) and Sign(M1) ne Sign(M2),
+			"Result of computation is not well defined";
+		M := M1;
+	elif ISA(Type(M2), Infty) then
+		M := M2;
+	else
+		M := M1 + M2;
+	end if;
+	return ValuationSpaceElement(Parent(v1), m, M);
 end intrinsic;
 
 intrinsic '-'(v1::ValPrmElt) -> ValPrmElt
@@ -244,7 +272,7 @@ intrinsic 'join' (v1::ValPrmElt, v2::ValPrmElt) -> ValPrmElt
 		Min(Min(v1),Min(v2),r), Max(Max(v1), Max(v2),r));
 end intrinsic;
 
-intrinsic Evaluate(v::ValPrmElt, r::FldRatElt) -> ValPrmElt
+intrinsic Evaluate(v::ValPrmElt, r::.) -> ValPrmElt
 {Evaluate v at r}
 	vm := Retrieve(Min(v));
 	vM := Retrieve(Max(v));

@@ -1,7 +1,7 @@
 //Etale algebras
 declare type EtAlg;
 declare attributes EtAlg: DefiningPolynomial, Components, BaseRing,
-    UniqueRepresentatives, Witness, FactorizationStructure;
+    Witness, FactorizationStructure;
 
 
 EtaleReduce := function(E)
@@ -34,20 +34,18 @@ set to a witness.}
     R := PolynomialRing(OK);
     S := PolynomialRing(K);
 
-    //F := Factorization(R ! MakeMonicIntegral(P));
-    //Es := [ <FindLocalFieldExtension(a[1]: D := D), a[2]> : a in F ];
-    F, _, certs := Factorization(R ! MakeMonicIntegral(P): Extensions := true);
-    Es := [<certs[i]`Extension ,F[i][2]> : i in [1..#F]];
+    F := Factorization(R ! MakeMonicIntegral(P));
+    Es := [ <FindLocalFieldExtension(a[1]: D := D), a[2]> : a in F ];
+    //F, _, certs := Factorization(R ! MakeMonicIntegral(P): Extensions := true);
+    //Es := [<certs[i]`Extension ,F[i][2]> : i in [1..#F]];
 
     E := New(EtAlg);
 	E`DefiningPolynomial := P;
 	E`BaseRing := OK;
 
-	//E`Components := EtaleReduce(Es);
-    //E`UniqueRepresentatives := true;
-    E`Components := Es;
+	E`Components := EtaleReduce(Es);
+    //E`Components := Es;
     E`FactorizationStructure := Sort([<AbsoluteDegree(C[1]), C[2]> : C in Components(E)]);
-	E`UniqueRepresentatives := false;
     
     if not ISA(Type(W), MonStgElt) or W ne "" then
         E`Witness := W;
@@ -69,7 +67,6 @@ intrinsic EtaleAlgebra(L::SeqEnum[Tup]) -> EtAlg
    
     E`Components := EtaleReduce(L);
     E`FactorizationStructure := Sort([<AbsoluteDegree(C[1]), C[2]> : C in Components(E)]);
-    E`UniqueRepresentatives := false;
     return E;
 end intrinsic;
 
@@ -79,7 +76,6 @@ intrinsic EtaleAlgebra(K::RngPad) -> EtAlg
     E`BaseRing := BaseRing(BaseRing(K));
     E`DefiningPolynomial := MinimalPolynomial(UniformizingElement(K), BaseRing(E));
     E`Components := [<K, 1>];
-    E`UniqueRepresentatives := false;
     return E;
 end intrinsic;
 
@@ -119,13 +115,17 @@ intrinsic Witness(E::EtAlg) -> .
     return E`Witness;
 end intrinsic;
 
+intrinsic Rank(E::EtAlg) -> RngIntElt
+{The rank of E over its base ring}
+    return Degree(DefiningPolynomial(E));
+end intrinsic;
+
 intrinsic Product(L::SeqEnum[EtAlg]) -> EtAlg
 {Constructs the product of a sequence of etale algebras}
     E := New(EtAlg);
     E`DefiningPolynomial := &* [DefiningPolynomial(Ei) : Ei in L];
     E`BaseRing := BaseRing(L[1]);
     E`Components := EtaleReduce(&cat [Components(Ei) : Ei in L]);
-    E`UniqueRepresentatives := false;
     return E;
 end intrinsic;
 
@@ -169,49 +169,14 @@ used for searching.}
     return BaseRing(P);
 end intrinsic;
 
-intrinsic MakeMonicIntegral(P::RngUPolElt) -> RngUPolElt
-{Scales a polynomial over a local field such that it is monic and
-integral}
-	//TODO: ASSERT: Must be over a local field
-	K := BaseRing(P);
-	p := Prime(K);
-	c := Valuation(LeadingCoefficient(P));
-	P /:= p^c;
-	//TODO: Can me more optimized
-	v := Min([Valuation(a) : a in Coefficients(P)]);
-	return ScaleCoefficients(P, K!p^(-v));
-end intrinsic;
-
 intrinsic ScaleCoefficients(P::RngUPolElt, c::FldPadElt) -> RngUPolElt
 {Scales the Coefficients of a polynomial weighted by degree}
     t := Name(P,1);
     return c^Degree(P) * Evaluate(P, t / c);
 end intrinsic;
 
-
-//TODO: is this needed?
-IsIsomorphicUnique := function(E1, E2)
-	for Ki in Components(E1) do
-        found := false;
-        for Li in Components(E2) do
-            if DefiningPolynomial(Ki[1]) eq DefiningPolynomial(Li[1]) and Ki[2] eq Li[2] then
-                found := true;
-                break;
-            end if;
-        end for;
-        if not found then
-            return false;
-        end if;
-    end for;
-    return true;
-end function;
-
 intrinsic IsIsomorphic(E1::EtAlg, E2::EtAlg) -> BoolElt
 {Determines whether two etale algebras are isomorphic}
-	//if E1`UniqueRepresentatives and E2`UniqueRepresentatives then
-	//	return IsIsomorphicUnique(E1, E2);
-	//end if;
-    //TODO: fix problem above with ramified of unramified extension
 	for Ki in Components(E1) do
         found := false;
         for Li in Components(E2) do
