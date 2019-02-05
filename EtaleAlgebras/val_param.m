@@ -352,7 +352,7 @@ over a parameter space}
 	N := FamilyOfNewtonPolygons(P);
 	range := PowerRange(BaseRing(Parent(P)));
 	r := range[1];
-	require FamNewtonPolygonConverged(N, r):
+	require range[1] eq range[2] or FamNewtonPolygonConverged(N, r):
 		"Newton polygon of Argument 1 is not converged over:", range;
 	V := ValuationSpace(range);
 	return [<-V!Slope(F), Length(F)> : F in FacesAt(N, r)];

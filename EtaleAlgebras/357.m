@@ -50,14 +50,15 @@ end intrinsic
 intrinsic Etale257(p::RngIntElt) -> []
 {Gives the list of possible etale algebras for
 signature (2,5,7) and p}
+	Qp := pAdicField(p,500);
+	o := O(Qp!p);
+
 	if p eq 2 then
 		D := LocalFieldDatabaseOctic2Adics();
 	else
 		D := LocalFieldDatabase();
 	end if;
-
-	Qp := pAdicField(p,500);
-	o := O(Qp!p);
+	
 	B<r,a> := CreateParameterSpace(PolynomialRing(Qp,2), <0,0>, car<[Z!b+o : b in Integers(p) | b notin [0,1]]>);
 	R<t> := PolynomialRing(B);
 	phi1 := 4*t^5*(14 + 14*t + 20*t^2 + 25*t^3);

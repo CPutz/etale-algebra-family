@@ -47,7 +47,7 @@ intrinsic GenerateCongruences(E::EtAlg, n::RngIntElt) -> Rec
 {Generates a list of congruences on the coefficients mod p of
 the minimal possible polynomials for E}
     T := Tschirnhaus(E);
-    N := NewtonOreExponents(E: T := T);
+    N := NewtonOreExponents(T);
     p := UniformizingElement(BaseRing(E));
     Zp := Integers(Prime(BaseRing(E))^n);
     Zx<[c]>  := PolynomialRing(Z,  Rank(E));
