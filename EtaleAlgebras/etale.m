@@ -74,7 +74,16 @@ intrinsic EtaleAlgebra(K::RngPad) -> EtAlg
 {Creates an etale algebra from a field extension of a local field}
     E := New(EtAlg);
     E`BaseRing := BaseRing(BaseRing(K));
-    E`DefiningPolynomial := MinimalPolynomial(UniformizingElement(K), BaseRing(E));
+    E`DefiningPolynomial := DefiningPolynomial(K, BaseRing(E));
+    E`Components := [<K, 1>];
+    return E;
+end intrinsic;
+
+intrinsic EtaleAlgebra(K::FldPad) -> EtAlg
+{Creates an etale algebra from a field extension of a local field}
+    E := New(EtAlg);
+    E`BaseRing := BaseRing(BaseRing(K));
+    E`DefiningPolynomial := DefiningPolynomial(K, BaseRing(E));
     E`Components := [<K, 1>];
     return E;
 end intrinsic;
@@ -170,6 +179,12 @@ used for searching.}
 end intrinsic;
 
 intrinsic ScaleCoefficients(P::RngUPolElt, c::FldPadElt) -> RngUPolElt
+{Scales the Coefficients of a polynomial weighted by degree}
+    t := Name(P,1);
+    return c^Degree(P) * Evaluate(P, t / c);
+end intrinsic;
+
+intrinsic ScaleCoefficients(P::RngUPolElt, c::RngPadElt) -> RngUPolElt
 {Scales the Coefficients of a polynomial weighted by degree}
     t := Name(P,1);
     return c^Degree(P) * Evaluate(P, t / c);

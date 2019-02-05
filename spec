@@ -12,5 +12,6 @@
         2-adic_octics.m
         357.m
         congr.m
+        hunter.m
     }
 }
