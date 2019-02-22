@@ -9,6 +9,7 @@ intrinsic HenselLift(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt) -> S
 
 	//substitution
 	g := Evaluate(f, [ Z!x[i] + m * P.i : i in [1..Rank(P)] ]);
+	g;
 	g := [Pp!(PZ!gi div m) : gi in g];
 
 	J := Transpose(JacobianMatrix(g));
@@ -114,6 +115,16 @@ intrinsic Roots(f::SeqEnum[RngMPolElt]) -> SeqEnum
 	return SetToSequence(&meet [{@ x : x in S | Evaluate(fi, Eltseq(x)) eq 0 @} : fi in f]);
 end intrinsic;
 
+intrinsic RootsFamily(f::SeqEnum[RngMPolElt]) -> .
+{A list of all simultanious roots of the fi over their base ring}
+	Rc := Parent(f[1]);
+	P := BaseRing(Rc);
+	R := BaseRing(P);
+	Lin := [P ! Eltseq(x) : x in RSpace(R, 2)];
+	S := CartesianProduct([Lin : i in [1..Rank(Rc)]]);
+	return [x : x in S | forall { fi : fi in f | Evaluate(fi, TupSeq(x)) eq 0 }];
+end intrinsic;
+
 intrinsic Homogenization(f::RngMPolElt) -> RngMPolElt
 {Homogenizes f}
 	R := Parent(f);
@@ -121,6 +132,12 @@ intrinsic Homogenization(f::RngMPolElt) -> RngMPolElt
 	Rt<t> := PolynomialRing(S);
 	g := Evaluate(f, [t * S.i : i in [1..Rank(R)]]);
 	return Evaluate(ReciprocalScale(g, S.(Rank(R)+1)), 1);
+end intrinsic;
+
+intrinsic ChangeRing(f::SeqEnum[RngMPolElt], R::Rng) -> SeqEnum[RngMPolElt]
+{}
+	S := ChangeRing(Parent(f[1]),R);
+	return [S!fi : fi in f];
 end intrinsic;
 
 intrinsic Testje() -> SeqEnum
@@ -134,20 +151,66 @@ intrinsic Testje() -> SeqEnum
 	return Coefficients(15*r - (phi + (1) * 2^5));
 end intrinsic;
 
-intrinsic Testje2() -> SeqEnum
+intrinsic Testje2(a::RngIntElt) -> SeqEnum
 {}
-	R<a> := PolynomialRing(Z);
-	Rc<[c]> := PolynomialRing(R, 7);
+	//R<a> := PolynomialRing(Z);
+	//Rc<[c]> := PolynomialRing(R, 7);
+	Rc<[c]> := PolynomialRing(Z, 7);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
 	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
 		t - (c[1]+c[2]*x+c[3]*x^2+c[4]*x^3+c[5]*x^4+c[6]*x^5+c[7]*x^6));
 	phi := 15*t^7 - 35*t^6 + 21*t^5;
-	return Coefficients(15*r - (phi + (1 + 2*a)));
+	return Coefficients(15*r - (phi + 2^5*a));
 end intrinsic;
 
-intrinsic ChangeRing(f::SeqEnum[RngMPolElt], R::Rng) -> SeqEnum[RngMPolElt]
+intrinsic CloseSolution(f::SeqEnum[RngMPolElt], x::ModTupRngElt) -> ModTupRngElt, RngIntElt
 {}
-	S := ChangeRing(Parent(f[1]),R);
-	return [S!fi : fi in f];
+	S := Parent(x);
+	R := BaseRing(S);
+	m := #R;
+	p := Factorization(m)[1][1];
+	e := Factorization(m)[1][2];
+	
+	SZ := RSpace(Z, Rank(S));
+	for d := 0 to e do
+		T := Integers(p^d);
+		ST := RSpace(T, Rank(S));
+		k := m / p^d;
+		for y in ST do
+			vs := [Valuation(c,p) : c in Evaluate(f, Eltseq(SZ!x + k*SZ!y)) | c ne 0];
+			if forall {v : v in vs | v ge e} then
+				return y, d;
+			end if;
+		end for;
+	end for;
+end intrinsic;
+
+intrinsic pAdicDistance(x::SeqEnum, y::SeqEnum, p::RngIntElt) -> RngRatElt
+{The l^1 distance induced by the p-adic norm}
+	return &+ [p^(-Valuation(Z!(x[i] - y[i]), p)) : i in [1..#x]];
+end intrinsic;
+
+intrinsic HenselLiftSingleClose(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt, M::RngIntElt) -> BoolElt, .
+{Lifts a solution x of f modulo m = p^k to a single solution of f modulo p^2k}
+	p := Factorization(M)[1][1];
+	d := Factorization(M)[1][2];
+	SZ := RSpace(Integers(), #f);
+	xZ := SZ!x;
+	exp := 1;
+	for e := 1 to d do
+		Se := RSpace(Integers(p^e), #f);
+		if exists {c : c in f | Valuation(Evaluate(c, Eltseq(SZ!Se!xZ)), p) lt e} then
+			exp := e-2;
+			break;
+		end if;
+	end for;
+	if exp+2 eq d then
+		return true, x;
+	else
+		x;
+		RSpace(Integers(p^exp), #f)!xZ;
+		exp;
+		return HenselLiftSingle(f, RSpace(Integers(p^exp), #f)!xZ, p^exp, M);
+	end if;
 end intrinsic;
