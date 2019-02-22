@@ -11,7 +11,9 @@
         pseudo.m
         2-adic_octics.m
         357.m
+        257.m
         congr.m
         hunter.m
+        hensel.m
     }
 }
