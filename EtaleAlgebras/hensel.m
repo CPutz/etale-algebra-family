@@ -1,4 +1,5 @@
 Z := Integers();
+Q := Rationals();
 
 intrinsic HenselLift(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt) -> SeqEnum
 {Lifts a solution x of f modulo m = p^k to all possible solutions of f modulo p^2k}
@@ -9,7 +10,6 @@ intrinsic HenselLift(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt) -> S
 
 	//substitution
 	g := Evaluate(f, [ Z!x[i] + m * P.i : i in [1..Rank(P)] ]);
-	g;
 	g := [Pp!(PZ!gi div m) : gi in g];
 
 	J := Transpose(JacobianMatrix(g));
@@ -28,13 +28,7 @@ intrinsic HenselLift(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt) -> S
 	end if;
 end intrinsic;
 
-intrinsic HenselLiftSingle(f::SeqEnum[RngMPolElt], x::ModTupRngElt, p::RngIntElt, M::RngIntElt) -> BoolElt, .
-{Lifts a solution x of f modulo p to a single solution of f modulo M (where M is a power of p)}
-	return HenselLiftSingle2(f, x, p, M);
-end intrinsic;
-
-
-intrinsic HenselLiftSingle2(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt, M::RngIntElt) -> BoolElt, .
+intrinsic HenselLiftSingle(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt, M::RngIntElt) -> BoolElt, .
 {Lifts a solution x of f modulo m = p^k to a single solution of f modulo p^2k}
 	P := Parent(f[1]);
 	Pp := PolynomialRing(Integers(m), Rank(P));
@@ -55,11 +49,12 @@ intrinsic HenselLiftSingle2(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntEl
 	sol, v, N := IsConsistent(J0, g0);
 	if sol then
 		y := SZ!x + m*SZ!v;
+		y; v; N;
 		if m^2 ge M then
 			return true, S2!y;
 		else
 			for n in N do
-				b, x := HenselLiftSingle2(f, S2!(y + m*SZ!n), m^2, M);
+				b, x := HenselLiftSingle(f, S2!(y + m*SZ!n), m^2, M);
 				if b then
 					return true, x;
 				end if;
@@ -71,15 +66,97 @@ intrinsic HenselLiftSingle2(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntEl
 	end if;
 end intrinsic;
 
-intrinsic HenselLiftable(f::SeqEnum[RngMPolElt], x::SeqEnum, p::RngIntElt) -> BoolElt
+intrinsic Hensel(x::Pt, prec::RngIntElt) -> BoolElt, .
+{Lifts an approximate point x over Qp on a 0-dimensional affine scheme over
+the rationals to precision prec}
+	S := Parent(x);
+	K := Ring(S);
+	p := UniformizingElement(K);
+	X := Scheme(S);
+	J := Transpose(JacobianMatrix(X));
+
+	prec0 := Min([AbsolutePrecision(xi) : xi in Eltseq(x)]);
+	p0 := p^prec0;
+	x2 := [ChangePrecision(xi, prec0 + Precision(xi)) : xi in Eltseq(x)];
+
+	d := Dimension(AmbientSpace(X));
+	Sp := RSpace(Integers(Z!p0), d);
+	Mp := MatrixAlgebra(Integers(Z!p0), d);
+	SZ := RSpace(Z, d);
+	MZ := MatrixAlgebra(Z, d);
+	SK := RSpace(K, d);
+
+	Jx := Mp!MZ!(Evaluate(J, Eltseq(x)));
+	fx := Sp!(SZ!Evaluate(DefiningPolynomials(X),x2) div p0);
+	sol, v, N := IsConsistent(Jx, -fx);
+
+	if sol then
+		y := SK!x2 + SK!(p0*SZ!v);
+		if 2*prec0 ge prec then
+			return true, X(K)!Eltseq(y);
+		else
+			for n in N do
+				b, z := Hensel(X(K)!Eltseq(y + p0*SZ!n), prec);
+				if b then
+					return true, z;
+				end if;
+			end for;
+			return  false, 0;
+		end if;
+	else 
+		return false, 0;
+	end if;
+end intrinsic;
+
+intrinsic HenselLiftSingle3(f::SeqEnum[RngMPolElt], x::ModTupRngElt, p::RngIntElt, m::RngIntElt, M::RngIntElt) -> BoolElt, .
+{Lifts a solution x of f modulo m = p^k to a single solution of f modulo p^2k}
+	m;
+	pm := p^m;
+	P := Parent(f[1]);
+	Pp := PolynomialRing(GF(p), Rank(P));
+	PZ := PolynomialRing(Z, Rank(P));
+	require Rank(P) eq #f: "System of equations must be zero dimensional";
+
+	//substitution
+	g := Evaluate(f, [ Z!x[i] + pm * P.i : i in [1..Rank(P)] ]);
+	g := [Pp!(PZ!gi div pm) : gi in g];
+	J := Transpose(JacobianMatrix(g));
+	zero := [0 : i in [1..#g]];
+	J0 := Evaluate(J, zero);
+	Sp := KSpace(GF(p), Rank(P));
+	S  := RSpace(Integers(pm * p), Rank(P));
+	SZ := RSpace(Z, Rank(P));
+	g0 := -Sp!Evaluate(g, zero);
+	sol, v, N := IsConsistent(J0, g0);
+	if sol then
+		y := SZ!x + pm*SZ!v;
+		if m ge M then
+			return true, S!y;
+		else
+			for n in N do
+				b, x := HenselLiftSingle3(f, S!(y + pm*SZ!n), p, m+1, M);
+				if b then
+					return true, x;
+				end if;
+			end for;
+			return false, 0;
+		end if;
+	else
+		return false, 0;
+	end if;
+end intrinsic;
+
+intrinsic HenselLiftable(f::SeqEnum[RngMPolElt], x::ModTupRngElt, p::RngIntElt) -> BoolElt
 {Returns whether one can lift the solution x of f(x) = 0 mod p to a solution in Zp}
 	P := Parent(f[1]);
 	require Rank(P) eq #f: "System of equations must be zero dimensional";
+	SZ := RSpace(Z, Rank(P));
 
 	J := JacobianMatrix(f);
-	D := Determinant(Evaluate(J, Eltseq(x)));
+	D := Determinant(Evaluate(J, Eltseq(SZ!x)));
 	vJ := Valuation(D, p);
-	vf := [Valuation(c, p) : c in Evaluate(f, x)];
+	vf := [Valuation(c, p) : c in Evaluate(f, Eltseq(SZ!x))];
+	vJ; vf;
 	return forall {v : v in vf | v gt 2*vJ};
 end intrinsic;
 
@@ -140,28 +217,49 @@ intrinsic ChangeRing(f::SeqEnum[RngMPolElt], R::Rng) -> SeqEnum[RngMPolElt]
 	return [S!fi : fi in f];
 end intrinsic;
 
-intrinsic Testje() -> SeqEnum
+intrinsic Testje(a::RngElt) -> SeqEnum
 {}
-	Rc<[c]> := PolynomialRing(Z, 7);
+	Rc<[c]> := PolynomialRing(Parent(a), 7);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
 	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
 		t - (c[1]+c[2]*x+c[3]*x^2+c[4]*x^3+c[5]*x^4+c[6]*x^5+c[7]*x^6));
 	phi := 15*t^7 - 35*t^6 + 21*t^5;
-	return Coefficients(15*r - (phi + (1) * 2^5));
+	return Coefficients(15*r - (phi + a));
 end intrinsic;
 
-intrinsic Testje2(a::RngIntElt) -> SeqEnum
+intrinsic Testje2a() -> SeqEnum
 {}
-	//R<a> := PolynomialRing(Z);
-	//Rc<[c]> := PolynomialRing(R, 7);
-	Rc<[c]> := PolynomialRing(Z, 7);
+	Rc<a,c1,c2,c3,c4,c5,c6,c7> := PolynomialRing(Q, 8);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
 	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
-		t - (c[1]+c[2]*x+c[3]*x^2+c[4]*x^3+c[5]*x^4+c[6]*x^5+c[7]*x^6));
+		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6));
 	phi := 15*t^7 - 35*t^6 + 21*t^5;
 	return Coefficients(15*r - (phi + 2^5*a));
+end intrinsic;
+
+intrinsic Testje2(a::RngElt) -> SeqEnum
+{}
+	Rc<[c]> := PolynomialRing(Parent(a), 2);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	r := Resultant((x^2+x+1),
+		t - (c[1]+c[2]*x));
+	phi := t^2 + t + 1;
+	return Coefficients(r - (phi + 2*a * t));
+end intrinsic;
+
+intrinsic Testje257(a::RngElt) -> SeqEnum
+{}
+	Rc<[c]> := PolynomialRing(Parent(a), 8);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	r := Resultant(x*(x^3+2*x+1)*(x^4+2*x^3+2),
+		t - (c[1]+c[2]*x+c[3]*x^2+c[4]*x^3+c[5]*x^4+c[6]*x^5+c[7]*x^6+c[8]*x^7));
+	phi1 := 4*t^5*(14+14*t+20*t^2+25*t^3);
+	phi2 := 4*t-1;
+	return Coefficients(100*r - (phi1 - a*phi2));
 end intrinsic;
 
 intrinsic CloseSolution(f::SeqEnum[RngMPolElt], x::ModTupRngElt) -> ModTupRngElt, RngIntElt
