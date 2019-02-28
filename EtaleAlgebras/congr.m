@@ -14,20 +14,24 @@ defining polynomial of E}
     coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
     res := &*[Resultant(coe(DefiningPolynomial(Eif[1])), y - Eif[2], x) : Eif in Zip(Eis, fs)];
     return UnivariatePolynomial(res);
+    //f := &+[c[i] * x^(i-1) : i in [1..Rank(E)]];
+    //coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
+    //res := Resultant(coe(DefiningPolynomial(E)), y - f, x);
+    //return UnivariatePolynomial(res);
 end intrinsic;
 
-intrinsic TschirnhausEliminate(E::EtAlg, a::RngElt) -> SeqEnum
+intrinsic TschirnhausEliminate(E::EtAlg, i::RngElt, a::RngElt) -> SeqEnum
 {Computes the Tschirnhaus transformations of the
 defining polynomial of E and tries to eliminate the
-first parameter using the coefficient of a1}
+first parameter using the coefficient of ai}
     T := Tschirnhaus(E);
-    a1 := Coefficient(T, Rank(E)-1);
+    ai := Coefficient(T, Rank(E)-i);
     Rx := Parent(T);
     R := BaseRing(Rx);
 
     i := 1;
     while i lt Rank(E) do
-        if Valuation(Content(Coefficient(a1, i, 1))) eq 0 then
+        if Valuation(Content(Coefficient(ai, i, 1))) eq 0 then
             break;
         end if;
         i +:= 1;
@@ -37,7 +41,7 @@ first parameter using the coefficient of a1}
     S<[c]> := PolynomialRing(Q, Rank(E)-1);
     Sx<x> := PolynomialRing(S);
     f := hom<R -> Sx | Insert([Sx!S.i : i in [1..Rank(S)]], i, x)>;
-    root := Roots(f(a1 - a))[1][1];
+    root := Roots(f(ai - a))[1][1];
     g := hom<R -> S  | Insert([S.i : i in [1..Rank(S)]], i, root)>;
     P, coeSx := ChangeRing(Rx, S, g);
     _, coeE := ChangeRing(P, PolynomialRing(BaseRing(E), Rank(E)-1));
@@ -64,11 +68,14 @@ the minimal possible polynomials for E}
     Zp := Integers(Prime(BaseRing(E))^n);
     Zx<[c]>  := PolynomialRing(Z,  Rank(E));
     Zpx<[c]> := PolynomialRing(Zp, Rank(E));
+    //C := [Zpx!Zx!c : c in Coefficients(T)];
+    //C := [Zpx!Zx!c : c in Reverse(Prune(Coefficients(T)))];
     C := [Zpx!Zx!(nc[1] div p^nc[2]) : nc in Zip(Reverse(Prune(Coefficients(T))), N)];
     //Evaluation
     R := RSpace(Zp, Rank(E));
     //CE := {@ Evaluate(C, Eltseq(r)) : r in R | Evaluate(C[1], Eltseq(r)) in {0,1,2,3} @};
     CE := {@ Evaluate(C, Eltseq(r)) : r in R @};
+
     return rec< RC | congr := CE, exp := N>;
 end intrinsic;
 
@@ -81,8 +88,8 @@ the minimal possible polynomials for E}
     Zp := Integers(Prime(BaseRing(R))^n);
     Zx<[c]>  := PolynomialRing(Z,  Rank(R));
     Zpx<[c]> := PolynomialRing(Zp, Rank(R));
-    //C := [Zpx!Zx!c : c in Coefficients(T)];
-    C := [Zpx!Zx!(nc[1] div p^nc[2]) : nc in Zip(Reverse(Prune(Coefficients(T))), N)];
+    C := [Zpx!Zx!c : c in Coefficients(T)];
+    //C := [Zpx!Zx!(nc[1] div p^nc[2]) : nc in Zip(Reverse(Prune(Coefficients(T))), N)];
     //Evaluation
     R := RSpace(Zp, Rank(R));
     //CE := {@ Evaluate(C, Eltseq(r)) : r in R | Evaluate(C[1], Eltseq(r)) in {0,1,2,3} @};
@@ -93,26 +100,25 @@ end intrinsic;
 intrinsic GenerateCongruencesElim(E::EtAlg, n::RngIntElt, as::SeqEnum[RngElt]) -> Rec
 {}
     N := NewtonOreExponents(E);
-    return {@ C : C in GenerateCongruences(TschirnhausEliminate(E, a), n: N := N), a in as @};
+    return {@ C : C in GenerateCongruences(TschirnhausEliminate(E, 1, a), n: N := N), a in as @};
 end intrinsic;
 
-intrinsic GenerateCongruences2(E::EtAlg, n::RngIntElt) -> Rec
+intrinsic GenerateCongruences2(E::EtAlg, n::RngIntElt) -> SetIndx
 {Generates a list of congruences on the coefficients mod p of
 the minimal possible polynomials for E}
     T := Tschirnhaus(E);
     Zc<[c]> := PolynomialRing(Z, Rank(E));
     Zcx := PolynomialRing(Zc);
     FT := [<Parent(T)!F[1], F[2]> : F in Factorization(Zcx!T)];
-    CF := [];
-    Zp := Integers(Prime(BaseRing(E))^n);
-    Zpx := PolynomialRing(Zp);
+    Zpx := PolynomialRing(Integers(Prime(BaseRing(E))^n));
     CF := [];
     for F in FT do
         C := GenerateCongruences(F[1], n);
-        C := [(Zpx ! c)^F[2] : c in C];
-        Append(~CF, C);
+        C := [Zpx ! c : c in C];
+        for i := 1 to F[2] do
+            Append(~CF, C);
+        end for;
     end for;
-    [#c : c in CF];
     CE := {@ &*TupSeq(c) : c in CartesianProduct(CF) @};
     return {@ Reverse(Prune(Coefficients(c))) : c in CE @};
 end intrinsic;
@@ -129,4 +135,20 @@ intrinsic WriteCongruences(f::MonStgElt, C::SetIndx, N::SeqEnum[RngIntElt], p::R
         Write(f, Sprintf("%o,", l));
     end for;
     Write(f, "]");
+end intrinsic;
+
+intrinsic GenerateCongruencesSquares(d::RngIntElt, D::RngIntElt, p::RngIntElt, n::RngIntElt) -> SetIndx
+{Finds all polynomials of degree d such that its discriminant
+is D upto squares modulo p^n}
+    if n eq 1 then
+        Zp := GF(p);
+    else
+        Zp := Integers(p^n);
+    end if;
+    Rc<[c]> := PolynomialRing(Zp, d);
+    R := PolynomialRing(Rc);
+    f := R!([c[d-i+1] : i in [1..d]] cat [1]);
+    disc := Discriminant(f) * D;
+    squares := {@ x^2 : x in Zp @};
+    return {@ Eltseq(x) : x in RSpace(Zp, d) | Evaluate(disc, Eltseq(x)) in squares @};
 end intrinsic;

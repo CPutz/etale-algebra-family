@@ -66,7 +66,8 @@ intrinsic HenselLiftSingle(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt
 	end if;
 end intrinsic;
 
-intrinsic Hensel(x::Pt, prec::RngIntElt) -> BoolElt, .
+intrinsic Hensel(x::Pt, prec::RngIntElt:
+	prec0:=Min([AbsolutePrecision(xi) : xi in Eltseq(x)])) -> BoolElt, .
 {Lifts an approximate point x over Qp on a 0-dimensional affine scheme over
 the rationals to precision prec}
 	S := Parent(x);
@@ -75,7 +76,6 @@ the rationals to precision prec}
 	X := Scheme(S);
 	J := Transpose(JacobianMatrix(X));
 
-	prec0 := Min([AbsolutePrecision(xi) : xi in Eltseq(x)]);
 	p0 := p^prec0;
 	x2 := [ChangePrecision(xi, prec0 + Precision(xi)) : xi in Eltseq(x)];
 
@@ -96,7 +96,7 @@ the rationals to precision prec}
 			return true, X(K)!Eltseq(y);
 		else
 			for n in N do
-				b, z := Hensel(X(K)!Eltseq(y + p0*SZ!n), prec);
+				b, z := Hensel(X(K)!Eltseq(y + p0*SZ!n), prec: prec0:=2*prec0);
 				if b then
 					return true, z;
 				end if;
@@ -248,6 +248,40 @@ intrinsic Testje2(a::RngElt) -> SeqEnum
 		t - (c[1]+c[2]*x));
 	phi := t^2 + t + 1;
 	return Coefficients(r - (phi + 2*a * t));
+end intrinsic;
+
+intrinsic Testje3() -> SeqEnum
+{}
+	Rc<c1,c2,c3,c4,c5,c6,c7,a,e> := PolynomialRing(Q, 9);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
+		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6));
+	phi := 15*t^7 - 35*t^6 + 21*t^5;
+	hs := Coefficients(15*r - (phi + a));
+	J := ColumnSubmatrix(JacobianMatrix(hs),1,7);
+	"det";
+	D := Determinant(J);
+	"det finished";
+	I := ideal<Rc | [e-D] cat hs>;
+	"eliminate";
+	return EliminationIdeal(I, {a,e});
+end intrinsic;
+
+intrinsic Testje3(p::RngIntElt) -> SeqEnum
+{}
+	Rc<c1,c2,c3,c4,c5,c6,c7,a,e> := PolynomialRing(GF(p), 9);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
+		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6));
+	phi := 15*t^7 - 35*t^6 + 21*t^5;
+	hs := Coefficients(15*r - (phi + a));
+	J := ColumnSubmatrix(JacobianMatrix(hs),1,7);
+	D := Determinant(J);
+	I := ideal<Rc | [e-D] cat hs>;
+	//return EliminationIdeal(I, 7: Al := "Direct");
+	return I;
 end intrinsic;
 
 intrinsic Testje257(a::RngElt) -> SeqEnum
