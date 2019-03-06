@@ -15,5 +15,6 @@
         congr.m
         hunter.m
         hensel.m
+        newton-ore.m
     }
 }
