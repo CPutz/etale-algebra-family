@@ -236,7 +236,7 @@ intrinsic Testje2a() -> SeqEnum
 	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
 		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6));
 	phi := 15*t^7 - 35*t^6 + 21*t^5;
-	return Coefficients(15*r - (phi + 2^5*a));
+	return Coefficients(15*r - (phi + 2^20*a));
 end intrinsic;
 
 intrinsic Testje2(a::RngElt) -> SeqEnum
@@ -250,9 +250,9 @@ intrinsic Testje2(a::RngElt) -> SeqEnum
 	return Coefficients(r - (phi + 2*a * t));
 end intrinsic;
 
-intrinsic Testje3() -> SeqEnum
+intrinsic Testje3(R::Rng) -> SeqEnum
 {}
-	Rc<c1,c2,c3,c4,c5,c6,c7,a,e> := PolynomialRing(Q, 9);
+	Rc<c1,c2,c3,c4,c5,c6,c7,e,a> := PolynomialRing(R, 9);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
 	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
@@ -260,15 +260,16 @@ intrinsic Testje3() -> SeqEnum
 	phi := 15*t^7 - 35*t^6 + 21*t^5;
 	hs := Coefficients(15*r - (phi + a));
 	J := ColumnSubmatrix(JacobianMatrix(hs),1,7);
-	"det";
+	//"det";
 	D := Determinant(J);
-	"det finished";
-	I := ideal<Rc | [e-D] cat hs>;
-	"eliminate";
-	return EliminationIdeal(I, {a,e});
+	return hs,D;
+	//"det finished";
+	//I := ideal<Rc | [e-D] cat hs>;
+	//"eliminate";
+	//return EliminationIdeal(I, {a,e});
 end intrinsic;
 
-intrinsic Testje3(p::RngIntElt) -> SeqEnum
+intrinsic Testje4(p::RngIntElt) -> SeqEnum
 {}
 	Rc<c1,c2,c3,c4,c5,c6,c7,a,e> := PolynomialRing(GF(p), 9);
 	Rt<t> := PolynomialRing(Rc);
@@ -294,6 +295,117 @@ intrinsic Testje257(a::RngElt) -> SeqEnum
 	phi1 := 4*t^5*(14+14*t+20*t^2+25*t^3);
 	phi2 := 4*t-1;
 	return Coefficients(100*r - (phi1 - a*phi2));
+end intrinsic;
+
+intrinsic Testje357() -> .
+{}
+	printf "Initialization\n";
+	CZ,DZ := Testje3(Z);
+	FZ := Factorization(DZ);
+	return Testje357(CZ,FZ);
+end intrinsic;
+
+intrinsic Testje357(CZ, FZ) -> .
+{}
+	RZ := Parent(CZ[1]);
+	ez := Name(RZ,8);
+
+	vs := [];
+	for F in FZ do
+		f := F[1];
+		printf "Factor "; PrintTrunc(f,50);
+		v := FindValuation(f, CZ, [1,1,1,1,1,1,1]);
+		printf "Valuation %o\n", v;
+		Append(~vs, v);
+	end for;
+	return vs;
+end intrinsic;
+
+intrinsic FindValuation(F, C, vs) -> RngIntElt
+{}
+	p := 2;
+	R<c1,c2,c3,c4,c5,c6,c7,e,a> := PolynomialRing(GF(p),9);
+	rel := [(R.i)^2-R.i : i in [1..7]];
+	RZ := Parent(F);
+	ez := Name(RZ,8);
+	coe := hom<R -> RZ | c1,c2,c3,c4,c5,c6,c7,e,a>;
+
+	I := ideal<R | [R!x : x in [ez-F] cat C] cat rel>;
+	E := EliminationIdeal(I, {a,e});
+
+	if e + 1 in E or e + a + 1 in E then
+		return 0;
+	else
+		Ec := EliminationIdeal(I, {c1,c2,c3,c4,c5,c6,c7});
+		Basis(Ec);
+		printf "%o\n", Basis(E);
+		E1 := [g : g in Basis(Ec) | TotalDegree(g) eq 1];
+		E1;
+		read accept, "Accept? (y/n/split i)";
+		if #accept ge 5 and Substring(accept, 1, 5) eq "split" then
+			i := StringToInteger(Substring(accept, 7, 9));
+			cZi := coe(RZ.i);
+			vsn := vs;
+			vsn[i] +:= 1;
+			//TODO: do for other p than 2
+			printf "c%o = 0\n", i;
+			C2 := [Evaluate(c, cZi, 0) div Content(Evaluate(c, cZi, 0)) : c in C | Evaluate(c, cZi, 0) ne 0];
+			F2 :=  Evaluate(F, cZi, 0);
+			v := Valuation(Content(F2), p);
+			printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 0, v, vsn;
+			F2 div:= Content(F2);
+			v0 := v + FindValuation(F2, C2, vsn);
+
+			printf "c%o = 1\n", i;
+			C2 := [Evaluate(c, cZi, 1) div Content(Evaluate(c, cZi, 1)) : c in C | Evaluate(c, cZi, 1) ne 0];
+			F2 :=  Evaluate(F, cZi, 1);
+			v := Valuation(Content(F2), p);
+			printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 1, v, vsn;
+			F2 div:= Content(F2);
+			v1 := v + FindValuation(F2, C2, vsn);
+
+			return Max(v0, v1);
+		elif accept eq "y" then
+			return 0;
+		else
+			if not IsEmpty(E1) then
+				read index, "Choose an element of E";
+				if index eq "" then
+					index := 1;
+				else
+					index := StringToInteger(index);
+				end if;
+				g1 := E1[index];
+				ci := LeadingMonomial(g1);
+
+				i := -1;
+				for j in [1..7] do
+					if R.j eq ci then
+						i := j;
+					end if;
+				end for;
+				vsn := vs;
+				vsn[i] +:= 1;
+
+				di := (g1-c*ci)/c where c := Coefficient(g1,ci,1);
+				cZi := coe(ci);
+				dZi := coe(di);
+				C2 := [Evaluate(c, cZi, 2*cZi - dZi) div Content(Evaluate(c, cZi, 2*cZi - dZi)) : c in C];
+				F2 :=  Evaluate(F, cZi, 2*cZi - dZi);
+				v := Valuation(Content(F2), p);
+				printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 2*cZi - dZi, v, vsn;
+				F2 div:= Content(F2);
+				return v + FindValuation(F2, C2, vsn);
+			else
+				printf "no reductions...\n";
+				Error("");
+				return -1;
+			end if;
+		end if;
+	end if;
+
+	Error("");
+	return -1;
 end intrinsic;
 
 intrinsic CloseSolution(f::SeqEnum[RngMPolElt], x::ModTupRngElt) -> ModTupRngElt, RngIntElt

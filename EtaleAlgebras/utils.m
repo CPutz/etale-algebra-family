@@ -67,3 +67,14 @@ intrinsic Evaluate(Q::SeqEnum[RngMPolElt], x::SeqEnum[RngElt]) -> SeqEnum[RngElt
 {Evaluates every polynomial in a sequence at x}
 	return [Evaluate(p, x) : p in Q];
 end intrinsic;
+
+intrinsic PrintTrunc(x::Any, m::RngIntElt)
+{Prints x, but truncates the output to m characters}
+	require m ge 0: "Argument 2 must be non-negative";
+	s := Sprint(x);
+	if m lt #s then
+		print Substring(s, 1, m) cat "...";
+	else
+		print s;
+	end if;
+end intrinsic;
