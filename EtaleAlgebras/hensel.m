@@ -285,16 +285,19 @@ intrinsic Testje4(p::RngIntElt) -> SeqEnum
 	return I;
 end intrinsic;
 
-intrinsic Testje257(a::RngElt) -> SeqEnum
+intrinsic Testje257(R::Rng) -> SeqEnum
 {}
-	Rc<[c]> := PolynomialRing(Parent(a), 8);
+	Rc<c1,c2,c3,c4,c5,c6,c7,c8,a,e> := PolynomialRing(R, 10);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
 	r := Resultant(x*(x^3+2*x+1)*(x^4+2*x^3+2),
-		t - (c[1]+c[2]*x+c[3]*x^2+c[4]*x^3+c[5]*x^4+c[6]*x^5+c[7]*x^6+c[8]*x^7));
+		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6+c8*x^7));
 	phi1 := 4*t^5*(14+14*t+20*t^2+25*t^3);
 	phi2 := 4*t-1;
-	return Coefficients(100*r - (phi1 - a*phi2));
+	hs := Coefficients(100*r - (phi1 - a*phi2));
+	J := ColumnSubmatrix(JacobianMatrix(hs),1,8);
+	D := Determinant(J);
+	return hs,D;
 end intrinsic;
 
 intrinsic Testje357() -> .
@@ -308,7 +311,6 @@ end intrinsic;
 intrinsic Testje357(CZ, FZ) -> .
 {}
 	RZ := Parent(CZ[1]);
-	ez := Name(RZ,8);
 
 	vs := [];
 	for F in FZ do
@@ -324,11 +326,17 @@ end intrinsic;
 intrinsic FindValuation(F, C, vs) -> RngIntElt
 {}
 	p := 2;
-	R<c1,c2,c3,c4,c5,c6,c7,e,a> := PolynomialRing(GF(p),9);
-	rel := [(R.i)^2-R.i : i in [1..7]];
+
 	RZ := Parent(F);
-	ez := Name(RZ,8);
-	coe := hom<R -> RZ | c1,c2,c3,c4,c5,c6,c7,e,a>;
+	n := Rank(RZ);
+	ez := Name(RZ,n);
+
+	R := ChangeRing(RZ, GF(p));
+	a := Name(R,n-1);
+	e := Name(R,n);
+
+	rel := [(R.i)^2-R.i : i in [1..(n-2)]];
+	coe := hom<R -> RZ | [R.i : i in [1..n]]>;
 
 	I := ideal<R | [R!x : x in [ez-F] cat C] cat rel>;
 	E := EliminationIdeal(I, {a,e});
@@ -336,8 +344,9 @@ intrinsic FindValuation(F, C, vs) -> RngIntElt
 	if e + 1 in E or e + a + 1 in E then
 		return 0;
 	else
-		Ec := EliminationIdeal(I, {c1,c2,c3,c4,c5,c6,c7});
+		Ec := EliminationIdeal(I, Set([R.i : i in [1..(n-2)]]));
 		Basis(Ec);
+		Basis(EliminationIdeal(ideal<R | [R!x : x in C] cat rel>,Set([R.i : i in [1..(n-2)]])));
 		printf "%o\n", Basis(E);
 		E1 := [g : g in Basis(Ec) | TotalDegree(g) eq 1];
 		E1;
@@ -379,7 +388,7 @@ intrinsic FindValuation(F, C, vs) -> RngIntElt
 				ci := LeadingMonomial(g1);
 
 				i := -1;
-				for j in [1..7] do
+				for j in [1..(n-2)] do
 					if R.j eq ci then
 						i := j;
 					end if;
@@ -406,6 +415,97 @@ intrinsic FindValuation(F, C, vs) -> RngIntElt
 
 	Error("");
 	return -1;
+end intrinsic;
+
+intrinsic Testje357_2(CZ, FZ) -> .
+{}
+	RZ := Parent(CZ[1]);
+
+	vs := [];
+	for F in FZ do
+		f := F[1];
+		printf "Factor "; PrintTrunc(f,50);
+		v, tree := FindValuation2(f, CZ, [1,1,1,1,1,1,1]);
+		printf "Valuation %o, tree %o\n", v, tree;
+		Append(~vs, v);
+	end for;
+	return vs;
+end intrinsic;
+
+intrinsic FindValuation2(F, C, vs: max_depth := 10, max_div := 2) -> RngIntElt, .
+{}
+	p := 2;
+
+	RZ := Parent(F);
+	n := Rank(RZ);
+	ez := Name(RZ,n);
+
+	R := ChangeRing(RZ, GF(p));
+	a := Name(R,n-1);
+	e := Name(R,n);
+
+	rel := [(R.i)^2-R.i : i in [1..(n-2)]];
+	coe := hom<R -> RZ | [R.i : i in [1..n]]>;
+
+	I := ideal<R | [R!x : x in [ez-F] cat C] cat rel>;
+	E := EliminationIdeal(I, {a,e});
+
+	if e + 1 in E or e + a + 1 in E then
+		return 0, <>;
+	else
+		minv, mini := Min(vs);
+		Ic := ideal<R | [R!x : x in C] cat rel>;
+		Ec := EliminationIdeal(Ic, Set([R.i : i in [1..(n-2)]]));
+		E1 := [g : g in Basis(Ec) | TotalDegree(g) eq 1];
+
+		for g1 in E1 do
+			vars := Monomials(g1 - ConstantCoefficient(g1));
+			for ci in vars do
+				i := Index(Exponents(ci),1);
+				if vs[i] - minv lt max_div then
+					vsn := vs;
+					vsn[i] +:= 1;
+					di := (g1-c*ci)/c where c := Coefficient(g1,ci,1);
+					cZi := coe(ci);
+					dZi := coe(di);
+					C2 := [Evaluate(c, cZi, 2*cZi - dZi) div Content(Evaluate(c, cZi, 2*cZi - dZi)) : c in C];
+					F2 :=  Evaluate(F, cZi, 2*cZi - dZi);
+					v := Valuation(Content(F2), p);
+					printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 2*cZi - dZi, v, vsn;
+					F2 div:= Content(F2);
+					va, tree := FindValuation2(F2, C2, vsn);
+					vn := v + va;
+					return vn, <i, di, v, tree>;
+				end if;
+			end for;
+		end for;
+
+		//split on mini
+		i := mini;
+		cZi := coe(RZ.i);
+		vsn := vs;
+		vsn[i] +:= 1;
+		//TODO: do for other p than 2
+		printf "c%o = 0\n", i;
+		C2 := [Evaluate(c, cZi, 0) div Content(Evaluate(c, cZi, 0)) : c in C | Evaluate(c, cZi, 0) ne 0];
+		F2 :=  Evaluate(F, cZi, 0);
+		v0p := Valuation(Content(F2), p);
+		printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 0, v0p, vsn;
+		F2 div:= Content(F2);
+		va0, tree0 := FindValuation2(F2, C2, vsn);
+		v0 := v0p + va0;
+
+		printf "c%o = 1\n", i;
+		C2 := [Evaluate(c, cZi, 1) div Content(Evaluate(c, cZi, 1)) : c in C | Evaluate(c, cZi, 1) ne 0];
+		F2 :=  Evaluate(F, cZi, 1);
+		v1p := Valuation(Content(F2), p);
+		printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 1, v1p, vsn;
+		F2 div:= Content(F2);
+		va1, tree1 := FindValuation2(F2, C2, vsn);
+		v1 := v1p + va1;
+
+		return Max(v0, v1), <i, <v0p,tree0>, <v1p,tree1>>;
+	end if;
 end intrinsic;
 
 intrinsic CloseSolution(f::SeqEnum[RngMPolElt], x::ModTupRngElt) -> ModTupRngElt, RngIntElt
