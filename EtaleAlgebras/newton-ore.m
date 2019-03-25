@@ -50,22 +50,23 @@ given that the ideal I is the product of all primes above p}
   require IsPrime(p): "Argument 2 must be prime";
   n := &+[y[1] : y in R];
   c := &+[y[2] : y in R];
-  res := [0];
+  S<[c]> := PolynomialRing(Integers(),n);
+  T<x> := PolynomialRing(S);
+  res := 1;
   for r in R do
-    e := [1]; //constant coefficient is always once divisible by p
+    if r[2] eq 0 then
+      e := [S.1];
+    else
+      e := [p*S.1]; //constant coefficient is always once divisible by p
+    end if;
     for i in [1..r[1]-1] do
       v := Valuation(i, p);
-      Append(~e, Ceiling(-v+(r[2]-i+1)/r[1]));
+      Append(~e, p^Ceiling(-v+(r[2]-i+1)/r[1]) * S.(i+1));
     end for;
-    Append(~e, [0]);
-    res := NewtonOreExponentsMultiply(res, e);
+    Append(~e, [1]);
+    res *:= T!e;
   end for;
-  return res;
-end intrinsic;
-
-intrinsic NewtonOreExponentsMultiply(r1::SeqEnum, r2::SeqEnum) -> SeqEnum
-{Calculates the Newton-Ore exponents for r1*r2}
-  return [Min([r1[j+1] + r2[d-j+1] : j in [Max(d+1-#r2,0)..Min(#r1-1,d)]]) : d in [0..(#r1+#r2-2)]];
+  return [Valuation(Content(c),p) : c in Coefficients(res)];
 end intrinsic;
 
 intrinsic NewtonOreExponentsShift(r::SeqEnum, p::RngIntElt) -> SeqEnum
