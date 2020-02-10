@@ -49,17 +49,18 @@ intrinsic StructuralStability(P::RngUPolElt:
 {Returns the constant mu (as a valuation) from the structural stability theorem}
 	require ValuationE(LeadingCoefficient(P)) eq 0: "Argument 1 needs to be a monic polynomial:", P;
 
-	//vs := ValuationsOfPolynomial(Derivative(P), P);
 	t := Name(Parent(P),1);
 	R := PolynomialRing(PolynomialRing(Z,2));
-	vs := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-7*P), P);
+	vs := ValuationsOfPolynomial(Derivative(P), P);
+	//vs := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-Degree(P)*P), P);
 	Mvs := {* v[1]^^v[2] : v in vs *};
 	PMvs := Partitions(Mvs, [Length(F) : F in Fs]);
 
 	for i in [1..#Fs] do
 		F := Fs[i];
-		//vsF := ValuationsOfPolynomial(Derivative(P), P, F);
-		vsF := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-7*P), P, F);
+		vsF := ValuationsOfPolynomial(Derivative(P), P, F);
+		//vsF := ValuationsOfPolynomial(Parent(P)!R!(t*Derivative(P)-Degree(P)*P), P, F);
+
 		PMvsNew := {};
 		for p in PMvs do
 			if forall {v : v in MultisetToSet(p[i]) | v subset vsF[1]} then
@@ -171,7 +172,7 @@ isomorphism classes of all fibres}
 	end if;
 	samples := Set(IsomorphismClassesFamEtaleUptoPrecision(P, prec: D := D));
 	printf "Found %o etale algebras.\n", #samples;
-
+	samples;
 
 	printf "Trying around 0\n";
 	b, L0 := IsomorphismClassesFamEtale(P, ER!0: D := D);
@@ -405,6 +406,10 @@ isomorphism classes of all fibres}
 	    	printf "Found %o etale algebras\n", #candidates;
 	    	if IsConstant(disc_upto_squares) then
 	    		bf := #candidates;
+	    		if bf eq 10 then
+	    			Z!disc_upto_squares;
+	    			[<E, Factorization(Z!Discriminant(E))> : E in candidates];
+	    		end if;
 	    		candidates := [E : E in candidates | IsSquare(Z!disc_upto_squares * DiscriminantUptoSquares(E))];
 	    		af := #candidates;
 	    		printf "Eliminated %o etale algebras by comparing discriminants upto squares\n", bf - af;

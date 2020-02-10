@@ -81,7 +81,7 @@ end intrinsic;
 
 intrinsic GenerateCongruences(T::RngUPolElt, n::RngIntElt:
     N := NewtonOreExponents(T)) -> SeqEnum
-{Generates a list of congruences on the coefficients mod p of
+{Generates a list of congruences on the coefficients mod p^n of
 the minimal possible polynomials for E}
     R := BaseRing(T);
     p := UniformizingElement(BaseRing(R));
@@ -104,7 +104,7 @@ intrinsic GenerateCongruencesElim(E::EtAlg, n::RngIntElt, as::SeqEnum[RngElt]) -
 end intrinsic;
 
 intrinsic GenerateCongruences2(E::EtAlg, n::RngIntElt) -> SetIndx
-{Generates a list of congruences on the coefficients mod p of
+{Generates a list of congruences on the coefficients mod p^n of
 the minimal possible polynomials for E}
     T := Tschirnhaus(E);
     Zc<[c]> := PolynomialRing(Z, Rank(E));
@@ -113,12 +113,38 @@ the minimal possible polynomials for E}
     Zpx := PolynomialRing(Integers(Prime(BaseRing(E))^n));
     CF := [];
     for F in FT do
+        F[1];
         C := GenerateCongruences(F[1], n);
+        "done";
         C := [Zpx ! c : c in C];
         for i := 1 to F[2] do
             Append(~CF, C);
         end for;
     end for;
+    CE := {@ &*TupSeq(c) : c in CartesianProduct(CF) @};
+    return {@ Reverse(Prune(Coefficients(c))) : c in CE @};
+end intrinsic;
+
+intrinsic GenerateCongruences3(E::EtAlg, n::RngIntElt) -> SetIndx
+{Generates a list of congruences on the coefficients mod p^n of
+the minimal possible polynomials for E}
+    FT := Factorization(DefiningPolynomial(E));
+    if n eq 1 then
+        Zpx := PolynomialRing(GF(Prime(BaseRing(E))));
+    else
+        Zpx := PolynomialRing(Integers(Prime(BaseRing(E))^n));
+    end if;
+
+    CF := [];
+    for F in FT do
+        T := Tschirnhaus(EtaleAlgebra(F[1]));
+        C := GenerateCongruences(T, n);
+        C := [Zpx ! c : c in C];
+        for i := 1 to F[2] do
+            Append(~CF, C);
+        end for;
+    end for;
+    "done";
     CE := {@ &*TupSeq(c) : c in CartesianProduct(CF) @};
     return {@ Reverse(Prune(Coefficients(c))) : c in CE @};
 end intrinsic;
@@ -152,3 +178,4 @@ is D upto squares modulo p^n}
     squares := {@ x^2 : x in Zp @};
     return {@ Eltseq(x) : x in RSpace(Zp, d) | Evaluate(disc, Eltseq(x)) in squares @};
 end intrinsic;
+

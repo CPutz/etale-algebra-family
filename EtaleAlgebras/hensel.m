@@ -49,7 +49,7 @@ intrinsic HenselLiftSingle(f::SeqEnum[RngMPolElt], x::ModTupRngElt, m::RngIntElt
 	sol, v, N := IsConsistent(J0, g0);
 	if sol then
 		y := SZ!x + m*SZ!v;
-		y; v; N;
+		//y; v; N;
 		if m^2 ge M then
 			return true, S2!y;
 		else
@@ -110,7 +110,6 @@ end intrinsic;
 
 intrinsic HenselLiftSingle3(f::SeqEnum[RngMPolElt], x::ModTupRngElt, p::RngIntElt, m::RngIntElt, M::RngIntElt) -> BoolElt, .
 {Lifts a solution x of f modulo m = p^k to a single solution of f modulo p^2k}
-	m;
 	pm := p^m;
 	P := Parent(f[1]);
 	Pp := PolynomialRing(GF(p), Rank(P));
@@ -239,26 +238,43 @@ intrinsic Testje2a() -> SeqEnum
 	return Coefficients(15*r - (phi + 2^20*a));
 end intrinsic;
 
-intrinsic Testje2(a::RngElt) -> SeqEnum
+intrinsic Testje2(R::Rng) -> SeqEnum
 {}
-	Rc<[c]> := PolynomialRing(Parent(a), 2);
+	Rc<c1,c2,a,e> := PolynomialRing(R, 4);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
-	r := Resultant((x^2+x+1),
-		t - (c[1]+c[2]*x));
-	phi := t^2 + t + 1;
-	return Coefficients(r - (phi + 2*a * t));
+	r := Resultant((x^2-2),
+		t - (c1+c2*x));
+	phi := t^2;
+	hs := Coefficients(r - (phi - 2*a^2));
+	J := ColumnSubmatrix(JacobianMatrix(hs),1,2);
+	D := Determinant(J);
+	return hs,D;
+end intrinsic;
+
+intrinsic Testje2a(R::Rng) -> SeqEnum
+{}
+	Rc<c1,c2,c3,a,e> := PolynomialRing(R, 5);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	r := Resultant((x^2+2*x+2)*(x+1),
+		t - (c1+c2*x+c3*x^2));
+	hs := Coefficients(r - (t^2*(t+1)+2^5*a^2));
+	J := ColumnSubmatrix(JacobianMatrix(hs),1,3);
+	D := Determinant(J);
+	return hs,D;
 end intrinsic;
 
 intrinsic Testje3(R::Rng) -> SeqEnum
 {}
-	Rc<c1,c2,c3,c4,c5,c6,c7,e,a> := PolynomialRing(R, 9);
+	Rc<c1,c2,c3,c4,c5,c6,c7,a,e> := PolynomialRing(R, 9);
 	Rt<t> := PolynomialRing(Rc);
 	Rx<x> := PolynomialRing(Rt);
 	r := Resultant((x+1)*(x^2+x+1)*(x^4+x+1),
 		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6));
 	phi := 15*t^7 - 35*t^6 + 21*t^5;
-	hs := Coefficients(15*r - (phi + a));
+	psi := -ReciprocalPolynomial(Evaluate(phi - (2*a)^5, 2*a*t) div (2*a)^5);
+	hs := Coefficients(r - psi);
 	J := ColumnSubmatrix(JacobianMatrix(hs),1,7);
 	//"det";
 	D := Determinant(J);
@@ -285,6 +301,17 @@ intrinsic Testje4(p::RngIntElt) -> SeqEnum
 	return I;
 end intrinsic;
 
+intrinsic Testje5() -> SeqEnum
+{}
+	Rc<c0,c1,c2,c3> := PolynomialRing(Q, 4);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	r := Resultant(x^4 + 2*x^3 + 2*x^2 + 2,
+		t - (c0 + c1*x + c2*x^2 + c3*x^3));
+	phi := 5*t^4 + 28*t^3 + 70*t^2 + 140*t - 35;
+	return Coefficients(5*r - phi);
+end intrinsic;
+
 intrinsic Testje257(R::Rng) -> SeqEnum
 {}
 	Rc<c1,c2,c3,c4,c5,c6,c7,c8,a,e> := PolynomialRing(R, 10);
@@ -295,6 +322,21 @@ intrinsic Testje257(R::Rng) -> SeqEnum
 	phi1 := 4*t^5*(14+14*t+20*t^2+25*t^3);
 	phi2 := 4*t-1;
 	hs := Coefficients(100*r - (phi1 - a*phi2));
+	J := ColumnSubmatrix(JacobianMatrix(hs),1,8);
+	D := Determinant(J);
+	return hs,D;
+end intrinsic;
+
+intrinsic Testje257a(R::Rng) -> SeqEnum
+{}
+	Rc<c1,c2,c3,c4,c5,c6,c7,c8,a,e,p> := PolynomialRing(R, 11);
+	Rt<t> := PolynomialRing(Rc);
+	Rx<x> := PolynomialRing(Rt);
+	psix := -35 + 140*x + 70*x^2 + 28*x^3 + 5*x^4;
+	psit := -35 + 140*t + 70*t^2 + 28*t^3 + 5*t^4;
+	r := Resultant(psix^2 - a^2 * x,
+		t - (c1+c2*x+c3*x^2+c4*x^3+c5*x^4+c6*x^5+c7*x^6+c8*x^7));
+	hs := Coefficients(r - 5^12*(psit^2 - p^2 * a^2 * t));
 	J := ColumnSubmatrix(JacobianMatrix(hs),1,8);
 	D := Determinant(J);
 	return hs,D;
@@ -417,7 +459,7 @@ intrinsic FindValuation(F, C, vs) -> RngIntElt
 	return -1;
 end intrinsic;
 
-intrinsic Testje357_2(CZ, FZ) -> .
+intrinsic Testje357_2(CZ, FZ: max_depth := 10, max_div := 2) -> .
 {}
 	RZ := Parent(CZ[1]);
 
@@ -425,14 +467,14 @@ intrinsic Testje357_2(CZ, FZ) -> .
 	for F in FZ do
 		f := F[1];
 		printf "Factor "; PrintTrunc(f,50);
-		v, tree := FindValuation2(f, CZ, [1,1,1,1,1,1,1]);
+		v, tree := FindValuation2(f, CZ, [1,1,1,1,1,1,1], max_depth, max_div);
 		printf "Valuation %o, tree %o\n", v, tree;
-		Append(~vs, v);
+		Append(~vs, ExtendedReals()!v);
 	end for;
 	return vs;
 end intrinsic;
 
-intrinsic FindValuation2(F, C, vs: max_depth := 10, max_div := 2) -> RngIntElt, .
+intrinsic FindValuation2(F, C, vs, max_depth, max_div) -> RngIntElt, .
 {}
 	p := 2;
 
@@ -450,10 +492,15 @@ intrinsic FindValuation2(F, C, vs: max_depth := 10, max_div := 2) -> RngIntElt, 
 	I := ideal<R | [R!x : x in [ez-F] cat C] cat rel>;
 	E := EliminationIdeal(I, {a,e});
 
-	if e + 1 in E or e + a + 1 in E then
+	if 1 in E then
+		return 0, "x";
+	elif e + 1 in E or e + a + 1 in E then
 		return 0, <>;
 	else
 		minv, mini := Min(vs);
+		if minv ge max_depth then
+			return Infinity(), <>;
+		end if;
 		Ic := ideal<R | [R!x : x in C] cat rel>;
 		Ec := EliminationIdeal(Ic, Set([R.i : i in [1..(n-2)]]));
 		E1 := [g : g in Basis(Ec) | TotalDegree(g) eq 1];
@@ -473,7 +520,7 @@ intrinsic FindValuation2(F, C, vs: max_depth := 10, max_div := 2) -> RngIntElt, 
 					v := Valuation(Content(F2), p);
 					printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 2*cZi - dZi, v, vsn;
 					F2 div:= Content(F2);
-					va, tree := FindValuation2(F2, C2, vsn);
+					va, tree := FindValuation2(F2, C2, vsn, max_depth, max_div);
 					vn := v + va;
 					return vn, <i, di, v, tree>;
 				end if;
@@ -486,22 +533,20 @@ intrinsic FindValuation2(F, C, vs: max_depth := 10, max_div := 2) -> RngIntElt, 
 		vsn := vs;
 		vsn[i] +:= 1;
 		//TODO: do for other p than 2
-		printf "c%o = 0\n", i;
-		C2 := [Evaluate(c, cZi, 0) div Content(Evaluate(c, cZi, 0)) : c in C | Evaluate(c, cZi, 0) ne 0];
-		F2 :=  Evaluate(F, cZi, 0);
+		C2 := [Evaluate(c, cZi, 2*cZi) div Content(Evaluate(c, cZi,2*cZi)) : c in C | Evaluate(c, cZi,2*cZi) ne 0];
+		F2 :=  Evaluate(F, cZi, 2*cZi);
 		v0p := Valuation(Content(F2), p);
-		printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 0, v0p, vsn;
+		printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 2*cZi, v0p, vsn;
 		F2 div:= Content(F2);
-		va0, tree0 := FindValuation2(F2, C2, vsn);
+		va0, tree0 := FindValuation2(F2, C2, vsn, max_depth, max_div);
 		v0 := v0p + va0;
 
-		printf "c%o = 1\n", i;
-		C2 := [Evaluate(c, cZi, 1) div Content(Evaluate(c, cZi, 1)) : c in C | Evaluate(c, cZi, 1) ne 0];
-		F2 :=  Evaluate(F, cZi, 1);
+		C2 := [Evaluate(c, cZi,2*cZi-1) div Content(Evaluate(c, cZi,2*cZi-1)) : c in C | Evaluate(c, cZi,2*cZi-1) ne 0];
+		F2 :=  Evaluate(F, cZi,2*cZi-1);
 		v1p := Valuation(Content(F2), p);
-		printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 1, v1p, vsn;
+		printf "Substitution %o <- %o (valuation +%o) (%o)\n", cZi, 2*cZi - 1, v1p, vsn;
 		F2 div:= Content(F2);
-		va1, tree1 := FindValuation2(F2, C2, vsn);
+		va1, tree1 := FindValuation2(F2, C2, vsn, max_depth, max_div);
 		v1 := v1p + va1;
 
 		return Max(v0, v1), <i, <v0p,tree0>, <v1p,tree1>>;

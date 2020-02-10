@@ -16,5 +16,13 @@
         hunter.m
         hensel.m
         newton-ore.m
+        phi_newton.m
+        tschirnhaus.m
+        subresultants.m
+        rad.m
+        groebner.m
+        invariants.m
+        etale_test.m
+        separant.m
     }
 }

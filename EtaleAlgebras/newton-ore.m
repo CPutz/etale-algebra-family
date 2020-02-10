@@ -41,11 +41,27 @@ end intrinsic;
 intrinsic NewtonOreExponents(R::SeqEnum, p::RngIntElt) -> SeqEnum
 {Finds the Newton-Ore exponents for a ramification structure R and prime p
 without any information about the search ideal}
-  return NewtonOreExponentsShift(NewtonOreExponentsMax(R, p), p);
+  P := NewtonOrePolynomialMax(R,p);
+  T := Parent(P);
+  S := BaseRing(T);
+  S2 := PolynomialRing(GF(p), 2*Rank(S));
+  T2<x,y> := PolynomialRing(S2,2);
+  coe := hom<S -> S2 | [S2.i : i in [1..Rank(S)]]>;
+  C := [coe(c) : c in Coefficients(P)];
+  f := &+[C[i+1]*x^i : i in [0..#C-1]];
+  g := &+[S2.(Rank(S)+i+1)*x^i : i in [0..#C-2]];
+  r := Resultant(f, y-g, x);
+  return [Valuation(Integers()!Content(Evaluate(c, [0,0])),p) : c in Coefficients(r,y)];
 end intrinsic;
 
 intrinsic NewtonOreExponentsMax(R::SeqEnum, p::RngIntElt) -> SeqEnum
 {Finds the Newton-Ore exponents for a ramification structure R and prime p,
+given that the ideal I is the product of all primes above p}
+  return [Valuation(Content(c),p) : c in Coefficients(NewtonOrePolynomialMax(R,p))];
+end intrinsic;
+
+intrinsic NewtonOrePolynomialMax(R::SeqEnum, p::RngIntElt) -> RngUPolElt
+{Finds the Newton-Ore polynomial for a ramification structure R and prime p,
 given that the ideal I is the product of all primes above p}
   require IsPrime(p): "Argument 2 must be prime";
   n := &+[y[1] : y in R];
@@ -66,7 +82,7 @@ given that the ideal I is the product of all primes above p}
     Append(~e, [1]);
     res *:= T!e;
   end for;
-  return [Valuation(Content(c),p) : c in Coefficients(res)];
+  return res;
 end intrinsic;
 
 intrinsic NewtonOreExponentsShift(r::SeqEnum, p::RngIntElt) -> SeqEnum
