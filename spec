@@ -2,27 +2,13 @@
 {
     EtaleAlgebras
     {
-        etale_fam_newton.m
-        etale_fam.m
         etale.m
-        poly.m
-        val_param.m
-        utils.m
-        pseudo.m
+        etale_alg.m
         2-adic_octics.m
-        357.m
-        257.m
-        congr.m
-        hunter.m
-        hensel.m
-        newton-ore.m
-        phi_newton.m
-        tschirnhaus.m
-        subresultants.m
-        rad.m
-        groebner.m
-        invariants.m
-        etale_test.m
         separant.m
+        utils.m
+    	
+    	poly.m
+    	val_param.m
     }
 }

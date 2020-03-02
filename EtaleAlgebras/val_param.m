@@ -54,6 +54,7 @@ intrinsic IsCoercible(V::ValPrm, x::.) -> BoolElt, .
 	if ISA(Type(x), ValPrmElt) and PowerRange(V) eq PowerRange(Parent(x)) then
 		return true, ValuationSpaceElement(V, Min(x), Max(x));
 	end if;
+	"test";
 	for i in [1..#Values(V)] do
 		l, c := IsCoercible(Constituent(Values(V), i), x);
 		if l then

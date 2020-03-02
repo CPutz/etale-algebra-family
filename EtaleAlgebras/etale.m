@@ -124,6 +124,11 @@ intrinsic Witness(E::EtAlg) -> .
     return E`Witness;
 end intrinsic;
 
+intrinsic ChangeWitness(~E::EtAlg, W::.)
+{Changes the witness of E to W}
+    E`Witness := W;
+end intrinsic;
+
 intrinsic Rank(E::EtAlg) -> RngIntElt
 {The rank of E over its base ring}
     return Degree(DefiningPolynomial(E));
@@ -293,17 +298,21 @@ intrinsic EtaleAlgebraListIsomorphism(L::SeqEnum[RngUPolElt]
         res := [];
         for FP in C do
             found := false;
+            Ec := 0;
             for E in res do
                 if IsDefiningPolynomialEtale(E, FP[1]) then
                     found := true;
+                    Ec := E;
                     break;
                 end if;
             end for;
-            if not found then
+            if found then //add witness
+                ChangeWitness(~Ec, Append(Witness(Ec), FP[3])); 
+            else
                 if W eq [] then
                     Append(~res, EtaleAlgebra(FP[2]: D := D));
                 else
-                    Append(~res, EtaleAlgebra(FP[2]: D := D, W := FP[3]));
+                    Append(~res, EtaleAlgebra(FP[2]: D := D, W := [FP[3]]));
                 end if;
             end if;
         end for;
