@@ -292,6 +292,11 @@ intrinsic EtaleAlgebraListIsomorphism2(L0::SeqEnum[RngUPolElt], B0::SeqEnum[FldP
             end if;
         end for;
 
+        for i := 1 to #res do
+        	res[i]`B0 := GeneralizeBalls(res[i]`B0);
+        	//res[i]`Boo := GeneralizeBalls(res[i]`Boo);
+        end for;
+
     	Res cat:= res;
     end for;
 
