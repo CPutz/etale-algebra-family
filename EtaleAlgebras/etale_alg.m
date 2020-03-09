@@ -79,13 +79,30 @@ end intrinsic;
 intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 {}
 	P := Parent(F);
+	s := P.1;
+	t := P.2;
 	K := BaseRing(P);
+	p := UniformizingElement(K);
 	require ISA(Type(K), FldPad): "Argument 1 must be a polynomial over a p-adic field";
 	require Rank(P) eq 2: "Argument 1 must be a polynomial in 2 variables";
 
+	printf "computing general discriminant\n";
 	disc := UnivariatePolynomial(Discriminant(F, 2));
-	roots_Zp := [r : r in Roots(disc) | Valuation(r[1]) ge 0];
-	p := UniformizingElement(K);
+	roots_Zp := [r[1] : r in Roots(disc) | Valuation(r[1]) ge 0];
+
+	/*R := PolynomialRing(K, 4);
+	RQ<e,sR,x,y> := PolynomialRing(Q, 4);
+	dF := Derivative(F, t);
+	printf "computing general separant\n";
+	//time sep := Resultant(Resultant(e - (x - y) * Evaluate(dF, [sR, x]), Evaluate(F, [sR, x]), x), Evaluate(F, [sR, y]), y);
+	sep := Resultant(Resultant(e - (x - y) * Evaluate(dF, [sR, x]), Evaluate(F, [sR, x]), x), Evaluate(F, [sR, y]), y);
+	sep;
+	coeffs := [PolynomialRing(K)![c2 + O(p)^1000 : c2 in Coefficients(UnivariatePolynomial(c))] : c in Coefficients(sep, 1) | c ne 0];
+	coeffs;
+	roots_Zp := IndexedSetToSequence({@ r[1] : r in Roots(c), c in coeffs | Valuation(r[1]) ge 0 @});
+	//roots_Zp;
+	GeneralizeBalls(roots_Zp);*/
+	
 
 	C := [O(K!1)];
 	C_end := [];
@@ -95,11 +112,11 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 		C_new := [];
 		for c in C do
 			cp := ChangePrecision(c, i+1);
-			//TODO: maybe relax the condition to Zp?
-			if not HasRoot(Evaluate(disc, cp + p^i * Parent(disc).1))then
-			//if forall { r : r in roots_Z | not (Qp!r in c) } then
+			//if not HasRoot(Evaluate(disc, cp + p^i * Parent(disc).1))then
+			n_roots_in_c := #{ r : r in roots_Zp | r in c };
+			if n_roots_in_c eq 0 then
 				Append(~C_end, c);
-			elif #{ r : r in roots_Zp | r[1] in c } eq 1 then
+			elif n_roots_in_c eq 1 then
 				Append(~C0, <c, i>);
 			else
 				C_new cat:= [ cp + p^i * x + O(p)^(i+1) : x in ResidueSystem(K) ];
@@ -116,45 +133,50 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 
 	for ci in C0 do
 		c0 := ci[1];
-		i := ci[2];
-		error if not exists (r0) { r : r in [ro[1] : ro in roots_Zp] | r in c0 },
+		e := ci[2];
+		error if not exists (r0) { r : r in [ro : ro in roots_Zp] | r in c0 },
 			"This should not happen: c0 should contain a unique zero of the discriminant.";
 
 		printf "computing around root: %o\n", r0;
-		s := P.1;
-		t := P.2;
-		F0 := Evaluate(F, [p^i * s + r0, t]);
+		F0 := Evaluate(F, [p^e * s + r0, t]);
+		F0 := F0 / Coefficient(F0, t, Degree(F0, t)); //make monic in t
 		f := UnivariatePolynomial(Evaluate(F0, [0, t]));
 
 		//require Degree(F0, s) le 1: "Degree of g in s must be <= 1.";
 		//TODO: prove I can remove the O(s^2) part
-		g := UnivariatePolynomial(Coefficient(F0, s, 1));
+		g := -UnivariatePolynomial(Coefficient(F0, s, 1));
 		Facf := Factorization(f);
 		facs := [fac[1]^fac[2] : fac in Facf];
 		_, cs := Xgcd([f div h : h in facs]);
 		fcs := Zip(facs, cs);
-		rs := [fc[2] * g mod fc[1] : fc in fcs];
+		rs := [(fc[2] * g) mod fc[1] : fc in fcs];
+
 
 		Es := [ EtaleAlgebraFamily0(Facf[i][1], rs[i], Facf[i][2], a) : i in [1..#facs] ];
 		for i := 1 to #Es do
 			for j := 1 to #Es[i] do
-				Es[i,j]`B0 := [ (c - r0) / p^i : c in Es[i,j]`B0 ];
+				B0 := Es[i,j]`B0;
+				Boo := Es[i,j]`Boo;
+				Boo_new := [];
+				//TODO: do this better
+				for boo in Boo do
+					r := boo[1];
+					c := boo[2];
+					k := boo[3];
+					while Valuation(c) ge k and exists (b0) { b : b in B0 | b in r + (c / p^k) and r + (c / p^k) in b } do
+						Exclude(~B0, b0);
+						c /:= p^k;
+					end while;
+					Append(~Boo_new, <r, c, k>);
+				end for;
+
+				Es[i,j]`B0 := [ p^e * c + r0 : c in B0 ];
+				Es[i,j]`Boo := [ <c[1] + r0, p^e * c[2], c[3]> : c in Boo_new ];
+				//Es[i,j]`B0 := [ p^e * c + r0 : c in Es[i,j]`B0 ];
+				//Es[i,j]`Boo := [ <c[1] + r0, p^e * c[2], c[3]> : c in Es[i,j]`Boo ];
 			end for;
 		end for;
 
-		/*Ess_new := [];
-		for Es1 in Es do
-			Es_new := [];
-			for E in Es1 do
-				W_new := [<p^i * c[1] + r0, c[2] - i> : c in Witness(E)];
-				E_new := E;
-				ChangeWitness(~E_new, W_new);
-				Append(~Es_new, E_new);
-			end for;
-			Append(~Ess_new, Es_new);
-		end for;
-
-		Append(~Ess, Ess_new);*/
 		Append(~Ess, Es);
 	end for;
 
@@ -169,7 +191,7 @@ intrinsic EtaleAlgebraFamily0(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, a::Rng
 	printf "computing étale algebras for %o polynomials\n", #B0 + #Boo;
 
 	D := LocalFieldDatabaseOctic2Adics();
-	return EtaleAlgebraListIsomorphism2([f^k - c*g : c in B0], B0, [f^k - c[1]*g : c in Boo], Boo: D := D);
+	return EtaleAlgebraListIsomorphism2([f^k - c*g : c in B0], B0, [f^k - (c[1] + c[2])*g : c in Boo], Boo: D := D);
 end intrinsic
 
 intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> SeqEnum, SeqEnum
@@ -204,7 +226,7 @@ intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -
 	printf "computing separant\n";
 	F1 := UnivariatePolynomial(Evaluate(F, s, p));
 	sig1 := Separant(F1);
-	prec := Floor(sig1 - 1 - vg) + 1;
+	prec := Max(0, Floor(sig1 - 1 - vg) + 1);
 
 	printf "generating p-adic neighbourhoods\n";
 	//TODO: prove that linearly extending the separant works
@@ -215,7 +237,7 @@ intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -
 
 	Boo := [];
 	for i := 0 to k-1 do
-		Boo cat:= [<p^(B+i) * c, k> : c in quo<Integers(K) | p^prec> | Valuation(c) eq 0];
+		Boo cat:= [<0, p^(B+i) * c, k> : c in quo<Integers(K) | p^prec> | Valuation(c) eq 0];
 	end for;
 
 	return B0, Boo;
@@ -259,8 +281,7 @@ intrinsic EtaleAlgebraListIsomorphism2(L0::SeqEnum[RngUPolElt], B0::SeqEnum[FldP
             found := false;
             //for E in res do
             for i := 1 to #res do
-            	E := res[i];
-                if IsDefiningPolynomialEtale(E`E, FP[1]) then
+                if IsDefiningPolynomialEtale(res[i]`E, FP[1]) then
                     found := true;
                 	found_i := i;
                     break;
@@ -294,34 +315,18 @@ intrinsic EtaleAlgebraListIsomorphism2(L0::SeqEnum[RngUPolElt], B0::SeqEnum[FldP
 
         for i := 1 to #res do
         	res[i]`B0 := GeneralizeBalls(res[i]`B0);
-        	//res[i]`Boo := GeneralizeBalls(res[i]`Boo);
+        	
+        	ks := {@ b[3] : b in res[i]`Boo @};
+        	Boo_new := [ b : b in res[i]`Boo | b[1] ne 0 ];
+        	for k in ks do
+        		B := GeneralizeBalls([b[2] : b in res[i]`Boo | b[3] eq k and b[1] eq 0 ]);
+        		Boo_new cat:= [<0, b, k> : b in B];
+        	end for;
+        	res[i]`Boo := Boo_new;
         end for;
 
     	Res cat:= res;
     end for;
-
-    /*for C in Fss0 do
-        res := [];
-        for FP in C do
-            found := false;
-            Ec := 0;
-            //for E in res do
-            for i := 1 to #res do
-            	E := res[i];
-                if IsDefiningPolynomialEtale(E`E, FP[1]) then
-                    found := true;
-                	found_i := i;
-                    break;
-                end if;
-            end for;
-            if found then //add witness
-            	res[found_i]`B0 := Append(res[found_i]`B0, FP[3]);
-            else
-                Append(~res, rec< EtRF | E := EtaleAlgebra(FP[2]: D := D), B0 := [FP[3]], Boo := [] >);
-            end if;
-        end for;
-        Res cat:= res;
-    end for;*/
 
     return Res;
 end intrinsic;
@@ -637,6 +642,10 @@ end intrinsic;
 
 intrinsic GeneralizeBalls(S::SeqEnum[FldPadElt]) -> SeqEnum[FldPadElt]
 {}
+	if IsEmpty(S) then
+		return [];
+	end if;
+	
 	R := Parent(S[1]);
 	p := UniformizingElement(R);
 	rs := ResidueSystem(R);
