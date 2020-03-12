@@ -82,6 +82,7 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 	s := P.1;
 	t := P.2;
 	K := BaseRing(P);
+	OK := Integers(K);
 	p := UniformizingElement(K);
 	require ISA(Type(K), FldPad): "Argument 1 must be a polynomial over a p-adic field";
 	require Rank(P) eq 2: "Argument 1 must be a polynomial in 2 variables";
@@ -138,6 +139,7 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 			"This should not happen: c0 should contain a unique zero of the discriminant.";
 
 		printf "computing around root: %o\n", r0;
+		r0 := 0;
 		F0 := Evaluate(F, [p^e * s + r0, t]);
 		F0 := F0 / Coefficient(F0, t, Degree(F0, t)); //make monic in t
 		f := UnivariatePolynomial(Evaluate(F0, [0, t]));
@@ -155,7 +157,7 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 		Es := [ EtaleAlgebraFamily0(Facf[i][1], rs[i], Facf[i][2], a) : i in [1..#facs] ];
 		for i := 1 to #Es do
 			for j := 1 to #Es[i] do
-				B0 := Es[i,j]`B0;
+				/*B0 := Es[i,j]`B0;
 				Boo := Es[i,j]`Boo;
 				Boo_new := [];
 				//TODO: do this better
@@ -171,9 +173,9 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt) -> .
 				end for;
 
 				Es[i,j]`B0 := [ p^e * c + r0 : c in B0 ];
-				Es[i,j]`Boo := [ <c[1] + r0, p^e * c[2], c[3]> : c in Boo_new ];
-				//Es[i,j]`B0 := [ p^e * c + r0 : c in Es[i,j]`B0 ];
-				//Es[i,j]`Boo := [ <c[1] + r0, p^e * c[2], c[3]> : c in Es[i,j]`Boo ];
+				Es[i,j]`Boo := [ <c[1] + r0, p^e * c[2], c[3]> : c in Boo_new ];*/
+				Es[i,j]`B0 := [ p^e * c + r0 : c in Es[i,j]`B0 ];
+				Es[i,j]`Boo := [ CreatePAdicNbhd(Parent(c), OK!(Middle(c) + r0), OK!(p^e * Radius(c)), Exponent(c)) : c in Es[i,j]`Boo ];
 			end for;
 		end for;
 
@@ -188,10 +190,14 @@ intrinsic EtaleAlgebraFamily0(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, a::Rng
 {}
 	B0, Boo := EtaleAlgebraFamily0Nbhds(f, g, k);
 
+	B0 := [b : b in B0 | Valuation(b) mod a eq 0];
+	Boo := [b : b in Boo | Valuation(Radius(b)) mod GCD(a, Exponent(b)) eq 0]; //TODO: make better
+
 	printf "computing étale algebras for %o polynomials\n", #B0 + #Boo;
 
 	D := LocalFieldDatabaseOctic2Adics();
-	return EtaleAlgebraListIsomorphism2([f^k - c*g : c in B0], B0, [f^k - (c[1] + c[2])*g : c in Boo], Boo: D := D);
+	return EtaleAlgebraListIsomorphism2([f^k - c*g : c in B0], B0, [f^k - Representant(c)*g : c in Boo], Boo: D := D);
+	//return EtaleAlgebraListIsomorphism2([f^k - c*g : c in B0], B0, [f^k - (c[1] + c[2])*g : c in Boo], Boo: D := D);
 end intrinsic
 
 intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> SeqEnum, SeqEnum
@@ -218,7 +224,7 @@ intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -
 	v0 := &+([0] cat [r[2] : r in Roots(disc) | Valuation(r[1]) ge 0]);
 	require v0 eq Degree(f) * (k - 1): "F(s,t) may only have s = 0 as a singular point in Zp";
 
-	B := Z!Bound1(f, g, k);
+	B := Ceiling(Bound1(f, g, k));
 	printf "bound: %o\n", B;
 
 	vg := Valuation(Content(ChangeRing(g, Integers(K))));
@@ -236,8 +242,10 @@ intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -
 	end for;
 
 	Boo := [];
+	OK := Integers(K);
+	X := PAdicNbhds(OK);
 	for i := 0 to k-1 do
-		Boo cat:= [<0, p^(B+i) * c, k> : c in quo<Integers(K) | p^prec> | Valuation(c) eq 0];
+		Boo cat:= [CreatePAdicNbhd(X, OK!0, OK!(p^(B+i) * c), k) : c in quo<Integers(K) | p^prec> | Valuation(c) eq 0];
 	end for;
 
 	return B0, Boo;
@@ -248,7 +256,7 @@ FactorizationStructureList := function(L)
 end function;
 
 intrinsic EtaleAlgebraListIsomorphism2(L0::SeqEnum[RngUPolElt], B0::SeqEnum[FldPadElt],
-	Loo::SeqEnum[RngUPolElt], Boo::SeqEnum[Tup] :
+	Loo::SeqEnum[RngUPolElt], Boo::SeqEnum[PadNbhdElt] :
 	D := LocalFieldDatabase()) -> SeqEnum[EtAlg]
 {Creates a list of etale algebra given a sequence of polynomials over a local field}
     require #L0 eq #B0: "L0 and W0 must have the same length";
@@ -316,11 +324,13 @@ intrinsic EtaleAlgebraListIsomorphism2(L0::SeqEnum[RngUPolElt], B0::SeqEnum[FldP
         for i := 1 to #res do
         	res[i]`B0 := GeneralizeBalls(res[i]`B0);
         	
-        	ks := {@ b[3] : b in res[i]`Boo @};
-        	Boo_new := [ b : b in res[i]`Boo | b[1] ne 0 ];
+        	ks := {@ <Middle(b), Exponent(b)> : b in res[i]`Boo @};
+        	Boo_new := [];
         	for k in ks do
-        		B := GeneralizeBalls([b[2] : b in res[i]`Boo | b[3] eq k and b[1] eq 0 ]);
-        		Boo_new cat:= [<0, b, k> : b in B];
+        		B := GeneralizeBalls([K!Radius(b) : b in res[i]`Boo | Middle(b) eq k[1] and Exponent(b) eq k[2]]);
+        		if not IsEmpty(res[i]`Boo) then
+        			Boo_new cat:= [CreatePAdicNbhd(Parent(res[i]`Boo[1]), k[1], OK!b, k[2]) : b in B];
+        		end if;
         	end for;
         	res[i]`Boo := Boo_new;
         end for;
