@@ -8,8 +8,8 @@
         separant.m
         utils.m
         padic_nbhd.m
+        pad_mod_pow.m
     	
     	poly.m
-    	val_param.m
     }
 }

@@ -98,7 +98,7 @@ intrinsic ReciprocalScale(P::RngUPolElt, r::RngElt) -> RngUPolElt
 	return Parent(P) ! [r^(d-c) * Coefficient(P, c) : c in [0..d]]; 
 end intrinsic;
 
-intrinsic MakeMonic(P::RngUPolElt) -> RngUPolElt
+/*intrinsic MakeMonic(P::RngUPolElt) -> RngUPolElt
 {Transforms P such that it is becomes monic}
 	p := Prime(BaseRing(BaseRing(P)));
 	r := Name(BaseRing(P), 1);
@@ -112,7 +112,7 @@ intrinsic MakeMonic(P::RngUPolElt) -> RngUPolElt
 	Mp := Min(0, Floor(Min([Coefficient(m, 0) : m in M])));
 	Mr := Min(0, Floor(Min([Coefficient(m, 1) : m in M])));
 	return ReciprocalScale(P, p^(-Mp) * r^(-Mr)) div (p^vp * r^vr);
-end intrinsic;
+end intrinsic;*/
 
 intrinsic MakeMonicIntegral(P::RngUPolElt) -> RngUPolElt
 {Scales a polynomial over a local field such that it is monic and
