@@ -76,7 +76,7 @@ intrinsic Bound1(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::RngIntElt) -> Rn
 	return M;
 end intrinsic;
 
-intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt
+intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::PadNbhdElt
 	:D := LocalFieldDatabase()) -> .
 {}
 	P := Parent(F);
@@ -131,7 +131,6 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt
 		i +:= 1;
 	until IsEmpty(C);
 
-	Ess := [];
 	for c in C0 do
 		c0 := Middle(c);
 		pe := Radius(c);
@@ -151,28 +150,63 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, a::RngIntElt
 		fcs := Zip(facs, cs);
 		rs := [(fc[2] * g) mod fc[1] : fc in fcs];
 
-		Es := [];
+		bound := 0;
+		k := 1;
 		for i := 1 to #Facf do
-			fi := Facf[i][1];
-			k := Facf[i][2];
-			rsi := rs[i];
-			B := [r0 + pe * X!b : b in EtaleAlgebraFamily0Nbhds(fi, rsi, k)];
-			printf "computing étale algebras for %o polynomials\n", #B;
-			E := EtaleAlgebraListIsomorphism2(F, B : D := D);
-			for j := 1 to #E do
-				E[j][2] := GeneralizeNbhds(E[j][2]);
-			end for;
-			Append(~Es, E);
+			ki := Facf[i][2];
+			bound := Max(bound, EtaleAlgebraFamily0Bound(Facf[i][1], rs[i], ki));
+			k := Lcm(k, ki);
+		end for;
+		printf "using bound %o\n", bound;
+
+		printf "computing separant\n";
+		F1 := UnivariatePolynomial(Evaluate(F0, s, p));
+		sig1 := Separant(F1);
+		vg := Valuation(Content(ChangeRing(g, OK)));
+		prec := Max(0, Floor(sig1 - 1 - vg) + 1);
+
+		printf "generating p-adic neighbourhoods\n";
+		//TODO: prove that linearly extending the separant works
+		B := [];
+		for i := 1 to bound - 1 do
+			B cat:= [X!(p^i * c + O(p^(prec+i))) : c in quo<OK | (OK!p)^prec> | Valuation(c) eq 0];
 		end for;
 
-		Append(~Ess, Es);
+		//TODO: change
+		Precision := 500;
+		OKp := quo<OK | p^Precision>;
+		for i := 0 to k-1 do
+			B cat:= [CreatePAdicNbhd(X, OKp!0, p^(bound+i) * K!c, k) : c in RepresentativesModuloPower(OK, k)];
+		end for;
+
+		printf "#neighbourhoods = %o\n", #B;
+
+		//transform back
+		B := [r0 + pe * X!b : b in B];
+		C_end cat:= B;
 	end for;
 
-	return Ess;
+	//filter C_end
+	keep := [];
+	for c in C_end do
+		b, e := Intersection(X!a, c);
+		//throw away not implemented cases
+		if b then
+			keep cat:= e;
+		end if;
+	end for;
+	C_end := keep;
 
+	printf "computing étale algebras for %o polynomials\n", #C_end;
+	E := EtaleAlgebraListIsomorphism2(F, C_end : D := D);
+	for i := 1 to #E do
+		E[i][2] := GeneralizeNbhds(E[i][2]);
+	end for;
+
+	return E;
 end intrinsic;
 
-intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> SeqEnum[PadNbhdElt]
+intrinsic EtaleAlgebraFamily0Bound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt
 {}
 	require Degree(g) le k * Degree(f): "Degree of f^k must be at least the degree of g";
 	K := CoefficientRing(f);
@@ -203,28 +237,7 @@ intrinsic EtaleAlgebraFamily0Nbhds(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -
 	bound := Ceiling(Bound1(f, g, k));
 	printf "bound: %o\n", bound;
 
-	vg := Valuation(Content(ChangeRing(g, Integers(K))));
-
-	printf "computing separant\n";
-	F1 := UnivariatePolynomial(Evaluate(F, s, p));
-	sig1 := Separant(F1);
-	prec := Max(0, Floor(sig1 - 1 - vg) + 1);
-
-	printf "generating p-adic neighbourhoods\n";
-	//TODO: prove that linearly extending the separant works
-	B := [];
-	for i := 1 to bound - 1 do
-		B cat:= [X!(p^i * c + O(p^prec)) : c in quo<Integers(K) | p^prec> | Valuation(c) eq 0];
-	end for;
-
-	//TODO: change
-	Precision := 500;
-	OKp := quo<OK | p^Precision>;
-	for i := 0 to k-1 do
-		B cat:= [CreatePAdicNbhd(X, OKp!0, p^(bound+i) * K!c, k) : c in RepresentativesModuloPower(OK, k)];
-	end for;
-
-	return B;
+	return bound;
 end intrinsic;
 
 FactorizationStructureList := function(L)

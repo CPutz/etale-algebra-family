@@ -131,7 +131,7 @@ intrinsic Intersection(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt, .
 		d, a, b := Xgcd(k1, k2);
 
 		if not IsPower(r1 / r2, d) then
-			return false, "empty";
+			return true, [];
 		end if;
 
 		vr1 := Valuation(r1);
@@ -156,22 +156,21 @@ intrinsic Intersection(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt, .
 		end if;
 
 		c := Middle(N1) - Middle(N2);
-		r := Radius(N1);
+		r1 := Radius(N1);
 		r2 := Radius(N2);
 		k := Exponent(N2);
 
-		if Valuation(c) lt Valuation(r) then
+		if Valuation(c) lt Valuation(r1) then
 			if Valuation(c) lt Valuation(r2) then
-				return false, "empty";
+				return true, [];
 			else
 				c /:= r2;
-				r /:= r2;
+				r := r1 / r2;
 				vc := Valuation(c);
 				vr := Valuation(r);
-				prec := 2*(k-1)*vc - vr;
+				prec := Max(0, 2*(k-1)*vc - vr);
 
 				As := [(c + r*OK!a + O(p^(vr+prec))) : a in quo<OK | p^prec>];
-				As;
 				return true, [X!a : a in As | IsPower(a, k)];
 			end if;
 		else
