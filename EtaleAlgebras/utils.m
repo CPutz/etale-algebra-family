@@ -15,3 +15,17 @@ intrinsic Swap(~x::., ~y::.)
 	x := y;
 	y := temp;
 end intrinsic;
+
+intrinsic Repeat(x::., k::RngIntElt) -> SeqEnum
+{Repeat x k times}
+	return [x : i in [1..k]];
+end intrinsic;
+
+intrinsic Sup(L::SeqEnum) -> .
+{-Infinty() if L is empty and Max(L) otherwise}
+	if IsEmpty(L) then
+		return -Infinity();
+	else
+		return Max(L);
+	end if;
+end intrinsic;

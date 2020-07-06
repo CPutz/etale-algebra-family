@@ -113,70 +113,38 @@ intrinsic '*'(x::., N::PadNbhdElt) -> PadNbhdElt
 	return CreatePAdicNbhd(Parent(N), xR * Middle(N), xR * Radius(N), Exponent(N));
 end intrinsic;
 
-intrinsic Intersection(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt, .
-{}
-	X := Parent(N1);
-	OK := Integers(AmbientSpace(X));
-	p := UniformizingElement(OK);
+intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt) -> BoolElt
+{Returns whether N contains an element of valuation v mod m where v is defined mod m}
+	K := AmbientSpace(Parent(N));
+	R := Parent(v);
+	m := Modulus(R);
 
-	if Middle(N1) eq Middle(N2) then
-		if Valuation(Radius(N1)) lt Valuation(Radius(N2)) then
-			Swap(~N1, ~N2);
-		end if;
-		r1 := Radius(N1);
-		r2 := Radius(N2);
-		k1 := Exponent(N1);
-		k2 := Exponent(N2);
+	c := Middle(N);
+	r := Radius(N);
+	k := Exponent(N);
+	vc := Valuation(c);
+	vr := Valuation(r);
 
-		d, a, b := Xgcd(k1, k2);
-
-		if not IsPower(r1 / r2, d) then
-			return true, [];
-		end if;
-
-		vr1 := Valuation(r1);
-		vr2 := Valuation(r2);
-		vr := Valuation(r1) - Valuation(r2);
-		a *:= vr div d;
-		b *:= vr div d;
-
-		e := Ceiling(a / k2);
-		a -:= e * (k2 div d);
-		b +:= e * (k1 div d);
-
-		rn := r1 / (r2 * p^vr);
-		error if not exists (g) {g : g in RepresentativesModuloPower(OK, k2) | IsPower(rn * g^(k1 div d), k2 div d)},
-			"failed to find power";
-
-		m := Z!(k1 * k2 / d); //Lcm
-		return true, [CreatePAdicNbhd(Parent(N1), Middle(N1), r1 * p^(-a * k1 div d) * g^(k1 div d), m)];
-	elif Exponent(N1) eq 1 or Exponent(N2) eq 1 then
-		if Exponent(N2) eq 1 then
-			Swap(~N1, ~N2);
+	if c eq 0 then
+		d := GCD(k, m);
+		return (Z!v - vr) mod d eq 0;
+	else
+		if R!vc eq v then
+			return true;
 		end if;
 
-		c := Middle(N1) - Middle(N2);
-		r1 := Radius(N1);
-		r2 := Radius(N2);
-		k := Exponent(N2);
-
-		if Valuation(c) lt Valuation(r1) then
-			if Valuation(c) lt Valuation(r2) then
-				return true, [];
-			else
-				c /:= r2;
-				r := r1 / r2;
-				vc := Valuation(c);
-				vr := Valuation(r);
-				prec := Max(0, 2*(k-1)*vc - vr);
-
-				As := [(c + r*OK!a + O(p^(vr+prec))) : a in quo<OK | p^prec>];
-				return true, [X!a : a in As | IsPower(a, k)];
+		for va := 0 to Ceiling((vc - vr) / k) - 1 do
+			if R!(vr + k * va) eq v then
+				return true;
 			end if;
-		else
-			return Intersection(-c + N1, N2);
-		end if;
-	end if;
+		end for;
 
-	return false, "not implemented";
+		if vc lt vr then
+			return false;
+		end if;
+		
+		//TODO: not completely correct I think
+		b,_ := IsPower(-(K!c) / r, k);
+		return b;
+	end if;
 end intrinsic;

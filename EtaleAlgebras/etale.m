@@ -28,6 +28,9 @@ intrinsic EtaleAlgebra(P::RngUPolElt
 {Creates an etale algebra given a polynomial over a p-adic field. An optional
 database of local fields D can be used for searching. A parameter W can be
 set to a witness.}
+    require Discriminant(P) ne 0:
+        "P does not generate an etale algebra; it has double roots";
+
 	//TODO: require?
 	K := BaseRing(P);
     OK := RingOfIntegers(K);
