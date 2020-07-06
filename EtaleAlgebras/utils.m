@@ -9,9 +9,23 @@ intrinsic TupSeq(t::Tup) -> SeqEnum
 	return [c : c in t];	
 end intrinsic;
 
+intrinsic SeqTup(S::SeqEnum) -> Tup
+{The sequence t as a tuple}
+	t := <>;
+	for e in S do
+		Append(~t, e);
+	end for;
+	return t;
+end intrinsic;
+
 intrinsic Swap(~x::., ~y::.)
 {Swaps the values of x and y}
 	temp := x;
 	x := y;
 	y := temp;
+end intrinsic;
+
+intrinsic Repeat(x::., k::RngIntElt) -> SeqEnum
+{Returns the list of x repeated k times}
+	return [x : i in [1..k]];
 end intrinsic;

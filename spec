@@ -9,6 +9,7 @@
         utils.m
         padic_nbhd.m
         pad_mod_pow.m
+        congr.m
     	
     	poly.m
     }
