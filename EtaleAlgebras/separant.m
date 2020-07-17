@@ -83,7 +83,7 @@ intrinsic SeparantUPol(f::RngUPolElt, g::RngUPolElt) -> .
 end intrinsic;
 
 intrinsic SeparantMPol(f::RngMPolElt, v::MPolElt) -> .
-{}
+{The general separant polynomial of f with respect to v}
 	return SeparantMPol(f, f, v);
 end intrinsic;
 
