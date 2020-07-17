@@ -77,6 +77,54 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, v::RngIntResElt, p::RngIntElt
 	return EtaleAlgebraFamily(R!F, v : D := D, Precision := Precision, FZ := F);
 end intrinsic;
 
+intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Precision := 500) -> .
+{}
+	require ISA(Type(BaseRing(Parent(F))), RngInt) or ISA(Type(BaseRing(Parent(F))), FldRat):
+		"Argument 1 must be defined over Z or Q";
+
+	R := Parent(F);
+	s := R.1;
+	t := R.2;
+	K := pAdicField(p, Precision);
+	OK := Integers(K);
+	X := pAdicNbhds(K);
+	pi := K!p;
+
+	//TODO: make monic and integral
+
+	printf "computing general separant";
+	gen_sep := SeparantMPol(F, t) div t^Degree(F, t);
+
+	// Split up in neighborhoods
+	OKp := quo<OK | p^Precision>;
+	Nbhds := [OKp!0];
+	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
+	i := 0;
+	//TODO: instead, after computing the separant directly subdivide into neighborhoods of this radius
+	repeat
+		i;
+		Nbhds_new := [];
+		for N in Nbhds do
+			vals := ValuationsOfRoots(UnivariatePolynomial(Evaluate(gen_sep, s, N)), p);
+			sep := Sup([v[1] : v in vals]);
+
+			if sep lt i then
+				Append(~Nbhds_end, K!N + O(pi^i));
+			else
+				Nbhds_new cat:= [ N + (OKp!pi)^i * OKp!x : x in ResidueSystem(K) ];
+			end if;
+		end for;
+		Nbhds := Nbhds_new;
+		i +:= 1;
+	until IsEmpty(Nbhds) or i ge 20;
+
+	Nbhds;
+
+	return Nbhds_end, Nbhds;
+end intrinsic;
+
 intrinsic EtaleAlgebraFamily(F::RngMPolElt, p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500) -> .
@@ -144,6 +192,10 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, p::RngIntElt
 		fs := [fi[1] : fi in fac];
 		fs_hat := [f div (fi[1]^fi[2]) : fi in fac];
 		d,cs := XGCD(fs_hat);
+
+		assert Degree(d) eq 0;
+		d := ConstantCoefficient(d);
+
 		min_val := Min([Valuation(c) : c in Coefficients(ci), ci in cs]);
 		content := pi^(-min_val);
 		// Rescale the ci and d
@@ -158,8 +210,16 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, p::RngIntElt
 		nus := [v[1] : v in ValuationsInRootsOf(fhi[1], fhi[2]), fhi in Zip(fs_hat, fs)];
 		mus := [fj[2] * v[1] : v in ValuationsInRootsOf(fj[1], fi), fi in fs, fj in fac | fi ne fj[1]];
 
-		nus;
-		mus;
+		//TODO: compute the bi's
+		bs := [0 : f in fs];
+
+		bound1 := Sup([fac[i][2] * (Valuation(d) + bs[i] + nus[i]) : i in [1..#fac]]);
+		bound2 := Sup([Valuation(d) + mu : mu in mus]);
+
+		//bound for the fi^ki - sri
+		bound := Max(bound1, bound2);
+
+		bound;
 
 		/*
 		//require Degree(F0, s) le 1: "Degree of g in s must be <= 1.";
