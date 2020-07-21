@@ -98,11 +98,9 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 	gen_sep := SeparantMPol(F, t) div t^Degree(F, t);
 
 	// Split up in neighborhoods
-	OKp := quo<OK | p^Precision>;
-	Nbhds := [OKp!0];
+	Nbhds := [O(K!1)];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
 	i := 0;
-	//TODO: instead, after computing the separant directly subdivide into neighborhoods of this radius
 	repeat
 		i;
 		Nbhds_new := [];
@@ -110,10 +108,12 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 			vals := ValuationsOfRoots(UnivariatePolynomial(Evaluate(gen_sep, s, N)), p);
 			sep := Sup([v[1] : v in vals]);
 
-			if sep lt i then
-				Append(~Nbhds_end, K!N + O(pi^i));
+			if sep lt AbsolutePrecision(N) then
+				Append(~Nbhds_end, N);
+			elif sep lt Infinity() then
+				Nbhds_new cat:= Subdivide(N, Floor(sep + 1));
 			else
-				Nbhds_new cat:= [ N + (OKp!pi)^i * OKp!x : x in ResidueSystem(K) ];
+				Nbhds_new cat:= Subdivide(N, AbsolutePrecision(N) + 1);
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
@@ -123,6 +123,21 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 	Nbhds;
 
 	return Nbhds_end, Nbhds;
+end intrinsic;
+
+intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
+{}
+	r := AbsolutePrecision(x);
+	if n le r then
+		return [x];
+	else
+		K := Parent(x);
+		OK := Integers(K);
+		pi := UniformizingElement(OK);
+		R := quo<OK | pi^(n - r)>;
+		S := quo<OK | pi^n>;
+		return [K!((S!x) + pi^r * y) : y in R];
+	end if;
 end intrinsic;
 
 intrinsic EtaleAlgebraFamily(F::RngMPolElt, p::RngIntElt
