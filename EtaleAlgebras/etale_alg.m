@@ -94,8 +94,37 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 
 	//TODO: make monic and integral
 
-	printf "computing general separant";
+	printf "computing general separant\n";
 	gen_sep := SeparantMPol(F, t) div t^Degree(F, t);
+
+	printf "computing discriminant\n";
+	disc := UnivariatePolynomial(Discriminant(F, t));
+	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
+
+	RK := PolynomialRing(K,2);
+	sK := RK.1;
+	tK := RK.2;
+	FK := RK!ChangeRing(F, K);
+
+	for r in roots do	
+		f := UnivariatePolynomial(Evaluate(FK, [r, RK.2]));
+		g := UnivariatePolynomial(Coefficient(FK, sK, 1));
+		fs,unit := Factorization(f);
+		f_hats := [f div fi[1]^fi[2] : fi in fs];
+		d,cs := XGCD(f_hats);
+		//TODO: assert d = 1 or something else.
+		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
+		// Construction of the Fi = fi^ki + s*ri
+		Fis := [Evaluate(fr[1][1]^fr[1][2], tK) + sK * Evaluate(fr[2], tK) : fr in Zip(fs, rs)];
+
+		dif := unit * &*Fis - FK;
+		dif;
+
+		//TODO: assert that the difference is divisible by s^2?
+		//TODO: compute the content of dif
+
+		//Coefficient(dif, tK, 8);
+	end for;
 
 	// Split up in neighborhoods
 	Nbhds := [O(K!1)];
@@ -118,9 +147,7 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 		end for;
 		Nbhds := Nbhds_new;
 		i +:= 1;
-	until IsEmpty(Nbhds) or i ge 20;
-
-	Nbhds;
+	until IsEmpty(Nbhds) or i ge 10;
 
 	return Nbhds_end, Nbhds;
 end intrinsic;
