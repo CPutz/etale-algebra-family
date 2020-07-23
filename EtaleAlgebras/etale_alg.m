@@ -11,13 +11,32 @@ intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt) -> .
 	return ValuationsOfRoots(res);
 end intrinsic;
 
-intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngIntElt
+intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
 {Returns the valuations of f at the roots of g}
 	R := BaseRing(Parent(f));
 	S<e> := PolynomialRing(R);
 	T<t> := PolynomialRing(S);
 	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
 	return ValuationsOfRoots(res, p);
+end intrinsic;
+
+intrinsic MaxValuationInRootsOf(f::RngMPolElt, g::RngMPolElt, v::MPolElt) -> RngUPolElt, RngIntElt
+{Returns the maximal valuation of f at roots of g}
+	R := BaseRing(Parent(f));
+	S<e,t> := PolynomialRing(R,2);
+	res := Resultant(e - Evaluate(f, v, t), Evaluate(g, v, t), t);
+	f;g;
+	printf "res: %o\n", res;
+	return MaxValuationOfRootsMPol(res);
+end intrinsic;
+
+intrinsic MaxValuationInRootsOf(f::RngMPolElt, g::RngMPolElt, v::MPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+{Returns the maximal valuation of f at roots of g}
+	R := BaseRing(Parent(f));
+	S<e,t> := PolynomialRing(R,2);
+	res := Resultant(e - Evaluate(f, v, t), Evaluate(g, v, t), t);
+	res;
+	return MaxValuationOfRootsMPol(res, p);
 end intrinsic;
 
 intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngElt
@@ -101,9 +120,7 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 	disc := UnivariatePolynomial(Discriminant(F, t));
 	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
 
-	RK := PolynomialRing(K,2);
-	sK := RK.1;
-	tK := RK.2;
+	RK<sK, tK> := PolynomialRing(K,2);
 	FK := RK!ChangeRing(F, K);
 
 	for r in roots do	
@@ -112,6 +129,7 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 		fs,unit := Factorization(f);
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
+
 		//TODO: assert d = 1 or something else.
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
 		// Construction of the Fi = fi^ki + s*ri
@@ -119,6 +137,10 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 
 		dif := unit * &*Fis - FK;
 		dif;
+
+		MaxValuationInRootsOf(unit * &*Fis, FK, tK);
+		MaxValuationInRootsOf(FK, unit * &*Fis, tK);
+		MaxValuationInRootsOf(dif, FK, tK);
 
 		//TODO: assert that the difference is divisible by s^2?
 		//TODO: compute the content of dif
@@ -166,6 +188,109 @@ intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 		return [K!((S!x) + pi^r * y) : y in R];
 	end if;
 end intrinsic;
+
+intrinsic MaxValuationOfRootsMPol(res::RngMPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+{}
+	R := Parent(res);
+	e := R.1;
+	s := R.2;
+
+	i := 0;
+	while exists { c : c in Coefficients(res, e) | not CorrectAux(UnivariatePolynomial(c), p) } do
+		res := Evaluate(res, [e, p*s]);
+		i +:= 1;
+	end while;
+
+	L<x> := PolynomialRing(Q);
+	vals := [<c[1], ValuationUPol(UnivariatePolynomial(c[2]), p)> : c in Zip([0..Degree(res,e)], Coefficients(res, e)) | c[2] ne 0];
+	slopes := [(vals[1][2] - v[2]) / (v[1] - vals[1][1]) : v in vals[2..#vals]];
+	a := Max([Coefficient(c,1) : c in slopes]);
+	b := Max([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
+
+	while exists { c : c in slopes | ConstantCoefficient(c) gt b } do
+		slopes := [c + Coefficient(c,1) : c in slopes];
+		b +:= a;
+		i +:= 1;
+	end while;
+
+	return a*x+b, i;
+end intrinsic;
+
+intrinsic ValuationUPol(f::RngUPolElt, p::RngIntElt) -> RngUPolElt
+{}
+	L<x> := PolynomialRing(Q);
+	if f eq 0 then
+		return Infinity();
+	else
+		a := Valuation(f);
+		return a*x + Valuation(Coefficient(f, a), p);
+	end if;
+end intrinsic;
+
+intrinsic CorrectAux(f::RngUPolElt, p::RngIntElt) -> BoolElt
+{}
+	if f eq 0 then
+		return true;
+	end if;
+
+	t := Parent(f).1;
+	f := f div (t^(Z!Valuation(f)));
+	return forall {v : v in ValuationsOfRoots(f, p) | v[1] lt 0};
+end intrinsic;
+
+
+intrinsic MaxValuationOfRootsMPol(res::RngMPolElt) -> RngUPolElt, RngIntElt
+{}
+	R := Parent(res);
+	K := BaseRing(R);
+	p := UniformizingElement(K);
+	e := R.1;
+	s := R.2;
+
+	i := 0;
+	while exists { c : c in Coefficients(res, e) | not CorrectAux(UnivariatePolynomial(c)) } do
+		res := Evaluate(res, [e, p*s]);
+		i +:= 1;
+	end while;
+
+	L<x> := PolynomialRing(Q);
+	vals := [<c[1], ValuationUPol(UnivariatePolynomial(c[2]))> : c in Zip([0..Degree(res,e)], Coefficients(res, e)) | c[2] ne 0];
+	slopes := [(vals[1][2] - v[2]) / (v[1] - vals[1][1]) : v in vals[2..#vals]];
+	a := Max([Coefficient(c,1) : c in slopes]);
+	b := Max([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
+
+	while exists { c : c in slopes | ConstantCoefficient(c) gt b } do
+		slopes := [c + Coefficient(c,1) : c in slopes];
+		b +:= a;
+		i +:= 1;
+	end while;
+
+	return a*x+b, i;
+end intrinsic;
+
+intrinsic ValuationUPol(f::RngUPolElt) -> RngUPolElt
+{}
+	L<x> := PolynomialRing(Q);
+	if f eq 0 then
+		return Infinity();
+	else
+		a := Valuation(f);
+		return a*x + Valuation(Coefficient(f, a));
+	end if;
+end intrinsic;
+
+intrinsic CorrectAux(f::RngUPolElt) -> BoolElt
+{}
+	if f eq 0 then
+		return true;
+	end if;
+
+	t := Parent(f).1;
+	f := f div (t^(Z!Valuation(f)));
+	return forall {v : v in ValuationsOfRoots(f) | v[1] lt 0};
+end intrinsic;
+
+
 
 intrinsic EtaleAlgebraFamily(F::RngMPolElt, p::RngIntElt
 	: D := LocalFieldDatabase(),
