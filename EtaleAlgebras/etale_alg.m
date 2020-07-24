@@ -112,6 +112,8 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 	pi := K!p;
 
 	//TODO: make monic and integral
+	lc := LeadingCoefficient(F, t);
+	F /:= lc;
 
 	printf "computing general separant\n";
 	gen_sep := SeparantMPol(F, t) div t^Degree(F, t);
@@ -130,17 +132,21 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
 
-		//TODO: assert d = 1 or something else.
+		//TODO: assert d = 1 and unit = 1 or something else.
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
+
 		// Construction of the Fi = fi^ki + s*ri
 		Fis := [Evaluate(fr[1][1]^fr[1][2], tK) + sK * Evaluate(fr[2], tK) : fr in Zip(fs, rs)];
 
-		dif := unit * &*Fis - FK;
-		dif;
+		sepK := Evaluate(gen_sep, [sK + r, tK]);
+		phi := hom<RK -> RK | [tK, sK]>;
+		MaxValuationOfRootsMPol(phi(sepK));
 
-		MaxValuationInRootsOf(unit * &*Fis, FK, tK);
-		MaxValuationInRootsOf(FK, unit * &*Fis, tK);
-		MaxValuationInRootsOf(dif, FK, tK);
+		dif := Evaluate(FK, [sK + r, tK]) - &*Fis;
+		//MaxValuationInRootsOf(dif, &*Fis, tK);
+		//MaxValuationInRootsOf(Derivative(FK, tK), &*Fis, tK);
+
+		
 
 		//TODO: assert that the difference is divisible by s^2?
 		//TODO: compute the content of dif
