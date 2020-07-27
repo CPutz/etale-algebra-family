@@ -67,7 +67,7 @@ intrinsic SwitchVariables(f::RngUPolElt) -> RngUPolElt
 	return phi3(phi2(f));
 end intrinsic;
 
-intrinsic SeparantUPol(f::RngUPolElt, g::RngUPolElt) -> .
+intrinsic SeparantUPol(f::RngUPolElt) -> .
 {Returns the general separant polynomial of f when f is defined over a polynomial ring in one variable}
 	return SeparantUPol(f, f);
 end intrinsic;
@@ -76,10 +76,9 @@ intrinsic SeparantUPol(f::RngUPolElt, g::RngUPolElt) -> .
 {Returns the general separant polynomial of f wrt g when f is defined over a polynomial ring in one variable}
 	S := Parent(f);
 	t := S.1;
-	R := BaseRing(S);
 	T<x,y> := PolynomialRing(S,2);
 	res := Resultant(Resultant(t - Evaluate(Derivative(f),x) * (x-y), Evaluate(f, x), x), Evaluate(g, y), y);
-	return SwitchVariables(ConstantCoefficient(res));
+	return ConstantCoefficient(res);
 end intrinsic;
 
 intrinsic SeparantMPol(f::RngMPolElt, v::MPolElt) -> .
