@@ -20,22 +20,68 @@ intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
 	return ValuationsOfRoots(res, p);
 end intrinsic;
 
-intrinsic MaxValuationInRootsOf(f::RngMPolElt, g::RngMPolElt, v::MPolElt) -> RngUPolElt, RngIntElt
+intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
 {Returns the maximal valuation of f at roots of g}
 	R := BaseRing(Parent(f));
-	S<e,t> := PolynomialRing(R,2);
-	Evaluate(f, v, t);
-	Evaluate(g, v, t);
-	res := Resultant(e - Evaluate(f, v, t), Evaluate(g, v, t), t);
+	E<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(E);
+	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
 	return MaxValuationOfRootsMPol(res);
 end intrinsic;
 
-intrinsic MaxValuationInRootsOf(f::RngMPolElt, g::RngMPolElt, v::MPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
 {Returns the maximal valuation of f at roots of g}
 	R := BaseRing(Parent(f));
-	S<e,t> := PolynomialRing(R,2);
-	res := Resultant(e - Evaluate(f, v, t), Evaluate(g, v, t), t);
+	E<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(E);
+	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
 	return MaxValuationOfRootsMPol(res, p);
+end intrinsic;
+
+intrinsic MinValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
+{Returns the minimal valuation of f at roots of g}
+	R := BaseRing(Parent(f));
+	E<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(E);
+	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
+	return MinValuationOfRootsMPol(res);
+end intrinsic;
+
+intrinsic MinValuationInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+{Returns the minimal valuation of f at roots of g}
+	R := BaseRing(Parent(f));
+	E<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(E);
+	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
+	return MinValuationOfRootsMPol(res, p);
+end intrinsic;
+
+intrinsic MaxValuationDiffRoots(f::RngUPolElt) -> RngUPolElt, RngIntElt
+{}
+	return MaxValuationDiffRoots(f, f);
+end intrinsic;
+
+intrinsic MaxValuationDiffRoots(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
+{}
+	R := BaseRing(Parent(f));
+	E<e> := PolynomialRing(R);
+	T<x,y> := PolynomialRing(E,2);
+	res := ConstantCoefficient(Resultant(Resultant(e - (x - y), Evaluate(f, x), x), Evaluate(g, y), y));
+	return MaxValuationOfRootsMPol(res div e^Valuation(res));
+end intrinsic;
+
+intrinsic MaxValuationDiffRoots(f::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+{}
+	return MaxValuationDiffRoots(f, f, p);
+end intrinsic;
+
+intrinsic MaxValuationDiffRoots(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+{}
+	R := BaseRing(Parent(f));
+	E<e> := PolynomialRing(R);
+	T<x,y> := PolynomialRing(E,2);
+	res := ConstantCoefficient(Resultant(Resultant(e - (x - y), Evaluate(f, x), x), Evaluate(g, y), y));
+	return MaxValuationOfRootsMPol(res div e^Valuation(res), p);
 end intrinsic;
 
 intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngElt
@@ -95,38 +141,48 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, v::RngIntResElt, p::RngIntElt
 	return EtaleAlgebraFamily(R!F, v : D := D, Precision := Precision, FZ := F);
 end intrinsic;
 
-intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
+intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500) -> .
 {}
-	require ISA(Type(BaseRing(Parent(F))), RngInt) or ISA(Type(BaseRing(Parent(F))), FldRat):
+	R := Parent(F); //Z[s][t] or Q[s][t]
+	S := BaseRing(R); //Z[s] or Q[s]
+	require ISA(Type(BaseRing(S)), RngInt) or ISA(Type(BaseRing(S)), FldRat):
 		"Argument 1 must be defined over Z or Q";
 
-	R := Parent(F);
-	s := R.1;
-	t := R.2;
+	s := S.1;
+	t := R.1;
 	K := pAdicField(p, Precision);
 	OK := Integers(K);
 	X := pAdicNbhds(K);
 	pi := K!p;
 
 	//TODO: make monic and integral
-	lc := LeadingCoefficient(F, t);
+	lc := LeadingCoefficient(LeadingCoefficient(F));
 	F /:= lc;
 
 	printf "computing general separant\n";
-	gen_sep := SeparantMPol(F, t) div t^Degree(F, t);
+	gen_sep := SeparantUPol(F) div t^Degree(F);
 
 	printf "computing discriminant\n";
-	disc := UnivariatePolynomial(Discriminant(F, t));
+	disc := Discriminant(F);
 	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
 
-	RK<sK, tK> := PolynomialRing(K,2);
-	FK := RK!ChangeRing(F, K);
+	SK<sK> := PolynomialRing(K);
+	RK<tK> := PolynomialRing(SK);
+	FK := RK!F;
+
+	OKp := quo<OK | pi^Precision>;
+	SOKp := PolynomialRing(OKp);
+	ROKp := PolynomialRing(SOKp);
+	Nbhds_oo := [];
 
 	for r in roots do	
-		f := UnivariatePolynomial(Evaluate(FK, [r, RK.2]));
-		g := UnivariatePolynomial(Coefficient(FK, sK, 1));
+		// Evaluate F at s = r
+		f := Evaluate(SwitchVariables(FK), r);
+		// The coefficient of s in F
+		g := Coefficient(SwitchVariables(FK), 1);
+
 		fs,unit := Factorization(f);
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
@@ -137,30 +193,52 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 		// Construction of the Fi = fi^ki + s*ri
 		Fis := [Evaluate(fr[1][1]^fr[1][2], tK) + sK * Evaluate(fr[2], tK) : fr in Zip(fs, rs)];
 
-		sepK := Evaluate(gen_sep, [sK + r, tK]);
-		phi := hom<RK -> RK | [tK, sK]>;
-
-		OKp := quo<OK | pi^Precision>;
-		ROKp := PolynomialRing(OKp, 2);
-		MaxValuationOfRootsMPol(RK!ROKp!phi(sepK));
-
-		dif := Evaluate(FK, [sK + r, tK]) - &*Fis;
-		min_val := Min([Valuation(c) : c in Coefficients(dif)]);
-		// Cleanup coefficients
-		dif := RK!ROKp!(pi^(-min_val) * dif);
-
-		MaxValuationInRootsOf(dif, &*Fis, tK);
-		//MaxValuationInRootsOf(RK!ROKp!dif, &*Fis, tK);
-		//MaxValuationInRootsOf(Derivative(FK, tK), &*Fis, tK);
-
+		// Translate the variable s in gen_sep by r
+		sepK_r := SwitchVariables(Evaluate(SwitchVariables(gen_sep), tK + r));
+		// Translate the variable s in FK by r
+		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 		
+		sepOKp_r := ROKp![Evaluate(ChangeRing(c, OKp), SOKp.1 + OKp!r) : c in Coefficients(gen_sep)];
+		v_sep, b_sep := MaxValuationOfRootsMPol(sepOKp_r);
+		printf "max sep: %o\n", v_sep;
 
-		//TODO: assert that the difference is divisible by s^2?
-		//TODO: compute the content of dif
+		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
+		dif := FK_r - &*Fis;
+		min_val := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
+		if min_val gt 0 then
+			min_val := 0;
+		end if;
+		L<x> := PolynomialRing(Q);
+		v_diff := 2*x + min_val;
+		printf "min diff: %o\n", v_diff;
 
-		//Coefficient(dif, tK, 8);
+		min_val := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(&*Fis)]);
+		//TODO: bug? crash if not casted to ROKp
+		v_deriv, b_deriv := MaxValuationInRootsOf(ROKp!Derivative(FK_r), ROKp!(pi^(-min_val) * &*Fis));
+		printf "max deriv: %o\n", v_deriv;
+
+		v_diff_roots, b_diff_roots := MaxValuationDiffRoots(ROKp!FK_r);
+		printf "max diff_roots: %o\n", v_diff_roots;
+
+		// When is diff > sep?
+		assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_sep));
+		b1 := Floor(Roots(v_diff - v_sep)[1][1] + 1);
+		printf "diff > sep if v(s) >= %o\n", b1;
+
+		// When is deriv + diff_roots >= diff?
+		assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_deriv + v_diff_roots));
+		b2 := Floor(Roots(v_diff - v_deriv - v_diff_roots)[1][1] + 1);
+		printf "deriv + diff_roots >= diff if v(s) >= %o\n", b2;
+
+		bound := Max(Max(Max(Max(b_sep, b_deriv), b_diff_roots), b1), b2);
+		printf "bound (%o): %o\n", r, bound;
+
+		Append(~Nbhds_oo, r + O(pi^bound));
+
+		//TODO: split up the Nbhds_oo
 	end for;
 
+	gen_sep2 := RK![ChangeRing(c, K) : c in Coefficients(SwitchVariables(gen_sep))];
 	// Split up in neighborhoods
 	Nbhds := [O(K!1)];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
@@ -169,11 +247,13 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 		i;
 		Nbhds_new := [];
 		for N in Nbhds do
-			vals := ValuationsOfRoots(UnivariatePolynomial(Evaluate(gen_sep, s, N)), p);
+			vals := ValuationsOfRoots(Evaluate(gen_sep2, N));
 			sep := Sup([v[1] : v in vals]);
 
 			if sep lt AbsolutePrecision(N) then
 				Append(~Nbhds_end, N);
+			elif exists { Noo : Noo in Nbhds_oo | N in Noo } then
+				//Do nothing, N is contained in one of the limit neighborhoods
 			elif sep lt Infinity() then
 				Nbhds_new cat:= Subdivide(N, Floor(sep + 1));
 			else
@@ -182,9 +262,9 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 		end for;
 		Nbhds := Nbhds_new;
 		i +:= 1;
-	until IsEmpty(Nbhds) or i ge 10;
+	until IsEmpty(Nbhds);
 
-	return Nbhds_end, Nbhds;
+	return Nbhds_end, Nbhds_oo;
 end intrinsic;
 
 intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
@@ -202,7 +282,8 @@ intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 	end if;
 end intrinsic;
 
-intrinsic MaxValuationOfRootsMPol(res::RngMPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+//TODO: broken
+intrinsic MaxValuationOfRootsMPol(res::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
 {}
 	R := Parent(res);
 	e := R.1;
@@ -252,31 +333,68 @@ intrinsic CorrectAux(f::RngUPolElt, p::RngIntElt) -> BoolElt
 end intrinsic;
 
 
-intrinsic MaxValuationOfRootsMPol(res::RngMPolElt) -> RngUPolElt, RngIntElt
+intrinsic MaxValuationOfRootsMPol(res::RngUPolElt) -> RngUPolElt, RngIntElt
 {}
-	R := Parent(res);
-	K := BaseRing(R);
+	R := Parent(res); //K[s][t]
+	S := BaseRing(R); //K[s]
+	K := BaseRing(S);
 	p := UniformizingElement(K);
 	e := R.1;
-	s := R.2;
+	s := S.1;
 
-	if Coefficient(res, e, 0) eq 0 then
+	if ConstantCoefficient(res) eq 0 then
 		return Infinity(), -Infinity();
 	end if;
 
 	i := 0;
-	while exists { c : c in Coefficients(res, e) | not CorrectAux(UnivariatePolynomial(c)) } do
-		res := Evaluate(res, [e, p*s]);
+	while exists { c : c in Coefficients(res) | not CorrectAux(c) } do
+		// Scale the variable s in res by p
+		res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
 		i +:= 1;
 	end while;
 
 	L<x> := PolynomialRing(Q);
-	vals := [<c[1], ValuationUPol(UnivariatePolynomial(c[2]))> : c in Zip([0..Degree(res,e)], Coefficients(res, e)) | c[2] ne 0];
+	vals := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
 	slopes := [(vals[1][2] - v[2]) / (v[1] - vals[1][1]) : v in vals[2..#vals]];
 	a := Max([Coefficient(c,1) : c in slopes]);
 	b := Max([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
 
 	while exists { c : c in slopes | ConstantCoefficient(c) gt b } do
+		slopes := [c + Coefficient(c,1) : c in slopes];
+		b +:= a;
+		i +:= 1;
+	end while;
+
+	return a*x+b, i;
+end intrinsic;
+
+intrinsic MinValuationOfRootsMPol(res::RngUPolElt) -> RngUPolElt, RngIntElt
+{}
+	R := Parent(res); //K[s][t]
+	S := BaseRing(R); //K[s]
+	K := BaseRing(S);
+	p := UniformizingElement(K);
+	e := R.1;
+	s := S.1;
+
+	if ConstantCoefficient(res) eq 0 then
+		return Infinity(), -Infinity();
+	end if;
+
+	i := 0;
+	while exists { c : c in Coefficients(res) | not CorrectAux(c) } do
+		// Scale the variable s in res by p
+		res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
+		i +:= 1;
+	end while;
+
+	L<x> := PolynomialRing(Q);
+	vals := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
+	slopes := [(v[2] - vals[#vals][2]) / (vals[#vals][1] - v[1]) : v in vals[1..#vals-1]];
+	a := Min([Coefficient(c,1) : c in slopes]);
+	b := Min([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
+
+	while exists { c : c in slopes | ConstantCoefficient(c) lt b } do
 		slopes := [c + Coefficient(c,1) : c in slopes];
 		b +:= a;
 		i +:= 1;
