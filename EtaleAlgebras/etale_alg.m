@@ -24,9 +24,9 @@ intrinsic MaxValuationInRootsOf(f::RngMPolElt, g::RngMPolElt, v::MPolElt) -> Rng
 {Returns the maximal valuation of f at roots of g}
 	R := BaseRing(Parent(f));
 	S<e,t> := PolynomialRing(R,2);
+	Evaluate(f, v, t);
+	Evaluate(g, v, t);
 	res := Resultant(e - Evaluate(f, v, t), Evaluate(g, v, t), t);
-	f;g;
-	printf "res: %o\n", res;
 	return MaxValuationOfRootsMPol(res);
 end intrinsic;
 
@@ -35,7 +35,6 @@ intrinsic MaxValuationInRootsOf(f::RngMPolElt, g::RngMPolElt, v::MPolElt, p::Rng
 	R := BaseRing(Parent(f));
 	S<e,t> := PolynomialRing(R,2);
 	res := Resultant(e - Evaluate(f, v, t), Evaluate(g, v, t), t);
-	res;
 	return MaxValuationOfRootsMPol(res, p);
 end intrinsic;
 
@@ -140,10 +139,18 @@ intrinsic EtaleAlgebraFamily2(F::RngMPolElt, p::RngIntElt
 
 		sepK := Evaluate(gen_sep, [sK + r, tK]);
 		phi := hom<RK -> RK | [tK, sK]>;
-		MaxValuationOfRootsMPol(phi(sepK));
+
+		OKp := quo<OK | pi^Precision>;
+		ROKp := PolynomialRing(OKp, 2);
+		MaxValuationOfRootsMPol(RK!ROKp!phi(sepK));
 
 		dif := Evaluate(FK, [sK + r, tK]) - &*Fis;
-		//MaxValuationInRootsOf(dif, &*Fis, tK);
+		min_val := Min([Valuation(c) : c in Coefficients(dif)]);
+		// Cleanup coefficients
+		dif := RK!ROKp!(pi^(-min_val) * dif);
+
+		MaxValuationInRootsOf(dif, &*Fis, tK);
+		//MaxValuationInRootsOf(RK!ROKp!dif, &*Fis, tK);
 		//MaxValuationInRootsOf(Derivative(FK, tK), &*Fis, tK);
 
 		
@@ -252,6 +259,10 @@ intrinsic MaxValuationOfRootsMPol(res::RngMPolElt) -> RngUPolElt, RngIntElt
 	p := UniformizingElement(K);
 	e := R.1;
 	s := R.2;
+
+	if Coefficient(res, e, 0) eq 0 then
+		return Infinity(), -Infinity();
+	end if;
 
 	i := 0;
 	while exists { c : c in Coefficients(res, e) | not CorrectAux(UnivariatePolynomial(c)) } do
