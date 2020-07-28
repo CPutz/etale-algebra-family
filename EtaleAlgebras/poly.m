@@ -118,11 +118,13 @@ intrinsic MakeMonicIntegral(P::RngUPolElt) -> RngUPolElt
 {Scales a polynomial over a local field such that it is monic and
 integral}
 	//TODO: ASSERT: Must be over a local field
-	K := BaseRing(P);
+	R := BaseRing(P);
+	K := FieldOfFractions(R);
 	p := Prime(K);
-	c := Valuation(LeadingCoefficient(P));
-	P /:= p^c;
+	PK := PolynomialRing(K)!P;
+	c := Valuation(LeadingCoefficient(PK));
+	PK /:= p^c;
 	//TODO: Can me more optimized
-	v := Min([Valuation(a) : a in Coefficients(P)]);
-	return ScaleCoefficients(P, K!p^(-v));
+	v := Min([Valuation(a) : a in Coefficients(PK)]);
+	return Parent(P)!ScaleCoefficients(PK, K!p^(-v));
 end intrinsic;

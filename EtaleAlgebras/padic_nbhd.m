@@ -18,7 +18,7 @@ end intrinsic;
 
 intrinsic Print(X::PadNbhd)
 {Print X}
-	printf "The space of p-adic neighbourhoods of the form c + r * (OK)^k where K = %o", AmbientSpace(X);
+	printf "The space of p-adic neighbourhoods of the form c + r * (OK*)^k where K = %o", AmbientSpace(X);
 end intrinsic;
 
 intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt
@@ -83,7 +83,7 @@ intrinsic Print(N::PadNbhdElt)
 	if Exponent(N) eq 1 then
 		printf "%o + (%o) * OK", Middle(N), Radius(N);
 	else
-		printf "%o + (%o) * (OK)^%o", Middle(N), Radius(N), Exponent(N);
+		printf "%o + (%o) * (OK*)^%o", Middle(N), Radius(N), Exponent(N);
 	end if;
 end intrinsic;
 
@@ -93,8 +93,15 @@ intrinsic 'eq'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 end intrinsic;
 
 intrinsic Representative(N::PadNbhdElt) -> FldPadElt
-{Returns and element of N}
-	return AmbientSpace(Parent(N))!(Middle(N) + Radius(N));
+{Returns a nonzero element of N}
+	K := AmbientSpace(Parent(N));
+	c := K!(Middle(N) + Radius(N));
+	if Valuation(c) ge AbsolutePrecision(c) then //c is zero
+		p := Prime(K);
+		c := ChangePrecision(c,1);
+		c +:= p^AbsolutePrecision(Radius(N)) + ChangePrecision(Radius(N),1);
+	end if;
+	return c;
 end intrinsic;
 
 intrinsic '+'(x::., N::PadNbhdElt) -> PadNbhdElt

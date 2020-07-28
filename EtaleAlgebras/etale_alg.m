@@ -1,6 +1,6 @@
 Z := Integers();
 Q := Rationals();
-EtRF := recformat< E : EtAlg, B0 : SeqEnum, Boo : SeqEnum >;
+EtRF := recformat< E : EtAlg, N : SeqEnum, Noo : SeqEnum >;
 
 intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt) -> .
 {Returns the valuations of f at the roots of g}
@@ -141,14 +141,16 @@ intrinsic EtaleAlgebraFamily(F::RngMPolElt, v::RngIntResElt, p::RngIntElt
 	return EtaleAlgebraFamily(R!F, v : D := D, Precision := Precision, FZ := F);
 end intrinsic;
 
-intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
+intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 	: D := LocalFieldDatabase(),
-	  Precision := 500) -> .
+	  Precision := 500,
+	  Filter := Integers(1)!0) -> SeqEnum
 {}
 	R := Parent(F); //Z[s][t] or Q[s][t]
 	S := BaseRing(R); //Z[s] or Q[s]
-	require ISA(Type(BaseRing(S)), RngInt) or ISA(Type(BaseRing(S)), FldRat):
-		"Argument 1 must be defined over Z or Q";
+	//require ISA(Type(BaseRing(S)), RngInt) or ISA(Type(BaseRing(S)), FldRat):
+	//	"Argument 1 must be defined over Z or Q";
+	require ISA(Type(BaseRing(S)), FldRat): "Argument 1 must be defined over Q";
 
 	s := S.1;
 	t := R.1;
@@ -160,6 +162,9 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 	//TODO: make monic and integral
 	lc := LeadingCoefficient(LeadingCoefficient(F));
 	F /:= lc;
+	while exists {cs : cs in Coefficients(ct), ct in Coefficients(F) | Valuation(cs,p) lt 0} do
+		F := p^Degree(F) * Evaluate(F, t/p);
+	end while;
 
 	printf "computing general separant\n";
 	gen_sep := SeparantUPol(F) div t^Degree(F);
@@ -175,6 +180,7 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 	OKp := quo<OK | pi^Precision>;
 	SOKp := PolynomialRing(OKp);
 	ROKp := PolynomialRing(SOKp);
+	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
 	for r in roots do	
@@ -187,6 +193,9 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
 
+		//assert Valuation(d - 1, p) ge Precision;
+		//assert Valuation(unit - 1, p) ge Precision;
+
 		//TODO: assert d = 1 and unit = 1 or something else.
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
 
@@ -197,7 +206,7 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 		sepK_r := SwitchVariables(Evaluate(SwitchVariables(gen_sep), tK + r));
 		// Translate the variable s in FK by r
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
-		
+
 		sepOKp_r := ROKp![Evaluate(ChangeRing(c, OKp), SOKp.1 + OKp!r) : c in Coefficients(gen_sep)];
 		v_sep, b_sep := MaxValuationOfRootsMPol(sepOKp_r);
 		printf "max sep: %o\n", v_sep;
@@ -233,18 +242,22 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 		bound := Max(Max(Max(Max(b_sep, b_deriv), b_diff_roots), b1), b2);
 		printf "bound (%o): %o\n", r, bound;
 
-		Append(~Nbhds_oo, r + O(pi^bound));
+		Append(~Nbhds_disc, r + O(pi^bound));
 
-		//TODO: split up the Nbhds_oo
+		k := LCM([fi[2] : fi in fs]);
+		v := k * Ceiling(bound / k);
+		OKmOKk := quo<OK | pi^k>; // OK / (OK)^k
+		// representatives for OK* / (OK*)^k would be sufficient here
+		//TODO: something separate with 0 here...
+		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKp!r, (K!c) * pi^v, k) : c in OKmOKk];
 	end for;
 
+	printf "computing nbhds\n";
 	gen_sep2 := RK![ChangeRing(c, K) : c in Coefficients(SwitchVariables(gen_sep))];
 	// Split up in neighborhoods
 	Nbhds := [O(K!1)];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
-	i := 0;
 	repeat
-		i;
 		Nbhds_new := [];
 		for N in Nbhds do
 			vals := ValuationsOfRoots(Evaluate(gen_sep2, N));
@@ -252,8 +265,8 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 
 			if sep lt AbsolutePrecision(N) then
 				Append(~Nbhds_end, N);
-			elif exists { Noo : Noo in Nbhds_oo | N in Noo } then
-				//Do nothing, N is contained in one of the limit neighborhoods
+			elif exists { Nd : Nd in Nbhds_disc | N in Nd } then
+				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 			elif sep lt Infinity() then
 				Nbhds_new cat:= Subdivide(N, Floor(sep + 1));
 			else
@@ -261,10 +274,20 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
-		i +:= 1;
+
+		// Filter
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKp!N, pi^AbsolutePrecision(N), 1), Filter)];
 	until IsEmpty(Nbhds);
 
-	return Nbhds_end, Nbhds_oo;
+	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKp!n, pi^AbsolutePrecision(n), 1) : n in Nbhds_end];
+
+	// Filter neighborhoods
+	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
+
+	printf "computing etale algebras\n";
+	E := EtaleAlgebraListIsomorphism2(F, Nbhds : D := D);
+
+	return E;
 end intrinsic;
 
 intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
@@ -415,11 +438,10 @@ intrinsic ValuationUPol(f::RngUPolElt) -> RngUPolElt
 end intrinsic;
 
 intrinsic CorrectAux(f::RngUPolElt) -> BoolElt
-{}
+{Returns true if 0 is the only root of f in the ring of integers}
 	if f eq 0 then
 		return true;
 	end if;
-
 	t := Parent(f).1;
 	f := f div (t^(Z!Valuation(f)));
 	return forall {v : v in ValuationsOfRoots(f) | v[1] lt 0};
@@ -427,338 +449,26 @@ end intrinsic;
 
 
 
-intrinsic EtaleAlgebraFamily(F::RngMPolElt, p::RngIntElt
-	: D := LocalFieldDatabase(),
-	  Precision := 500) -> .
-{}
-	require ISA(Type(BaseRing(Parent(F))), RngInt) or ISA(Type(BaseRing(Parent(F))), FldRat):
-		"Argument 1 must be defined over Z or Q";
-
-	R := Parent(F);
-	s := R.1;
-	t := R.2;
-	K := pAdicField(p, Precision);
-	OK := Integers(K);
-	X := pAdicNbhds(K);
-	pi := K!p;
-
-	//TODO: make monic and integral
-
-	// Compute discriminant and find roots
-	disc := UnivariatePolynomial(Discriminant(F, 2));
-	roots_Zp := [x[1] : x in Roots(disc, K) | IsIntegral(x[1])];
-
-	// Split up in neighborhoods
-	OKp := quo<OK | p^Precision>;
-	C := [OKp!0];
-	C0 := [];  // The neighborhoods that do not contain a root of the discriminant
-	Coo := []; // The neighborhoods that do     contain a root of the discriminant
-	i := 0;
-	repeat
-		C_new := [];
-		for c in C do
-			// Count the number of roots of the discriminant in the neighborhood c
-			number_roots_in_c := #{ r : r in roots_Zp | r in (K!c + O(pi^i)) };
-			if number_roots_in_c eq 0 then
-				Append(~C0, K!c + O(p^i));
-			elif number_roots_in_c eq 1 then
-				Append(~Coo, CreatePAdicNbhd(X, c, pi^i, 1));
-			else
-				C_new cat:= [ c + (OKp!pi)^i * OKp!x : x in ResidueSystem(K) ];
-			end if;
-		end for;
-		C := C_new;
-		i +:= 1;
-	until IsEmpty(C);
-
-	for c in Coo do
-		c0 := Middle(c);
-		pe := Radius(c);
-		// Find the root of the discriminant r0 which lies inside c
-		assert exists (r0) { r : r in [ro : ro in roots_Zp] | r in (K!c0 + O(K!pe)) };
-
-		printf "computing around singular point: %o\n", r0;
-		//F0 := Evaluate(F, [r0 + pe * s, t]);
-		// Make monic and integral
-		//F0 := F0 / Coefficient(F0, t, Degree(F0, t)); //make monic in t
-		Fp := ChangeRing(F, K);
-		Rp := Parent(Fp);
-		sp := Rp.1;
-		tp := Rp.2;
-		f := UnivariatePolynomial(Evaluate(Fp, [r0, tp]));
-		g := UnivariatePolynomial(Coefficient(Evaluate(Fp, [r0 + pe * sp, tp]), sp, 1)); //TODO: deal with higher powers of s 
-		Factorization(f);
-		g;
-
-		fac,_ := Factorization(f);
-		fs := [fi[1] : fi in fac];
-		fs_hat := [f div (fi[1]^fi[2]) : fi in fac];
-		d,cs := XGCD(fs_hat);
-
-		assert Degree(d) eq 0;
-		d := ConstantCoefficient(d);
-
-		min_val := Min([Valuation(c) : c in Coefficients(ci), ci in cs]);
-		content := pi^(-min_val);
-		// Rescale the ci and d
-		cs := [content * c : c in cs];
-		d *:= content;
-
-		d;
-		cs;
-
-		rs := [(cf[1] * g) mod cf[2] : cf in Zip(cs, fs)];
-
-		nus := [v[1] : v in ValuationsInRootsOf(fhi[1], fhi[2]), fhi in Zip(fs_hat, fs)];
-		mus := [fj[2] * v[1] : v in ValuationsInRootsOf(fj[1], fi), fi in fs, fj in fac | fi ne fj[1]];
-
-		//TODO: compute the bi's
-		bs := [0 : f in fs];
-
-		bound1 := Sup([fac[i][2] * (Valuation(d) + bs[i] + nus[i]) : i in [1..#fac]]);
-		bound2 := Sup([Valuation(d) + mu : mu in mus]);
-
-		//bound for the fi^ki - sri
-		bound := Max(bound1, bound2);
-
-		bound;
-
-		/*
-		//require Degree(F0, s) le 1: "Degree of g in s must be <= 1.";
-		g := -UnivariatePolynomial(Coefficient(F0, s, 1));
-		Facf := Factorization(f);
-		facs := [fac[1]^fac[2] : fac in Facf];
-		_, cs := Xgcd([f div h : h in facs]);
-		fcs := Zip(facs, cs);
-		rs := [(fc[2] * g) mod fc[1] : fc in fcs];
-
-		bound := 0;
-		k := 1;
-		for i := 1 to #Facf do
-			ki := Facf[i][2];
-			bound := Max(bound, EtaleAlgebraFamily0Bound(Facf[i][1], rs[i], ki));
-			k := Lcm(k, ki);
-		end for;
-		printf "using bound %o\n", bound;
-
-		printf "computing separant\n";
-		if FZ eq 0 then
-			F1 := UnivariatePolynomial(Evaluate(F0, s, p));
-			sig1 := Separant(F1);
-		else
-			FZ1 := UnivariatePolynomial(Evaluate(FZ, 1, Prime(K)));
-			sig1 := Separant(FZ1, Prime(K));
-		end if;
-
-		vg := Valuation(Content(ChangeRing(g, OK)));
-		prec := Max(0, Floor(sig1 - 1 - vg) + 1);
-
-		printf "generating p-adic neighbourhoods\n";
-		//TODO: prove that linearly extending the separant works
-		B := [];
-		for i := 1 to bound - 1 do
-			B cat:= [X!(p^i * c + O(p^(prec+i))) : c in quo<OK | (OK!p)^prec> | Valuation(c) eq 0];
-		end for;
-
-		//TODO: change
-		Precision := 500;
-		OKp := quo<OK | p^Precision>;
-		for i := 0 to k-1 do
-			B cat:= [CreatePAdicNbhd(X, OKp!0, p^(bound+i) * K!c, k) : c in RepresentativesModuloPower(OK, k)];
-		end for;
-
-		//transform back
-		B := [r0 + pe * X!b : b in B];
-		C_end cat:= B;*/
-	end for;
-
-	// Compute the general separant of F
-	sep := SeparantMPol(F, t) / t^Degree(F,t);
-
-	//
-	for c in C0 do
-		sep_c := Sup([x[1] : x in ValuationsOfRoots(UnivariatePolynomial(Evaluate(sep, s, c)))]);
-		c;
-		sep_c;
-	end for;
-
-	return 0;
-end intrinsic;
-/*
-intrinsic EtaleAlgebraFamily(F::RngMPolElt, v::RngIntResElt
-	: D := LocalFieldDatabase(),
-	  Precision := 500,
-	  FZ := 0) -> .
-{}
-	P := Parent(F);
-	s := P.1;
-	t := P.2;
-	K := BaseRing(P);
-	OK := Integers(K);
-	X := pAdicNbhds(K);
-	p := UniformizingElement(K);
-	require ISA(Type(K), FldPad): "Argument 1 must be a polynomial over a p-adic field";
-	require Rank(P) eq 2: "Argument 1 must be a polynomial in 2 variables";
-
-	printf "computing general discriminant\n";
-	disc := UnivariatePolynomial(Discriminant(F, 2));
-	roots_Zp := [r[1] : r in Roots(disc) | Valuation(r[1]) ge 0];
-	Roots(disc);
-
-	
-	//TODO: change
-	OKp := quo<OK | p^Precision>;
-
-	C := [OKp!0];
-	C_end := [];
-	C0 := [];
-	i := 0;
-	repeat
-		C_new := [];
-		for c in C do
-			//if not HasRoot(Evaluate(disc, cp + p^i * Parent(disc).1))then
-			n_roots_in_c := #{ r : r in roots_Zp | r in (K!c + O(p^i)) };
-			if n_roots_in_c eq 0 then
-				C_end cat:= [ X!(K!c + x*p^i) : x in ResidueSystem(K) ];
-			elif n_roots_in_c eq 1 then
-				Append(~C0, CreatePAdicNbhd(X, c, p^i, 1));
-			else
-				C_new cat:= [ c + (OKp!p)^i * OKp!x : x in ResidueSystem(K) ];
-			end if;
-		end for;
-		C := C_new;
-		i +:= 1;
-	until IsEmpty(C);
-
-	for c in C0 do
-		c0 := Middle(c);
-		pe := Radius(c);
-		assert exists (r0) { r : r in [ro : ro in roots_Zp] | r in (K!c0 + O(K!pe)) };
-
-		printf "computing around singular point: %o\n", r0;
-		//TODO: do not cast r0 to Z!
-		F0 := Evaluate(F, [Z!r0 + pe * s, t]);
-		//F0 := F0 / Coefficient(F0, t, Degree(F0, t)); //make monic in t
-		//TODO: do not cast r0 to Z!
-		f := UnivariatePolynomial(Evaluate(F, [Z!r0, t]));
-
-		//require Degree(F0, s) le 1: "Degree of g in s must be <= 1.";
-		g := -UnivariatePolynomial(Coefficient(F0, s, 1));
-		Facf := Factorization(f);
-		facs := [fac[1]^fac[2] : fac in Facf];
-		_, cs := Xgcd([f div h : h in facs]);
-		fcs := Zip(facs, cs);
-		rs := [(fc[2] * g) mod fc[1] : fc in fcs];
-
-		bound := 0;
-		k := 1;
-		for i := 1 to #Facf do
-			ki := Facf[i][2];
-			bound := Max(bound, EtaleAlgebraFamily0Bound(Facf[i][1], rs[i], ki));
-			k := Lcm(k, ki);
-		end for;
-		printf "using bound %o\n", bound;
-
-		printf "computing separant\n";
-		if FZ eq 0 then
-			F1 := UnivariatePolynomial(Evaluate(F0, s, p));
-			sig1 := Separant(F1);
-		else
-			FZ1 := UnivariatePolynomial(Evaluate(FZ, 1, Prime(K)));
-			sig1 := Separant(FZ1, Prime(K));
-		end if;
-
-		vg := Valuation(Content(ChangeRing(g, OK)));
-		prec := Max(0, Floor(sig1 - 1 - vg) + 1);
-
-		printf "generating p-adic neighbourhoods\n";
-		//TODO: prove that linearly extending the separant works
-		B := [];
-		for i := 1 to bound - 1 do
-			B cat:= [X!(p^i * c + O(p^(prec+i))) : c in quo<OK | (OK!p)^prec> | Valuation(c) eq 0];
-		end for;
-
-		//TODO: change
-		Precision := 500;
-		OKp := quo<OK | p^Precision>;
-		for i := 0 to k-1 do
-			B cat:= [CreatePAdicNbhd(X, OKp!0, p^(bound+i) * K!c, k) : c in RepresentativesModuloPower(OK, k)];
-		end for;
-
-		//transform back
-		B := [r0 + pe * X!b : b in B];
-		C_end cat:= B;
-	end for;
-
-	//filter C_end
-	C_end := [N : N in C_end | ContainsElementOfValuation(N, v)];
-	printf "computing étale algebras for %o polynomials\n", #C_end;
-	E := EtaleAlgebraListIsomorphism2(F, C_end : D := D);
-	for i := 1 to #E do
-		E[i][2] := GeneralizeNbhds(E[i][2]);
-	end for;
-
-	return E;
-end intrinsic;
-
-
-intrinsic EtaleAlgebraFamily0Bound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt
-{}
-	require Degree(g) le k * Degree(f): "Degree of f^k must be at least the degree of g";
-	K := CoefficientRing(f);
-	OK := Integers(K);
-	X := pAdicNbhds(K);
-	require Parent(f) eq Parent(g): "Argument 1 and 2 must be defined over the same field";
-	require ISA(Type(K), FldPad): "Argument 1 and 2 must be defined over a p-adic field";
-	//require Valuation(LeadingCoefficient(f)) eq 0: "Argument 1 must be monic (the leading coefficient must be a unit)";
-	f /:= LeadingCoefficient(f);
-	g /:= LeadingCoefficient(f);
-
-	//Scale polynomials to be monic and have integral coefficients
-	P := Parent(f);
-	p := UniformizingElement(K);
-	while exists { c : c in Coefficients(g) | Valuation(c) lt 0 } do
-		f := p^Degree(f) * Evaluate(f, P.1 / p);
-		g := p^(Degree(f) * k) * Evaluate(g, P.1 / p);
-	end while;
-
-	R<s,t> := PolynomialRing(K, 2);
-	phi := hom<Parent(f) -> R | Parent(f).1 -> t>;
-	F := phi(f)^k - s * phi(g);
-	disc := UnivariatePolynomial(Discriminant(F, t));
-
-	v0 := &+([0] cat [r[2] : r in Roots(disc) | Valuation(r[1]) ge 0]);
-	require v0 eq Degree(f) * (k - 1): "F(s,t) may only have s = 0 as a singular point in Zp";
-
-	bound := Ceiling(Bound1(f, g, k));
-	printf "bound: %o\n", bound;
-
-	return bound;
-end intrinsic;
-
 FactorizationStructureList := function(L)
     return Sort([<Degree(Ki[1]), Ki[2]> : Ki in L]);
 end function;
 
-intrinsic EtaleAlgebraListIsomorphism2(F::RngMPolElt, B::SeqEnum :
-	D := LocalFieldDatabase()) -> SeqEnum[Tup]
-{Creates a list of etale algebra given a polynomial F in 2 variables over a local field
-and a list B of parameter values}
+intrinsic EtaleAlgebraListIsomorphism2(F::RngUPolElt, B::SeqEnum
+  : D := LocalFieldDatabase()) -> SeqEnum[Tup]
+{Creates a list of etale algebra given a polynomial F in K[s][t] where K is a local field
+and a list B of parameter values for s}
     if IsEmpty(B) then
         return [];
     end if;
 
     Res := [];
-    //K := Parent(B[1]); 
     OK := ISA(Type(Universe(B)), PadNbhd) select AmbientSpace(Parent(B[1])) else RingOfIntegers(Parent(B[1]));
-    R := PolynomialRing(OK);
+    //R := PolynomialRing(OK);
+    Fs := PolynomialRing(PolynomialRing(OK)) ! SwitchVariables(F);
 
-    P := Parent(F);
-
-    factorizations := [<Factorization(R ! MakeMonicIntegral(UnivariatePolynomial(Evaluate(F, [Representative(s), P.2])))),
-    	UnivariatePolynomial(Evaluate(F, [Representative(s), P.2])), s> : s in B];
+    factorizations := [<Factorization(MakeMonicIntegral(Evaluate(Fs, OK!Representative(s)))),
+    	Evaluate(Fs, OK!Representative(s)), s> : s in B];
     Fstructures := {@ FactorizationStructureList(fac[1]) : fac in factorizations @};
-    Fstructures;
     Fss := [[F : F in factorizations | FactorizationStructureList(F[1]) eq Fstruct] : Fstruct in Fstructures];
 
     for Fss0 in Fss do
@@ -785,12 +495,12 @@ and a list B of parameter values}
     return Res;
 end intrinsic;
 
-
-
-intrinsic Splits(f::RngUPolElt, R::Rng) -> BoolElt
-{Returns whether f splits over the ring R.}
-	return &+([0] cat [r[2] : r in Roots(f, R)]) eq Degree(f);
+intrinsic Representative(N::FldPadElt) -> FldPadElt
+{}
+	return N;
 end intrinsic;
+
+
 
 intrinsic GeneralizeNbhds(S::SeqEnum[PadNbhdElt]) -> SeqEnum[PadNbhdElt]
 {}
@@ -849,7 +559,6 @@ intrinsic GeneralizeNbhds(S::SeqEnum[FldPadElt]) -> SeqEnum[FldPadElt]
 
 	return S;
 end intrinsic;
-*/
 
 intrinsic 'in'(x::FldPadElt, y::FldPadElt) -> BoolElt
 {Return whether x (as a p-adic ball) is contained in y.}
