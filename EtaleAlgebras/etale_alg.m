@@ -20,6 +20,15 @@ intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
 	return ValuationsOfRoots(res, p);
 end intrinsic;
 
+intrinsic ValuationsInRootsOfUPol(f::RngUPolElt, g::RngUPolElt) -> .
+{Returns the general resultant giving the valuations of f at the roots of g}
+	R := BaseRing(Parent(f));
+	S<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(S);
+	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
+	return res;
+end intrinsic;
+
 intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
 {Returns the maximal valuation of f at roots of g}
 	R := BaseRing(Parent(f));
@@ -214,9 +223,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
 		dif := FK_r - &*Fis;
 		min_val := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
-		if min_val gt 0 then
-			min_val := 0;
-		end if;
 		L<x> := PolynomialRing(Q);
 		v_diff := 2*x + min_val;
 		printf "min diff: %o\n", v_diff;
@@ -239,38 +245,50 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		b2 := Floor(Roots(v_diff - v_deriv - v_diff_roots)[1][1] + 1);
 		printf "deriv + diff_roots >= diff if v(s) >= %o\n", b2;
 
-		bound := Max(Max(Max(Max(b_sep, b_deriv), b_diff_roots), b1), b2);
+		bound := Max(Max(Max(Max(Max(0, b_sep), b_deriv), b_diff_roots), b1), b2);
 		printf "bound (%o): %o\n", r, bound;
+
+		//TODO: bounds for individual factors
 
 		Append(~Nbhds_disc, r + O(pi^bound));
 
 		k := LCM([fi[2] : fi in fs]);
+		printf "k = %o\n", k;
 		v := k * Ceiling(bound / k);
-		OKmOKk := quo<OK | pi^k>; // OK / (OK)^k
+		v_power := 2*Valuation(K!k) + 1;
+		OKmOKk := quo<OK | pi^v_power>; // OK / (OK)^k
 		// representatives for OK* / (OK*)^k would be sufficient here
-		//TODO: something separate with 0 here...
-		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKp!r, (K!c) * pi^v, k) : c in OKmOKk];
+		//TODO: something separate with 0 here...?
+		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKp!r, (K!c) * pi^(v + w), k) : c in OKmOKk, w in [0..k-1]];
 	end for;
 
 	printf "computing nbhds\n";
-	gen_sep2 := RK![ChangeRing(c, K) : c in Coefficients(SwitchVariables(gen_sep))];
+
+	gen_sep2 := RK!SwitchVariables(gen_sep);
+	//gen_mu_s := RK!SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
+	min_val_s := Min([Valuation(cs, p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
+
 	// Split up in neighborhoods
 	Nbhds := [O(K!1)];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
 	repeat
 		Nbhds_new := [];
 		for N in Nbhds do
-			vals := ValuationsOfRoots(Evaluate(gen_sep2, N));
-			sep := Sup([v[1] : v in vals]);
-
-			if sep lt AbsolutePrecision(N) then
-				Append(~Nbhds_end, N);
-			elif exists { Nd : Nd in Nbhds_disc | N in Nd } then
-				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
-			elif sep lt Infinity() then
-				Nbhds_new cat:= Subdivide(N, Floor(sep + 1));
-			else
+			if exists { Nd : Nd in Nbhds_disc | Nd in N } then
 				Nbhds_new cat:= Subdivide(N, AbsolutePrecision(N) + 1);
+			else
+				vals := ValuationsOfRoots(Evaluate(gen_sep2, N));
+				mu := Sup([v[1] : v in vals]) - min_val_s;
+				//vals := ValuationsOfRoots(Evaluate(gen_mu_s, N));
+				//mu := 2 * Sup([v[1] : v in vals]) - min_val_s;
+
+				if mu lt AbsolutePrecision(N) then
+					Append(~Nbhds_end, N);
+				elif exists { Nd : Nd in Nbhds_disc | N in Nd } then
+					//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
+				else //if sep lt Infinity() then
+					Nbhds_new cat:= Subdivide(N, Floor(mu + 1));
+				end if;
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
@@ -279,12 +297,15 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKp!N, pi^AbsolutePrecision(N), 1), Filter)];
 	until IsEmpty(Nbhds);
 
+	//return Nbhds_end;
+
+	// Add neighborhoods around the roots of the discriminant
 	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKp!n, pi^AbsolutePrecision(n), 1) : n in Nbhds_end];
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
 
-	printf "computing etale algebras\n";
+	printf "computing etale algebras for %o nbhds\n", #Nbhds;
 	E := EtaleAlgebraListIsomorphism2(F, Nbhds : D := D);
 
 	return E;
