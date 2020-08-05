@@ -23,6 +23,22 @@ intrinsic SeparantRng(f::RngUPolElt) -> RngIntElt
 	return SeparantRng(f, f);
 end intrinsic;
 
+intrinsic SeparantRng(f::RngUPolElt, g::RngUPolElt) -> RngIntElt
+{}
+	R := BaseRing(Parent(f));
+	S<e> := PolynomialRing(R);
+	T<x,y> := PolynomialRing(S,2);
+	df := Derivative(f);
+	res := S!Resultant(Resultant(e - Evaluate(df, x) * (x - y), Evaluate(f, x), 1), Evaluate(g, y), 2);
+
+	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
+	d := Degree(GCD(f,g));
+	res := res div e^d;
+
+	m, _ := Sup([v[1] : v in ValuationsOfRoots(res)]);
+	return m;
+end intrinsic;
+
 intrinsic Separant(f::RngUPolElt, p::RngIntElt) -> RngIntElt
 {Returns the separant of f}
 	return Separant(f, f, p);
@@ -49,9 +65,11 @@ intrinsic SeparantRng(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngIntElt
 	df := Derivative(f);
 	res := S!Resultant(Resultant(e - Evaluate(df, x) * (x - y), Evaluate(f, x), 1), Evaluate(g, y), 2);
 
-	//TODO: figure out when to throw away Infinity
-	//TODO: make Max([-Infinity()] cat ...) into Sup
-	m, _ := Max([-Infinity()] cat [v[1] : v in ValuationsOfRoots(res, p) | v[1] lt Infinity()]);
+	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
+	d := Degree(GCD(f,g));
+	res := res div e^d;
+
+	m, _ := Sup([v[1] : v in ValuationsOfRoots(res, p)]);
 	return m;
 end intrinsic;
 
