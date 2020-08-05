@@ -202,35 +202,41 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
 
+		//TODO: assert d = 1 and unit = 1 or something else.
 		//assert Valuation(d - 1, p) ge Precision;
 		//assert Valuation(unit - 1, p) ge Precision;
-
-		//TODO: assert d = 1 and unit = 1 or something else.
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
 
 		// Construction of the Fi = fi^ki + s*ri
 		Fis := [Evaluate(fr[1][1]^fr[1][2], tK) + sK * Evaluate(fr[2], tK) : fr in Zip(fs, rs)];
 
-		// Translate the variable s in gen_sep by r
-		sepK_r := SwitchVariables(Evaluate(SwitchVariables(gen_sep), tK + r));
 		// Translate the variable s in FK by r
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 
-		sepOKp_r := ROKp![Evaluate(ChangeRing(c, OKp), SOKp.1 + OKp!r) : c in Coefficients(gen_sep)];
+		sepOKp_r := SwitchVariables(Evaluate(SwitchVariables(ROKp!gen_sep), ROKp.1 + OKp!r));
 		v_sep, b_sep := MaxValuationOfRootsMPol(sepOKp_r);
 		printf "max sep: %o\n", v_sep;
 
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
 		dif := FK_r - &*Fis;
-		min_val := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
+		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
 		L<x> := PolynomialRing(Q);
-		v_diff := 2*x + min_val;
+		v_diff := 2*x + min_val_dif;
 		printf "min diff: %o\n", v_diff;
 
-		min_val := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(&*Fis)]);
+		v_derivs := [];
+		for Fi in Fis do
+			min_val_Fi := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(Fi)]);
+			//v_deriv_Fi, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!(pi^(-min_val_Fi) * Fi));
+			v_deriv_Fi, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!FK_r);
+			printf "max deriv: %o\n", v_deriv_Fi;
+			Append(~v_derivs, v_deriv_Fi);	
+		end for;
+
+		//min_val_Fis := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(&*Fis)]);
 		//TODO: bug? crash if not casted to ROKp
-		v_deriv, b_deriv := MaxValuationInRootsOf(ROKp!Derivative(FK_r), ROKp!(pi^(-min_val) * &*Fis));
-		printf "max deriv: %o\n", v_deriv;
+		//v_deriv, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!(pi^(-min_val_Fis) * &*Fis));
+		//printf "max deriv: %o\n", v_deriv;
 
 		v_diff_roots, b_diff_roots := MaxValuationDiffRoots(ROKp!FK_r);
 		printf "max diff_roots: %o\n", v_diff_roots;
@@ -241,8 +247,11 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		printf "diff > sep if v(s) >= %o\n", b1;
 
 		// When is deriv + diff_roots >= diff?
-		assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_deriv + v_diff_roots));
-		b2 := Floor(Roots(v_diff - v_deriv - v_diff_roots)[1][1] + 1);
+		b2 := -Infinity();
+		for v_deriv in v_derivs do
+			assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_deriv + v_diff_roots));
+			b2 := Max(b2, Floor(Roots(v_diff - v_deriv - v_diff_roots)[1][1] + 1));
+		end for;
 		printf "deriv + diff_roots >= diff if v(s) >= %o\n", b2;
 
 		b_power := -Infinity();
@@ -287,7 +296,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 	Nbhds := [O(K!1)];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
 	repeat
-		#Nbhds;
 		Nbhds_new := [];
 		for N in Nbhds do
 			if exists { Nd : Nd in Nbhds_disc | Nd in N } then
@@ -342,57 +350,6 @@ intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 	end if;
 end intrinsic;
 
-//TODO: broken
-intrinsic MaxValuationOfRootsMPol(res::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
-{}
-	R := Parent(res);
-	e := R.1;
-	s := R.2;
-
-	i := 0;
-	while exists { c : c in Coefficients(res, e) | not CorrectAux(UnivariatePolynomial(c), p) } do
-		res := Evaluate(res, [e, p*s]);
-		i +:= 1;
-	end while;
-
-	L<x> := PolynomialRing(Q);
-	vals := [<c[1], ValuationUPol(UnivariatePolynomial(c[2]), p)> : c in Zip([0..Degree(res,e)], Coefficients(res, e)) | c[2] ne 0];
-	slopes := [(vals[1][2] - v[2]) / (v[1] - vals[1][1]) : v in vals[2..#vals]];
-	a := Max([Coefficient(c,1) : c in slopes]);
-	b := Max([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
-
-	while exists { c : c in slopes | ConstantCoefficient(c) gt b } do
-		slopes := [c + Coefficient(c,1) : c in slopes];
-		b +:= a;
-		i +:= 1;
-	end while;
-
-	return a*x+b, i;
-end intrinsic;
-
-intrinsic ValuationUPol(f::RngUPolElt, p::RngIntElt) -> RngUPolElt
-{}
-	L<x> := PolynomialRing(Q);
-	if f eq 0 then
-		return Infinity();
-	else
-		a := Valuation(f);
-		return a*x + Valuation(Coefficient(f, a), p);
-	end if;
-end intrinsic;
-
-intrinsic CorrectAux(f::RngUPolElt, p::RngIntElt) -> BoolElt
-{}
-	if f eq 0 then
-		return true;
-	end if;
-
-	t := Parent(f).1;
-	f := f div (t^(Z!Valuation(f)));
-	return forall {v : v in ValuationsOfRoots(f, p) | v[1] lt 0};
-end intrinsic;
-
-
 intrinsic MaxValuationOfRootsMPol(res::RngUPolElt) -> RngUPolElt, RngIntElt
 {}
 	R := Parent(res); //K[s][t]
@@ -407,26 +364,28 @@ intrinsic MaxValuationOfRootsMPol(res::RngUPolElt) -> RngUPolElt, RngIntElt
 	end if;
 
 	i := 0;
-	while exists { c : c in Coefficients(res) | not CorrectAux(c) } do
+	while not CorrectAux(ConstantCoefficient(res)) do
 		// Scale the variable s in res by p
 		res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
 		i +:= 1;
 	end while;
-
-	L<x> := PolynomialRing(Q);
-	vals := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
-	slopes := [(vals[1][2] - v[2]) / (v[1] - vals[1][1]) : v in vals[2..#vals]];
-	a := Max([Coefficient(c,1) : c in slopes]);
-	b := Max([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
-
-	while exists { c : c in slopes | ConstantCoefficient(c) gt b } do
-		slopes := [c + Coefficient(c,1) : c in slopes];
-		b +:= a;
-		i +:= 1;
-	end while;
+	
+	repeat
+		L<x> := PolynomialRing(Q);
+		vals := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
+		slopes := [<(vals[1][2] - v[2]) / (v[1] - vals[1][1]), v[1]> : v in vals[2..#vals]];
+		a := Max([Coefficient(c[1],1) : c in slopes]);
+		b := Max([ConstantCoefficient(c[1]) : c in slopes | Coefficient(c[1],1) eq a]);
+		
+		index := Min([c[2] : c in slopes | c[1] eq a*x + b]);
+		if not CorrectAux(Coefficient(res,index)) then
+			res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
+			i +:= 1;
+		end if;
+	until CorrectAux(Coefficient(res,index));
 
 	//TODO: check that this is correct
-	return a*x+b - i*b, i;
+	return a*x+b - i*a, i;
 end intrinsic;
 
 intrinsic MinValuationOfRootsMPol(res::RngUPolElt) -> RngUPolElt, RngIntElt
@@ -443,71 +402,38 @@ intrinsic MinValuationOfRootsMPol(res::RngUPolElt) -> RngUPolElt, RngIntElt
 	end if;
 
 	i := 0;
-	while exists { c : c in Coefficients(res) | not CorrectAux(c) } do
+	while not CorrectAux(LeadingCoefficient(res)) do
 		// Scale the variable s in res by p
 		res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
 		i +:= 1;
 	end while;
 
-	L<x> := PolynomialRing(Q);
-	vals := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
-	slopes := [(v[2] - vals[#vals][2]) / (vals[#vals][1] - v[1]) : v in vals[1..#vals-1]];
-	a := Min([Coefficient(c,1) : c in slopes]);
-	b := Min([ConstantCoefficient(c) : c in slopes | Coefficient(c,1) eq a]);
+	repeat
+		L<x> := PolynomialRing(Q);
+		vals := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
+		slopes := [<(v[2] - vals[#vals][2]) / (vals[#vals][1] - v[1]), v[1]> : v in vals[1..#vals-1]];
+		a := Min([Coefficient(c[1],1) : c in slopes]);
+		b := Min([ConstantCoefficient(c[1]) : c in slopes | Coefficient(c[1],1) eq a]);
 
-	while exists { c : c in slopes | ConstantCoefficient(c) lt b } do
-		slopes := [c + Coefficient(c,1) : c in slopes];
-		b +:= a;
-		i +:= 1;
-	end while;
+		index := Max([c[2] : c in slopes | c[1] eq a*x + b]);
+		if not CorrectAux(Coefficient(res,index)) then
+			res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
+			i +:= 1;
+		end if;
+	until CorrectAux(Coefficient(res,index));
 
 	//TODO: check that this is correct
-	return a*x+b - i*b, i;
+	return a*x+b - i*a, i;
 end intrinsic;
 
 intrinsic ValuationOfRootsMPolStraight(res::RngUPolElt) -> RngUPolElt, RngIntElt
 {}
-	R := Parent(res); //K[s][t]
-	S := BaseRing(R); //K[s]
-	K := BaseRing(S);
-	p := UniformizingElement(K);
-	e := R.1;
-	s := S.1;
+	v_max, b_max := MaxValuationOfRootsMPol(res);
+	v_min, b_min := MinValuationOfRootsMPol(res);
 
-	if ConstantCoefficient(res) eq 0 then
-		return Infinity(), -Infinity();
-	end if;
+	assert v_max eq v_min;
 
-	i := 0;
-	while exists { c : c in Coefficients(res) | not CorrectAux(c) } do
-		// Scale the variable s in res by p
-		res := SwitchVariables(Evaluate(SwitchVariables(res), p*e));
-		i +:= 1;
-	end while;
-
-	L<x> := PolynomialRing(Q);
-	vals_max := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
-	slopes_max := [(v[2] - vals_max[#vals_max][2]) / (vals_max[#vals_max][1] - v[1]) : v in vals_max[1..#vals_max-1]];
-	a_max := Min([Coefficient(c,1) : c in slopes_max]);
-	b_max := Min([ConstantCoefficient(c) : c in slopes_max | Coefficient(c,1) eq a_max]);
-
-	vals_min := [<c[1], ValuationUPol(c[2])> : c in Zip([0..Degree(res)], Coefficients(res)) | c[2] ne 0];
-	slopes_min := [(v[2] - vals_min[#vals_min][2]) / (vals_min[#vals_min][1] - v[1]) : v in vals_min[1..#vals_min-1]];
-	a_min := Min([Coefficient(c,1) : c in slopes_min]);
-	b_min := Min([ConstantCoefficient(c) : c in slopes_min | Coefficient(c,1) eq a_min]);
-
-	while exists { c : c in slopes_max | ConstantCoefficient(c) lt b_max } or
-		  exists { c : c in slopes_min | ConstantCoefficient(c) lt b_min } or 
-		  b_max ne b_max do
-		slopes_max := [c + Coefficient(c,1) : c in slopes_max];
-		slopes_min := [c + Coefficient(c,1) : c in slopes_min];
-		b_max +:= a_max;
-		b_min +:= a_min;
-		i +:= 1;
-	end while;
-
-	//TODO: check that this is correct
-	return a_max*x+b_max - i*b_max, i;
+	return v_max, Max(b_max, b_min);
 end intrinsic;
 
 intrinsic ValuationUPol(f::RngUPolElt) -> RngUPolElt
