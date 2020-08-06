@@ -163,6 +163,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 	printf "computing discriminant\n";
 	disc := Discriminant(F);
 	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
+	roots_Q := [r[1] : r in Roots(disc, Q) | Valuation(r[1],p) ge 0];
+	require #roots eq #roots_Q: "The roots in Qp of the discriminant of Argument 1 should be in Q";
 
 	SK<sK> := PolynomialRing(K);
 	RK<tK> := PolynomialRing(SK);
@@ -174,7 +176,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
-	for r in roots do	
+	for r in roots_Q do	
 		// Evaluate F at s = r
 		f := Evaluate(SwitchVariables(FK), r);
 		// The coefficient of s in F
@@ -192,13 +194,14 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		// Construction of the Fi = fi^ki + s*ri
 		Fis := [Evaluate(fr[1][1]^fr[1][2], tK) + sK * Evaluate(fr[2], tK) : fr in Zip(fs, rs)];
 
-		// Translate the variable s in FK by r
-		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
+		// Translate the variable s in F by r
+		F_r := SwitchVariables(Evaluate(SwitchVariables(F), t + r));
 
-		sepOKp_r := SwitchVariables(Evaluate(SwitchVariables(ROKp!gen_sep), ROKp.1 + OKp!r));
-		v_sep, b_sep := MaxValuationOfRootsMPol(sepOKp_r);
+		sep_r := SwitchVariables(Evaluate(SwitchVariables(gen_sep), t + r));
+		v_sep, b_sep := MaxValuationOfRootsMPol(sep_r,p);
 		printf "max sep: %o\n", v_sep;
 
+		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
 		dif := FK_r - &*Fis;
 		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
@@ -220,7 +223,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		//v_deriv, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!(pi^(-min_val_Fis) * &*Fis));
 		//printf "max deriv: %o\n", v_deriv;
 
-		v_diff_roots, b_diff_roots := MaxValuationDiffRoots(ROKp!FK_r);
+		v_diff_roots, b_diff_roots := MaxValuationDiffRoots(F_r,p);
 		printf "max diff_roots: %o\n", v_diff_roots;
 
 		// When is diff > sep?
