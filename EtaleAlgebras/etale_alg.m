@@ -52,6 +52,7 @@ intrinsic MaxValuationDiffRoots(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, Rng
 	E<e> := PolynomialRing(R);
 	T<x,y> := PolynomialRing(E,2);
 	res := ConstantCoefficient(Resultant(Resultant(e - (x - y), Evaluate(f, x), x), Evaluate(g, y), y));
+	return res;
 	return MaxValuationOfRootsMPol(res div e^Valuation(res));
 end intrinsic;
 
@@ -157,6 +158,11 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		F := d^Degree(F) * Evaluate(F, t/d);
 	end while;
 
+	//for i := 1 to 7 do
+	//	F := p^Degree(F) * Evaluate(F, t/p);
+	//end for;
+
+
 	printf "computing general separant\n";
 	gen_sep := SeparantUPol(F) div t^Degree(F);
 
@@ -203,41 +209,16 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
-		dif := FK_r - &*Fis;
-		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
+		diff := FK_r - &*Fis;
+		min_val_diff := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
 		L<x> := PolynomialRing(Q);
-		v_diff := 2*x + min_val_dif;
+		v_diff := 2*x + min_val_diff;
 		printf "min diff: %o\n", v_diff;
-
-		v_derivs := [];
-		for Fi in Fis do
-			min_val_Fi := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(Fi)]);
-			v_deriv_Fi, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!(pi^(-min_val_Fi) * Fi));
-			//v_deriv_Fi, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!FK_r);
-			printf "max deriv: %o\n", v_deriv_Fi;
-			Append(~v_derivs, v_deriv_Fi);	
-		end for;
-
-		//min_val_Fis := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(&*Fis)]);
-		//TODO: bug? crash if not casted to ROKp
-		//v_deriv, b_deriv := MaxValuationInRootsOf(Derivative(ROKp!FK_r), ROKp!(pi^(-min_val_Fis) * &*Fis));
-		//printf "max deriv: %o\n", v_deriv;
-
-		v_diff_roots, b_diff_roots := MaxValuationDiffRoots(F_r,p);
-		printf "max diff_roots: %o\n", v_diff_roots;
 
 		// When is diff > sep?
 		assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_sep));
 		b1 := Floor(Roots(v_diff - v_sep)[1][1] + 1);
 		printf "diff > sep if v(s) >= %o\n", b1;
-
-		// When is deriv + diff_roots >= diff?
-		b2 := -Infinity();
-		for v_deriv in v_derivs do
-			assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_deriv + v_diff_roots));
-			b2 := Max(b2, Floor(Roots(v_diff - v_deriv - v_diff_roots)[1][1] + 1));
-		end for;
-		printf "deriv + diff_roots >= diff if v(s) >= %o\n", b2;
 
 		b_power := -Infinity();
 		for fr in Zip(fs, rs) do
@@ -255,7 +236,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		end for;
 		printf "straight bound: %o\n", b_straight;
 
-		bound := Max(Max(Max(Max(Max(Max(Max(0, b_sep), b_deriv), b_diff_roots), b1), b2), b_power), b_straight);
+		bound := Max(Max(Max(Max(0, b_sep), b1), b_power), b_straight);
 		printf "bound (%o): %o\n", r, bound;
 
 		//TODO: bounds for individual factors
@@ -274,8 +255,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 
 	printf "computing nbhds\n";
 
-	//gen_sep2 := RK!SwitchVariables(gen_sep);
-	gen_mu_s := RK!SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
+	gen_sep_K := RK!SwitchVariables(gen_sep);
 	min_val_s := Min([Valuation(cs, p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
 	// Split up in neighborhoods
@@ -287,10 +267,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 			if exists { Nd : Nd in Nbhds_disc | Nd in N } then
 				Nbhds_new cat:= Subdivide(N, AbsolutePrecision(N) + 1);
 			else
-				//vals := ValuationsOfRoots(Evaluate(gen_sep2, N));
-				//mu := Sup([v[1] : v in vals]) - min_val_s;
-				vals := ValuationsOfRoots(Evaluate(gen_mu_s, N));
-				mu := 2 * Sup([v[1] : v in vals]) - min_val_s;
+				vals := ValuationsOfRoots(Evaluate(gen_sep_K, N));
+				mu := Sup([v[1] : v in vals]) - min_val_s;
 
 				if mu lt AbsolutePrecision(N) then
 					Append(~Nbhds_end, N);

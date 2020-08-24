@@ -13,5 +13,6 @@
         dessin.m
     	poly.m
         257.m
+        test.m
     }
 }
