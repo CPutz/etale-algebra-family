@@ -83,7 +83,7 @@ intrinsic Print(N::PadNbhdElt)
 	if Exponent(N) eq 1 then
 		printf "%o + (%o) * OK", Middle(N), Radius(N);
 	else
-		printf "%o + (%o) * (OK*)^%o", Middle(N), Radius(N), Exponent(N);
+		printf "%o + (%o) * OK^%o", Middle(N), Radius(N), Exponent(N);
 	end if;
 end intrinsic;
 

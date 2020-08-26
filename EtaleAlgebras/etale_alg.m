@@ -21,6 +21,28 @@ intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
 	return ValuationsOfRoots(ValuationsInRootsOfUPol(f,g), p);
 end intrinsic;
 
+
+intrinsic ValuationsInRootsOfUPolQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPolElt) -> .
+{Returns the general resultant giving the valuations of f1/f2 at the roots of g}
+	R := BaseRing(Parent(f1));
+	S<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(S);
+	res := Resultant(Evaluate(f2, t) * e - Evaluate(f1, t), Evaluate(g, t));
+	return res;
+end intrinsic;
+
+intrinsic ValuationsInRootsOfQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPolElt) -> .
+{Returns the valuations of f1/f2 at the roots of g}
+	return ValuationsOfRoots(ValuationsInRootsOfUPolQuotient(f1,f2,g));
+end intrinsic;
+
+intrinsic ValuationsInRootsOfQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
+{Returns the valuations of f1/f2 at the roots of g}
+	return ValuationsOfRoots(ValuationsInRootsOfUPolQuotient(f1,f2,g), p);
+end intrinsic;
+
+
+
 intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
 {Returns the maximal valuation of f at roots of g}
 	return MaxValuationOfRootsMPol(ValuationsInRootsOfUPol(f,g));
@@ -75,9 +97,13 @@ intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngElt
 	R := BaseRing(Parent(f));
 	M := Max(0, k * Separant(f));
 	M := Max(M, k * Separant(f, g));
+	M := Max(M, k * Separant(f, Derivative(g)));
 
 	//vs := [v[1] : v in ValuationsInRootsOf(Derivative(f)^k * g^(k-1), f) | v[1] ne Infinity()];
 	//M := Max(M, Sup(vs));
+
+	vs := [v[1] : v in ValuationsInRootsOfQuotient(Derivative(f)^k * g^(k-1), Derivative(g)^k, f) | v[1] ne Infinity()];
+	M := Max(M, Sup(vs));
 
 	/*S<s> := PolynomialRing(R);
 	T<t> := PolynomialRing(S);
@@ -99,8 +125,12 @@ intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::RngIntElt) -
 	R := BaseRing(Parent(f));
 	M := Max(0, k * Separant(f, p));
 	M := Max(M, k * Separant(f, g, p));
+	M := Max(M, k * Separant(f, Derivative(g), p));
 	
-	vs := [v[1] : v in ValuationsInRootsOf(Derivative(f)^k * g^(k-1), f, p) | v[1] ne Infinity()];
+	//vs := [v[1] : v in ValuationsInRootsOf(Derivative(f)^k * g^(k-1), f, p) | v[1] ne Infinity()];
+	//M := Max(M, Sup(vs));
+
+	vs := [v[1] : v in ValuationsInRootsOfQuotient(Derivative(f)^k * g^(k-1), Derivative(g)^k, f, p) | v[1] ne Infinity()];
 	M := Max(M, Sup(vs));
 
 	/*S<s> := PolynomialRing(R);
@@ -158,11 +188,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		F := d^Degree(F) * Evaluate(F, t/d);
 	end while;
 
-	//for i := 1 to 7 do
-	//	F := p^Degree(F) * Evaluate(F, t/p);
-	//end for;
-
-
 	printf "computing general separant\n";
 	gen_sep := SeparantUPol(F) div t^Degree(F);
 
@@ -209,16 +234,16 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
-		diff := FK_r - &*Fis;
-		min_val_diff := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
+		dif := FK_r - &*Fis;
+		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
 		L<x> := PolynomialRing(Q);
-		v_diff := 2*x + min_val_diff;
-		printf "min diff: %o\n", v_diff;
+		v_dif := 2*x + min_val_dif;
+		printf "min diff: %o\n", v_dif;
 
-		// When is diff > sep?
-		assert (LeadingCoefficient(v_diff) gt LeadingCoefficient(v_sep));
-		b1 := Floor(Roots(v_diff - v_sep)[1][1] + 1);
-		printf "diff > sep if v(s) >= %o\n", b1;
+		// When is dif > sep?
+		assert (LeadingCoefficient(v_dif) gt LeadingCoefficient(v_sep));
+		b1 := Floor(Roots(v_dif - v_sep)[1][1] + 1);
+		printf "dif > sep if v(s) >= %o\n", b1;
 
 		b_power := -Infinity();
 		for fr in Zip(fs, rs) do
@@ -228,15 +253,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		b_power := Floor(b_power + 1);
 		printf "power bound: %o\n", b_power;
 
-		b_straight := -Infinity();
-		for Fi in Fis do
-			_,b := ValuationOfRootsMPolStraight(ValuationsInRootsOfUPol(Derivative(ROKp!FK_r), ROKp!Fi));
-			//_,b := ValuationOfRootsMPolStraight(ValuationsInRootsOfUPol(Derivative(ROKp!Fi), ROKp!Fi));
-			b_straight := Max(b_straight, b);
-		end for;
-		printf "straight bound: %o\n", b_straight;
-
-		bound := Max(Max(Max(Max(0, b_sep), b1), b_power), b_straight);
+		bound := Max(Max(Max(0, b_sep), b1), b_power);
 		printf "bound (%o): %o\n", r, bound;
 
 		//TODO: bounds for individual factors
