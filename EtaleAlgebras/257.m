@@ -17,12 +17,12 @@ intrinsic Etale257(p::RngIntElt
 	
 	printf "S1\n";
 	F1 := SwitchVariables(Evaluate(Fs, p^5*t));
-	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, Precision := 500, D := D);
+	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
 	printf "\n";
 
 	printf "S2\n";
 	F2 := SwitchVariables(Evaluate(Fs, 1 + p^2*t));
-	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(2)!0, Precision := 1000, D := D);
+	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(2)!0, D := D);
 	printf "\n";
 
 	printf "S3\n";
@@ -30,6 +30,22 @@ intrinsic Etale257(p::RngIntElt
 	E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(7)!0, D := D);
 
 	return E0s, E1, E2, E3;
+end intrinsic;
+
+intrinsic Etale257_2(p::RngIntElt
+	: D := LocalFieldDatabase()) -> .
+{}
+	S<s> := PolynomialRing(Rationals());
+	R<t> := PolynomialRing(S);
+	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
+	Fs := SwitchVariables(F);
+
+	printf "S3\n";
+	//F3 := ReciprocalPolynomial(p^7 * s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
+	F3 := p^7 * 4*t^5*(25*t^3 + 20*s*t^2 + 14*s^2*t + 14*s^3) - s^7*(4*t - 1);
+	E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(7)!0, D := D);
+
+	return E3;
 end intrinsic;
 
 
@@ -52,12 +68,12 @@ intrinsic Etale357(p::RngIntElt
 	
 	printf "S1\n";
 	F1 := SwitchVariables(Evaluate(Fs, p^5*t));
-	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, Precision := 500, D := D);
+	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
 	printf "\n";
 
 	printf "S2\n";
 	F2 := SwitchVariables(Evaluate(Fs, 1 + p^3*t));
-	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(3)!0, Precision := 1000, D := D);
+	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(3)!0, D := D);
 	printf "\n";
 
 	printf "S3\n";

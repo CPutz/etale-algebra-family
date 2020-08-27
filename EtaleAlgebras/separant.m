@@ -11,7 +11,7 @@ intrinsic Separant(f::RngUPolElt, g::RngUPolElt) -> RngIntElt
 	require BaseRing(Parent(g)) eq R: "Argument 1 and 2 must be defined over the same ring.";
 	if ISA(Type(R), RngUPol) then
 		return SeparantUPol(f, g);
-	elif ISA(Type(R), RngPad) or ISA(Type(R), FldPad) then
+	elif ISA(Type(R), RngPad) or ISA(Type(R), FldPad) or ISA(Type(R), RngPadRes) then
 		return SeparantRng(f, f);
 	else
 		error("Polynomials must be defined over a p-adic ring/field or a polynomial ring over a p-adic ring/field.");

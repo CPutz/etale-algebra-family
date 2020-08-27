@@ -99,23 +99,12 @@ intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngElt
 	M := Max(M, k * Separant(f, g));
 	M := Max(M, k * Separant(f, Derivative(g)));
 
-	//vs := [v[1] : v in ValuationsInRootsOf(Derivative(f)^k * g^(k-1), f) | v[1] ne Infinity()];
-	//M := Max(M, Sup(vs));
-
 	vs := [v[1] : v in ValuationsInRootsOfQuotient(Derivative(f)^k * g^(k-1), Derivative(g)^k, f) | v[1] ne Infinity()];
 	M := Max(M, Sup(vs));
 
-	/*S<s> := PolynomialRing(R);
-	T<t> := PolynomialRing(S);
-	F := Evaluate(f, t)^k - s * Evaluate(g, t);
-	disc := LeadingCoefficient(F) * Discriminant(F);
-	d := Degree(F) - Degree(f);
-	c := Coefficient(disc, d);
-
-	v := Valuation(Coefficient(disc, d));
-	for i := d + 1 to Degree(disc) do
-		M := Max(M, (Valuation(Coefficient(disc, i)) - v) / (d - i));
-	end for;*/
+	//for i := 0 to k*Degree(f) do
+	//	M := Max(M, Valuation(Coefficient(f^k, i)) - Valuation(Coefficient(g, i)));
+	//end for;
 
 	return M;
 end intrinsic;
@@ -126,24 +115,13 @@ intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::RngIntElt) -
 	M := Max(0, k * Separant(f, p));
 	M := Max(M, k * Separant(f, g, p));
 	M := Max(M, k * Separant(f, Derivative(g), p));
-	
-	//vs := [v[1] : v in ValuationsInRootsOf(Derivative(f)^k * g^(k-1), f, p) | v[1] ne Infinity()];
-	//M := Max(M, Sup(vs));
 
 	vs := [v[1] : v in ValuationsInRootsOfQuotient(Derivative(f)^k * g^(k-1), Derivative(g)^k, f, p) | v[1] ne Infinity()];
 	M := Max(M, Sup(vs));
 
-	/*S<s> := PolynomialRing(R);
-	T<t> := PolynomialRing(S);
-	F := Evaluate(f, t)^k - s * Evaluate(g, t);
-	disc := LeadingCoefficient(F) * Discriminant(F);
-	d := Degree(F) - Degree(f);
-	c := Coefficient(disc, d);
-
-	v := Valuation(Coefficient(disc, d), p);
-	for i := d + 1 to Degree(disc) do
-		M := Max(M, (Valuation(Coefficient(disc, i), p) - v) / (d - i));
-	end for;*/
+	//for i := 0 to k*Degree(f) do
+	//	M := Max(M, Valuation(Coefficient(f^k, i), p) - Valuation(Coefficient(g, i), p));
+	//end for;
 
 	return M;
 end intrinsic;
@@ -233,6 +211,9 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		printf "max sep: %o\n", v_sep;
 
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
+
+		Fis;
+
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
 		dif := FK_r - &*Fis;
 		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
@@ -246,15 +227,19 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		printf "dif > sep if v(s) >= %o\n", b1;
 
 		b_power := -Infinity();
-		for fr in Zip(fs, rs) do
-			b_power := Max(b_power, BoundPower(fr[1][1], fr[2], fr[1][2]));
-		end for;
+		//for fr in Zip(fs, rs) do
+		//	b_power := Max(b_power, BoundPower(fr[1][1], fr[2], fr[1][2]));
+		//end for;
 		// Make into inclusive bound
 		b_power := Floor(b_power + 1);
 		printf "power bound: %o\n", b_power;
 
 		bound := Max(Max(Max(0, b_sep), b1), b_power);
 		printf "bound (%o): %o\n", r, bound;
+
+		if Max(Max(0, b_sep), b1) lt b_power then
+			printf "b_power was larger\n";
+		end if;
 
 		//TODO: bounds for individual factors
 
