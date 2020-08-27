@@ -212,8 +212,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 
-		Fis;
-
 		// The valuation of difference between FK_r and &*Fis is >= 2v(s) - min_val
 		dif := FK_r - &*Fis;
 		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
@@ -286,8 +284,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		// Filter
 		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKp!N, pi^AbsolutePrecision(N), 1), Filter)];
 	until IsEmpty(Nbhds);
-
-	//return Nbhds_end;
 
 	// Add neighborhoods around the roots of the discriminant
 	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKp!n, pi^AbsolutePrecision(n), 1) : n in Nbhds_end];

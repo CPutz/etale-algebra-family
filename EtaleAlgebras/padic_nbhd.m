@@ -95,11 +95,11 @@ end intrinsic;
 intrinsic Representative(N::PadNbhdElt) -> FldPadElt
 {Returns a nonzero element of N}
 	K := AmbientSpace(Parent(N));
-	c := K!(Middle(N) + Radius(N));
+	c := K!(Middle(N) + ChangePrecision(Radius(N), Precision(K)));
 	if Valuation(c) ge AbsolutePrecision(c) then //c is zero
 		p := Prime(K);
 		c := ChangePrecision(c,1);
-		c +:= p^AbsolutePrecision(Radius(N)) + ChangePrecision(Radius(N),1);
+		c +:= p^AbsolutePrecision(Radius(N)) + ChangePrecision(Radius(N), Precision(K));
 	end if;
 	return c;
 end intrinsic;
