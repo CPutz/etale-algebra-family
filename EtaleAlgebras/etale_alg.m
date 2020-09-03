@@ -195,9 +195,11 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
 
-		//TODO: assert d = 1 and unit = 1 or something else.
-		//assert Valuation(d - 1, p) ge Precision;
-		//assert Valuation(unit - 1, p) ge Precision;
+		assert K!0 in (unit - 1);
+		assert Degree(d) eq 0;
+		d := ConstantCoefficient(d);
+		assert K!0 in (d - 1);
+
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
 
 		// Construction of the Fi = fi^ki + s*ri
