@@ -12,7 +12,7 @@ defining polynomial of E}
     vs := Partition([c[i] : i in [1..Rank(E)]], [AbsoluteDegree(Ei) : Ei in Eis]);
     fs := [&+[v[i] * x^(i-1) : i in [1..#v]] : v in vs];
     coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
-    res := &*[Resultant(coe(DefiningPolynomial(Eif[1])), y - Eif[2], x) : Eif in Zip(Eis, fs)];
+    res := &*[Resultant(coe(DefiningPolynomial(Eif[1], BaseRing(E))), y - Eif[2], x) : Eif in Zip(Eis, fs)];
     return UnivariatePolynomial(res);
     //f := &+[c[i] * x^(i-1) : i in [1..Rank(E)]];
     //coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
