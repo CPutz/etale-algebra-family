@@ -23,21 +23,26 @@ for p in primes do
 
 	for E in Es do
 		v := Z!Valuation(Discriminant(E));
-		pol := {*R!DefiningPolynomial(C[1], Zp)^^C[2] : C in Components(E)*};
-		s := "";
-		for f in pol do
-			s cat:= Sprintf("%o, ", f);
-		end for;
-	    Write(root_p cat IntegerToString(v) cat ".txt", s);
-
 	    Append(~vE[v], NewtonOreExponents(E));
 	end for;
 
 	min_v := AssociativeArray();
 	for v in vs do
 		min_v[v] := [Min([x[i] : x in vE[v]]) : i in [1..#vE[v][1]]];
+		Write(root_p cat IntegerToString(v) cat ".txt", Sprintf("Divisors=%o", [p^x : x in min_v[v]]));
 	end for;
 	Append(~exps, min_v);
+
+	//save defining polynomials
+	for E in Es do
+		v := Z!Valuation(Discriminant(E));
+		pol := {*R!DefiningPolynomial(C[1], Zp)^^C[2] : C in Components(E)*};
+		s := "";
+		for f in pol do
+			s cat:= Sprintf("%o, ", f);
+		end for;
+	    Write(root_p cat IntegerToString(v) cat ".txt", s);
+	end for;
 end for;
 
 for vs in CartesianProduct(l_discs) do
