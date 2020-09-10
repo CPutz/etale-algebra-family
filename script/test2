@@ -1,0 +1,10 @@
+#!/bin/bash
+
+div="{23, 24, 35}"
+div_list="${div//[\{\},]}"
+
+j=0
+for i in $div_list; do
+    echo "$i"
+    ((j++))
+done
