@@ -12,12 +12,27 @@ defining polynomial of E}
     vs := Partition([c[i] : i in [1..Rank(E)]], [AbsoluteDegree(Ei) : Ei in Eis]);
     fs := [&+[v[i] * x^(i-1) : i in [1..#v]] : v in vs];
     coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
+    DefiningPolynomial(Eis[1], BaseRing(E));
     res := &*[Resultant(coe(DefiningPolynomial(Eif[1], BaseRing(E))), y - Eif[2], x) : Eif in Zip(Eis, fs)];
     return UnivariatePolynomial(res);
     //f := &+[c[i] * x^(i-1) : i in [1..Rank(E)]];
     //coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
     //res := Resultant(coe(DefiningPolynomial(E)), y - f, x);
     //return UnivariatePolynomial(res);
+end intrinsic;
+
+intrinsic TschirnhausInt(E::EtAlg) -> SeqEnum
+{Computes all Tschirnhaus transformations of the
+defining polynomial of E}
+    C<[c]> := PolynomialRing(Z, Rank(E));
+    R<x, y> := PolynomialRing(C, 2);
+    Eis := [Ei[1] : j in [1..Ei[2]], Ei in Components(E)];
+    vs := Partition([c[i] : i in [1..Rank(E)]], [AbsoluteDegree(Ei) : Ei in Eis]);
+    fs := [&+[v[i] * x^(i-1) : i in [1..#v]] : v in vs];
+    coe := hom<PolynomialRing(Z) -> R | x>;
+    RZ := PolynomialRing(Z);
+    res := &*[Resultant(coe(RZ!DefiningPolynomial(Eif[1], BaseRing(E))), y - Eif[2], x) : Eif in Zip(Eis, fs)];
+    return UnivariatePolynomial(res);
 end intrinsic;
 
 intrinsic TschirnhausEliminate(E::EtAlg, i::RngElt, a::RngElt) -> SeqEnum
@@ -57,6 +72,17 @@ end intrinsic;
 intrinsic NewtonOreExponents(T::RngUPolElt) -> SeqEnum[RngIntElt]
 {Returns the minimal valuation of every coefficient of T}
     return Reverse([Valuation(Content(c)) : c in Prune(Coefficients(T))]);
+end intrinsic;
+
+intrinsic NewtonOreExponents(E::EtAlg, p::RngIntElt) -> SeqEnum[RngIntElt]
+{Returns the minimal valuation of every coefficient
+over all minimal polynomials for E}
+    time return NewtonOreExponents(TschirnhausInt(E), p);
+end intrinsic;
+
+intrinsic NewtonOreExponents(T::RngUPolElt, p::RngIntElt) -> SeqEnum[RngIntElt]
+{Returns the minimal valuation of every coefficient of T}
+    return Reverse([Valuation(Content(c), p) : c in Prune(Coefficients(T))]);
 end intrinsic;
 
 intrinsic GenerateCongruences(E::EtAlg, n::RngIntElt) -> Rec

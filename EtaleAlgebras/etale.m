@@ -1,3 +1,6 @@
+Z := Integers();
+Q := Rationals();
+
 //Etale algebras
 declare type EtAlg;
 declare attributes EtAlg: DefiningPolynomial, Components, BaseRing,
@@ -180,7 +183,19 @@ used for searching.}
     for Ext in Exts do
         R := PolynomialRing(Ext);
         if HasRoot(R ! P) then
-            return Ext;
+            B := BaseRing(Parent(P));
+            p := UniformizingElement(B);
+            f := DefiningPolynomial(Ext, B);
+            if IsEisenstein(f) then
+                //TODO: This only works over Q now
+                //s := Z!Floor(Separant(f) + 1);
+                s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
+                R := quo<B | p^s>;
+                fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
+                return ext<B | fR>;
+            else
+                return Ext;
+            end if;
         end if;
     end for;
     return BaseRing(P);

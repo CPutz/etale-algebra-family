@@ -553,7 +553,6 @@ and a list B of parameter values for s}
     //TODO: use MakeMonicIntegral only once
     factorizations := [<Factorization(MakeMonicIntegral(Evaluate(Fs, OK!Representative(s)))),
     	Evaluate(Fs, OK!Representative(s)), s> : s in B];
-
     Fstructures := {@ FactorizationStructureList(fac[1]) : fac in factorizations @};
     Fss := [[F : F in factorizations | FactorizationStructureList(F[1]) eq Fstruct] : Fstruct in Fstructures];
 
