@@ -194,7 +194,10 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		fs,unit := Factorization(f);
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 		d,cs := XGCD(f_hats);
+		//assert that sum_i cs[i] * f_hats[i] = d
+		assert forall {c : c in Coefficients(d - &+[fc[1]*fc[2] : fc in Zip(cs, f_hats)]) | K!0 in c};
 
+		//assert that d is the constant 1
 		assert K!0 in (unit - 1);
 		assert Degree(d) eq 0;
 		d := ConstantCoefficient(d);

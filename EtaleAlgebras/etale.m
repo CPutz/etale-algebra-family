@@ -186,16 +186,13 @@ used for searching.}
             B := BaseRing(Parent(P));
             p := UniformizingElement(B);
             f := DefiningPolynomial(Ext, B);
-            if IsEisenstein(f) then
-                //TODO: This only works over Q now
-                //s := Z!Floor(Separant(f) + 1);
-                s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
-                R := quo<B | p^s>;
-                fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
-                return ext<B | fR>;
-            else
-                return Ext;
-            end if;
+            s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
+            R := quo<B | p^s>;
+            //reduce coefficients modulo p^s
+            fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
+            _,_,Exts := Factorization(fR : Extensions := true);
+            assert #Exts eq 1;
+            return Exts[1]`Extension;
         end if;
     end for;
     return BaseRing(P);

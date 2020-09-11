@@ -2,7 +2,7 @@ Z := Integers();
 primes := [2,5,7];
 func := Etale257;
 data := LocalFieldDatabaseOctic2Adics();
-root := "/home/cp/PhD/script/";
+root := "/home/ppz600/Git/etale-algebras/script/";
 
 l_discs := [];
 exps := [];
@@ -38,7 +38,7 @@ for p in primes do
 			s cat:= Sprintf(", %o", x);
 		end for;
 		s cat:= "}";
-		Write(root_p cat IntegerToString(v) cat ".txt", s);
+		Write(root_p cat IntegerToString(v) cat ".txt", s : Overwrite := true);
 	end for;
 	Append(~exps, min_v);
 
