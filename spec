@@ -15,4 +15,9 @@
         257.m
         test.m
     }
+    
+    NumberFields
+    {
+        power.m
+    }
 }
