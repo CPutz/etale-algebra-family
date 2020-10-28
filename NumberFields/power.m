@@ -21,29 +21,125 @@ intrinsic GeneralNormMatrix(L::FldNum) -> SeqEnum
 	return res;
 end intrinsic;
 
+intrinsic HyperellipticReduction(C::CrvHyp, p::RngOrdIdl) -> CrvHyp
+{}
+	K := BaseRing(C);
+	f := HyperellipticPolynomials(C);
+	F,map1 := ResidueClassField(p);
+	OK := Domain(map1);
+	R := PolynomialRing(OK);
+	_,map2 := ChangeRing(R,F,map1);
+	fp := map2(R!f);
+	return HyperellipticCurve(fp);
+end intrinsic;
+
 intrinsic TorsionBound(J::JacHyp[FldNum[FldRat]], n::RngIntElt) -> RngIntElt
 {}	
 	K := BaseRing(J);
 	S := BadPrimes(J);
-	for P in PrimesUpTo(20) do
+	for P in PrimesUpTo(n) do
 		D := Decomposition(K,P);
 		for pl in D do
 			p := Ideal(pl[1]);
-			if p notin S then
-				f := HyperellipticPolynomials(Curve(J));
-				F,map1 := ResidueClassField(p);
-				OK := Domain(map1);
-				R := PolynomialRing(OK);
-				_,map2 := ChangeRing(R,F,map1);
-				fp := map2(R!f);
-				Cp := HyperellipticCurve(fp);
+			if p notin S and InertiaDegree(pl[1]) eq 1 then
+				C := Curve(J);
+				Cp := HyperellipticReduction(C,p);
 				Jp := Jacobian(Cp);
+				//p;
+				//#RationalPoints(Cp);
 				#RationalPoints(Jp);
 			end if;
 		end for;
 	end for;
 
-	return 0;
+	return -1;
+end intrinsic;
+
+intrinsic NormalizeHyperellipticCurve(C::CrvHyp[FldNum]) -> CrvHyp
+{}
+	f,g := HyperellipticPolynomials(C);
+	require g eq 0: "Argument 1 must be of the form y^2 = f(x)";
+	x := Parent(f).1;
+	n := Degree(f);
+	c0 := LeadingCoefficient(f);
+	K := Parent(c0);
+
+	for P in PrimeDivisors(Z!Norm(c0)) do
+		DP := Decomposition(K, P);
+		for p in DP do
+			v := Valuation(c0, p[1]);
+			_,gp := IsPrincipal(Ideal(p[1]));
+			if IsOdd(v) then
+				v +:= 5;
+				f := Evaluate(f, x * gp);
+			end if;
+			f *:= gp^(-v);
+		end for;
+	end for;
+
+	// Only works in my specific example
+	c0 := ConstantCoefficient(f);
+	for P in PrimeDivisors(Denominator(Norm(c0)) * Numerator(Norm(c0))) do
+		DP := Decomposition(K, P);
+		for p in DP do
+			v := Valuation(c0, p[1]);
+			k := (Z!v) mod 10;
+			l := (v - k) div 10;
+			_,gp := IsPrincipal(Ideal(p[1]));
+			f := Evaluate(f, x * gp^(2*l));
+			f *:= gp^(-10*l);
+		end for;
+	end for;
+
+	c0 := LeadingCoefficient(f);
+	assert Norm(c0) in {1, -1};
+
+	G,fG := UnitGroup(K);
+	e := fG(G.2);
+
+	k := 0;
+	found := false;
+	while not found do
+		if e^k eq c0 then
+			if IsEven(k) then
+				f *:= e^(-k);
+			else
+				f := Evaluate(f, x * e);
+				f *:= e^(-k-5);
+			end if;
+			found := true;
+		elif e^(-k) eq c0 then
+			if IsEven(k) then
+				f *:= e^(k);
+			else
+				f := Evaluate(f, x * e);
+				f *:= e^(k-5);
+			end if;
+			found := true;
+		elif -e^(k) eq c0 then
+			f := Evaluate(f, -x);
+			if IsEven(k) then
+				f *:= e^(-k);
+			else
+				f := Evaluate(f, x * e);
+				f *:= e^(-k-5);
+			end if;
+			found := true;
+		elif -e^(-k) eq c0 then
+			f := Evaluate(f, -x);
+			if IsEven(k) then
+				f *:= e^(k);
+			else
+				f := Evaluate(f, x * e);
+				f *:= e^(k-5);
+			end if;
+			found := true;
+		end if;
+		
+		k +:= 1;
+	end while;
+
+	return HyperellipticCurve(f);
 end intrinsic;
 
 intrinsic GCDPID(x::FldNumElt, y::FldNumElt) -> FldNumElt

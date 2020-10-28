@@ -19,5 +19,6 @@
     NumberFields
     {
         power.m
+        filter_local.m
     }
 }

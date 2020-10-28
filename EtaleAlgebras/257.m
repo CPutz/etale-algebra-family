@@ -32,6 +32,40 @@ intrinsic Etale257(p::RngIntElt
 	return E0s, E1, E2, E3;
 end intrinsic;
 
+intrinsic Etale257Linear(p::RngIntElt
+	: D := LocalFieldDatabase()) -> .
+{}
+	E0s, E1, E2, E3 := Etale257(p : D := D);
+
+	E0s := [[<RemoveLinearFactor(E[1]), E[2]> : E in E0 | ContainsLinearFactor(E[1])] : E0 in E0s];
+	E1 := [<RemoveLinearFactor(E[1]), E[2]> : E in E1 | ContainsLinearFactor(E[1])];
+	E2 := [<RemoveLinearFactor(E[1]), E[2]> : E in E2 | ContainsLinearFactor(E[1])];
+	E3 := [<RemoveLinearFactor(E[1]), E[2]> : E in E3 | ContainsLinearFactor(E[1])];
+
+	return E0s, E1, E2, E3;
+end intrinsic;
+
+intrinsic ContainsLinearFactor(E::EtAlg) -> BoolElt
+{Returns true if E contains a linear factor}
+	return HasRoot(DefiningPolynomial(E));
+end intrinsic;
+
+intrinsic RemoveLinearFactor(E::EtAlg) -> EtAlg
+{Provided an etale algebra E with a linear factor, remove it}
+	Cs := Components(E);
+	Csnew := [];
+	for C in Cs do
+		if AbsoluteDegree(C[1]) eq 1 then
+			if C[2] gt 1 then
+				Append(~Csnew, <C[1], C[2]-1>);
+			end if;
+		else
+			Append(~Csnew, C);
+		end if;
+	end for;
+	return EtaleAlgebra(Csnew);
+end intrinsic;
+
 intrinsic Etale257_2(p::RngIntElt
 	: D := LocalFieldDatabase()) -> .
 {}
