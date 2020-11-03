@@ -230,19 +230,15 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		printf "dif > sep if v(s) >= %o\n", b1;
 
 		b_power := -Infinity();
-		//for fr in Zip(fs, rs) do
-		//	b_power := Max(b_power, BoundPower(fr[1][1], fr[2], fr[1][2]));
-		//end for;
+		for fr in Zip(fs, rs) do
+			b_power := Max(b_power, BoundPower(fr[1][1], fr[2], fr[1][2]));
+		end for;
 		// Make into inclusive bound
 		b_power := Floor(b_power + 1);
 		printf "power bound: %o\n", b_power;
 
 		bound := Max(Max(Max(0, b_sep), b1), b_power);
 		printf "bound (%o): %o\n", r, bound;
-
-		if Max(Max(0, b_sep), b1) lt b_power then
-			printf "b_power was larger\n";
-		end if;
 
 		//TODO: bounds for individual factors
 

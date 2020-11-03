@@ -20,5 +20,11 @@
     {
         power.m
         filter_local.m
+        completion.m
+    }
+
+    LocalFields
+    {
+        subfields.m
     }
 }
