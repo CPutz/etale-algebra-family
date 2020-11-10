@@ -14,6 +14,7 @@
     	poly.m
         257.m
         test.m
+        pseudo.m
     }
     
     NumberFields
