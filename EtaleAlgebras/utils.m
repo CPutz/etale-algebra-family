@@ -38,3 +38,16 @@ intrinsic Sup(L::SeqEnum) -> .
 		return Max(L);
 	end if;
 end intrinsic;
+
+intrinsic UptoIsomorphism(S::SeqEnum) -> SeqEnum
+{Given a sequence of objects S for which IsIsomorphic is defined,
+returns a subsequence of S which contains a representative from
+each isomorphism class.}
+	res := [];
+	for s in S do
+		if forall {t : t in res | not IsIsomorphic(s,t)} then
+			Append(~res, s);
+		end if;
+	end for;
+	return res;
+end intrinsic;
