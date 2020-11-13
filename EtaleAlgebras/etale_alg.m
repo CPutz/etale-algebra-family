@@ -1,3 +1,5 @@
+declare verbose EtaleAlg, 1;
+
 Z := Integers();
 Q := Rationals();
 EtRF := recformat< E : EtAlg, N : SeqEnum, Noo : SeqEnum >;
@@ -166,10 +168,10 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		F := d^Degree(F) * Evaluate(F, t/d);
 	end while;
 
-	printf "computing general separant\n";
+	vprintf EtaleAlg: "computing general separant\n";
 	gen_sep := SeparantUPol(F) div t^Degree(F);
 
-	printf "computing discriminant\n";
+	vprintf EtaleAlg: "computing discriminant\n";
 	disc := Discriminant(F);
 	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
 	roots_Q := [r[1] : r in Roots(disc, Q) | Valuation(r[1],p) ge 0];
@@ -213,7 +215,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 
 		sep_r := SwitchVariables(Evaluate(SwitchVariables(gen_sep), t + r));
 		v_sep, b_sep := MaxValuationOfRootsMPol(sep_r,p);
-		printf "max sep: %o\n", v_sep;
+		vprintf EtaleAlg: "max sep: %o\n", v_sep;
 
 		FK_r := SwitchVariables(Evaluate(SwitchVariables(FK), tK + r));
 
@@ -222,12 +224,12 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		min_val_dif := Min([Valuation(cs) : cs in Coefficients(ct), ct in Coefficients(dif)]);
 		L<x> := PolynomialRing(Q);
 		v_dif := 2*x + min_val_dif;
-		printf "min diff: %o\n", v_dif;
+		vprintf EtaleAlg: "min diff: %o\n", v_dif;
 
 		// When is dif > sep?
 		assert (LeadingCoefficient(v_dif) gt LeadingCoefficient(v_sep));
 		b1 := Floor(Roots(v_dif - v_sep)[1][1] + 1);
-		printf "dif > sep if v(s) >= %o\n", b1;
+		vprintf EtaleAlg: "dif > sep if v(s) >= %o\n", b1;
 
 		b_power := -Infinity();
 		for fr in Zip(fs, rs) do
@@ -235,17 +237,17 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		end for;
 		// Make into inclusive bound
 		b_power := Floor(b_power + 1);
-		printf "power bound: %o\n", b_power;
+		vprintf EtaleAlg: "power bound: %o\n", b_power;
 
 		bound := Max(Max(Max(0, b_sep), b1), b_power);
-		printf "bound (%o): %o\n", r, bound;
+		vprintf EtaleAlg: "bound (%o): %o\n", r, bound;
 
 		//TODO: bounds for individual factors
 
 		Append(~Nbhds_disc, r + O(pi^bound));
 
 		k := LCM([fi[2] : fi in fs]);
-		printf "k = %o\n", k;
+		vprintf EtaleAlg: "k = %o\n", k;
 		v := k * Ceiling(bound / k);
 		v_power := 2*Valuation(K!k) + 1;
 		OKmOKk := quo<OK | pi^v_power>; // OK / (OK)^k
@@ -254,7 +256,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKp!r, (K!c) * pi^(v + w), k) : c in OKmOKk, w in [0..k-1]];
 	end for;
 
-	printf "computing nbhds\n";
+	vprintf EtaleAlg: "computing nbhds\n";
 
 	gen_sep_K := RK!SwitchVariables(gen_sep);
 	min_val_s := Min([Valuation(cs, p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
@@ -292,7 +294,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
 
-	printf "computing etale algebras for %o nbhds\n", #Nbhds;
+	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
 	E := EtaleAlgebraListIsomorphism2(F, Nbhds : D := D);
 
 	return E;

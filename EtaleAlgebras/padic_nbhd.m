@@ -2,7 +2,7 @@ Z := Integers();
 
 declare type PadNbhd[PadNbhdElt];
 declare attributes PadNbhd: AmbientSpace;
-declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent;
+declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent, Inverted;
 
 intrinsic pAdicNbhds(K::FldPad) -> PAdicNbhd
 {The space of p-adic neighbourhoods of the form c + r * (OK)^k}
@@ -39,6 +39,7 @@ intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::FldPadElt, k::RngIntEl
 	N`Middle := m;
 	N`Radius := r;
 	N`Exponent := k;
+	N`Inverted := false;
 	return N;
 end intrinsic;
 
@@ -78,13 +79,27 @@ intrinsic Exponent(N::PadNbhdElt) -> RngIntElt
 	return N`Exponent;
 end intrinsic;
 
+intrinsic Invert(N::PadNbhdElt) -> PadNbhdElt
+{Invert N}
+	N`Inverted := true;
+	return N;
+end intrinsic;
+
+intrinsic IsInverted(N::PadNbhdElt) -> BoolElt
+{Returns if N is inverted}
+	return N`Inverted;
+end intrinsic;
+
 intrinsic Print(N::PadNbhdElt)
 {Print N}
-	if Exponent(N) eq 1 then
-		printf "%o + (%o) * OK", Middle(N), Radius(N);
-	else
-		printf "%o + (%o) * OK^%o", Middle(N), Radius(N), Exponent(N);
+	s := Sprintf("%o + (%o) * OK", Middle(N), Radius(N));
+	if Exponent(N) gt 1 then
+		s cat:= "^" cat IntegerToString(Exponent(N));
 	end if;
+	if IsInverted(N) then
+		s := "(" cat s cat ")^{-1}";
+	end if;
+	printf "%o", s;
 end intrinsic;
 
 intrinsic 'eq'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
@@ -100,6 +115,9 @@ intrinsic Representative(N::PadNbhdElt) -> FldPadElt
 		p := Prime(K);
 		c := ChangePrecision(c,1);
 		c +:= p^AbsolutePrecision(Radius(N)) + ChangePrecision(Radius(N), Precision(K));
+	end if;
+	if IsInverted(N) then
+		c := c^(-1);
 	end if;
 	return c;
 end intrinsic;
