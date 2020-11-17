@@ -84,16 +84,51 @@ intrinsic CheckParametrization235(s::SeqEnum, f::RngMPolElt :
 	return not failed;
 end intrinsic;
 
-intrinsic QuadraticSearch(C::CrvHyp, D::RngIntElt : Bound := 100) -> SeqEnum
-{}
-	CD := BaseChange(C, QuadraticField(D));
-	J := Jacobian(CD);
+intrinsic System235(s::SeqEnum, f::RngMPolElt :
+	Moduli := Sort(PrimesUpTo(12) cat [4,8,9,27])) -> .
+{Checks }
+	H,G := KleinFormDecomposition(f);
+
+	_<x> := PolynomialRing(Z);
+	f12 := Evaluate(s[3], [x,1]);
+	// Maybe take a reduced model here?
+	C := HyperellipticCurve(f12);
+	P12 := RationalPoints(C : Bound := 300);
+
+	TH := Thue(Evaluate(H,[x,1]));
+	TG := Thue(Evaluate(G,[x,1]));
+	[Solutions(TH, Z!Evaluate(s[2], [p[1],p[3]])) : p in P12];
+	[Solutions(TG, Z!Evaluate(s[1], [p[1],p[3]])) : p in P12];
+
+	return 0;
+end intrinsic;
+
+function applymap(p,f);
+	J := Parent(p);
+	return elt<J | f(p[1]), f(p[2]), f(p[3])>;
+end function;
+
+intrinsic QuadraticSearch(C::CrvHyp, D::RngIntElt :
+	Bound := 100,
+	NumQ := -1) -> SetIndx
+{Searches for points on the Jacobian J of C by searching points on
+J over Q(sqrt(D)) and then lifting these points to Q.}
+	J := Jacobian(C);
+	K := QuadraticField(D);
+	CD := BaseChange(C, K);
 
 	PD := RationalPoints(CD : Bound := Bound);
-	PJ := {@ J![p,q] : p,q in PD @};
 
-	P0 := [CD!p : p in RationalPoints(C : Bound := Bound)];
-	PJ0 := {@ J![p,q] : p,q in P0 @};
+	if #PD gt NumQ then
+		D;
+		PJD := {@ p - q : p,q in PD @};
 
-	return SetToSequence(PJ diff PJ0);
+		G,_,tau := AutomorphismGroup(K);
+		s := tau(SetToSequence(Generators(G))[1]);
+		_,f := ChangeRing(PolynomialRing(K), K, s);
+
+		return {@ J!(p + applymap(p, f)) : p in PJD @};
+	else
+		return {@ @};
+	end if;
 end intrinsic;
