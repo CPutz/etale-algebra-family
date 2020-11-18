@@ -4,7 +4,6 @@
     {
         etale.m
         etale_alg.m
-        2-adic_octics.m
         separant.m
         utils.m
         padic_nbhd.m
@@ -12,7 +11,6 @@
         congr.m
         dessin.m
     	poly.m
-        257.m
         test.m
         pseudo.m
     }
@@ -27,10 +25,12 @@
     LocalFields
     {
         subfields.m
+        2-adic_octics.m
     }
 
     GFE
     {
         235.m
+        257.m
     }
 }
