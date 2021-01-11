@@ -189,18 +189,51 @@ intrinsic WriteCongruences(f::MonStgElt, C::SetIndx, N::SeqEnum[RngIntElt], p::R
     Write(f, "]");
 end intrinsic;
 
-intrinsic GenerateCongruencesSquares(d::RngIntElt, D::RngIntElt, p::RngIntElt, n::RngIntElt) -> SetIndx
-{Finds all polynomials of degree d such that its discriminant
-is D upto squares modulo p^n}
-    if n eq 1 then
-        Zp := GF(p);
+intrinsic GenerateCongruencesSquares(f::RngMPolElt, m::RngIntElt) -> SetIndx
+{Finds all input values modulo m such that f is a square modulo m}
+    if IsPrime(m) then
+        Zm := GF(m);
     else
-        Zp := Integers(p^n);
+        Zm := Integers(m);
     end if;
-    Rc<[c]> := PolynomialRing(Zp, d);
+    d := Rank(Parent(f));
+
+    Rm := PolynomialRing(Zm,d);
+    fm := Rm!f;
+
+    return {@ Eltseq(x) : x in RSpace(Zm, d) | IsSquare(Evaluate(f, Eltseq(x))) @};
+end intrinsic;
+
+intrinsic GenerateCongruencesSquares2(f::RngMPolElt, F::SeqEnum, m::RngIntElt) -> SetIndx
+{Finds all input values modulo m such that f is a square modulo m}
+    if IsPrime(m) then
+        Zm := GF(m);
+    else
+        Zm := Integers(m);
+    end if;
+    d := Rank(Parent(f));
+    
+    Rm := PolynomialRing(Zm,d);
+    fm := Rm!f;
+    Fm := [Rm!a : a in F];
+
+    return {@ Eltseq(x) : x in RSpace(Zm, d) | IsSquare(Evaluate(fm, [Evaluate(a,Eltseq(x)) : a in Fm])) @};
+end intrinsic;
+
+intrinsic GenerateCongruencesDiscSquares(d::RngIntElt, D::RngIntElt, m::RngIntElt) -> SetIndx
+{Finds all polynomials of degree d such that its discriminant
+is D upto squares modulo m}
+    if IsPrime(m) then
+        Zm := GF(m);
+    else
+        Zm := Integers(m);
+    end if;
+    Rc<[c]> := PolynomialRing(Zm, d);
     R := PolynomialRing(Rc);
     f := R!([c[d-i+1] : i in [1..d]] cat [1]);
     disc := Discriminant(f) * D;
-    squares := {@ x^2 : x in Zp @};
-    return {@ Eltseq(x) : x in RSpace(Zp, d) | Evaluate(disc, Eltseq(x)) in squares @};
+
+    return GenerateCongruencesSquares(f, m);
 end intrinsic;
+
+
