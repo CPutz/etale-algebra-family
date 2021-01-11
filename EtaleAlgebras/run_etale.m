@@ -1,8 +1,9 @@
 Z := Integers();
 primes := [2,5,7];
-func := Etale257;
+func := Etale257Linear;
 data := LocalFieldDatabaseOctic2Adics();
-root := "/home/ppz600/Git/etale-algebras/script/";
+//root := "/home/cp/Git/congruences/input/";
+root := "/home/cp/PhD/257_degree7/input/";
 
 l_discs := [];
 exps := [];
