@@ -2,8 +2,15 @@ QQ := Rationals();
 ZZ := Integers();
 R<x> := PolynomialRing(QQ);
 
+intrinsic NumberFieldHeight(x::FldNumElt) -> FldReElt
+{}
+	m := Sqrt(&+[Abs(Evaluate(x,p))^2 : p in InfinitePlaces(Parent(x))]);
+	return m;
+end intrinsic;
+
 function myheight(x);
-	m := Max([Abs(c) : c in Eltseq(x)]);
+	//m := Max([Abs(c) : c in Eltseq(x)]);
+	m := Sqrt(&+[Abs(Evaluate(x,p))^2 : p in InfinitePlaces(Parent(x))]);
 	return m;
 end function;
 
@@ -266,10 +273,23 @@ intrinsic ConicMap(u::FldNumElt, b::FldNumElt) -> MapSch
 
 	S := Curve(P2, U([X,Z])[1] * V([Y,Z])[2] - U([X,Z])[2] * V([Y,Z])[1]);
 
-	return map < S -> C |
+	f := DefiningPolynomial(S);
+	g := Evaluate(Discriminant(f,1), [0,t,1]);
+	H := HyperellipticCurve(g);
+	a0 := Term(f,X,2) div X^2;
+	a1 := Term(f,X,1) div X;
+	StoH := map< S -> H | [Y*Z, (2*a0*X + a1)*Z, Z^2]>;
+	inv := IsInvertible(StoH);
+	assert inv;
+
+	StoC := map < S -> C |
 		[U([X,Z])[3] * V([Y,Z])[1],
 		 par([U([X,Z])[1], U([X,Z])[2]])[2] * V([Y,Z])[1]^2 / b,
 		 U([X,Z])[1] * V([Y,Z])[3]] >;
+	
+	HtoC := Inverse(StoH) * StoC;
+
+	return HtoC;
 end intrinsic;
 
 intrinsic DescentConicMap(u::FldNumElt, phi::MapSch) -> MapSch
@@ -316,6 +336,23 @@ intrinsic DescentConicMap(u::FldNumElt, phi::MapSch) -> MapSch
 	D := Conic(P3, [P - (u*Z^2 + W^2), R - Z*W]);
 
 	return map <D -> H | [ Z, Q, W ] >;*/
+end intrinsic;
+
+intrinsic ConicMap2(u::FldNumElt) -> MapSch
+{}
+	K := Parent(u);
+	P2<X,Y,Z> := ProjectiveSpace(K,2);
+	_<t> := PolynomialRing(K);
+	C := HyperellipticCurve(u*(t^4 - (7*u)*t^2 - (7*u)^2));
+	C0 := Conic(P2, Y^2 - u*(X^2 - X*Z - Z^2));
+	par := MyImproveParametrization(Parametrization(C0));
+
+	P := Evaluate(par([X,Y])[1], [t,1,0]);
+	R := Evaluate(par([X,Y])[3], [t,1,0]);
+
+	H := HyperellipticCurve(7*u*P*R);
+
+	return H;
 end intrinsic;
 
 intrinsic CoprimeRepresentative(coords::SeqEnum) -> SeqEnum
@@ -375,8 +412,10 @@ intrinsic SimplifyUpToSquares(coords::SeqEnum) -> SeqEnum
 		for P in Decomposition(K,p[1]) do
 			val := Min([Valuation(c,P[1]) : c in coords]);
 			if val ne 0 then
-				_,g := IsPrincipal(Ideal(P[1]));
-				coords_new := [g^(-2*Floor(val/2)) * c : c in coords_new];
+				//if val mod 2 eq 0 then
+					_,g := IsPrincipal(Ideal(P[1]));
+					coords_new := [g^(-2*Floor(val/2)) * c : c in coords_new];
+				//end if;
 			end if;
 		end for;
 	end for;
@@ -418,22 +457,93 @@ intrinsic Test(u::FldNumElt) -> CrvHyp
 end intrinsic;
 
 //TODO: move to NumberFields
-intrinsic SquarefreePart(a::FldNumElt) -> FldNumElt
+intrinsic MySquarefreePart(x::FldNumElt) -> FldNumElt
 {}
-	K := Parent(a);
-	norm := Norm(a);
+	K<a> := Parent(x);
+	norm := Norm(x);
 	num := Numerator(norm);
 	denom := Denominator(norm);
 	for p in Factorization(num * denom) do
 		for P in Decomposition(K,p[1]) do
-			val := Valuation(a,P[1]);
+			val := Valuation(x,P[1]);
 			if val ne 0 then
 				_,g := IsPrincipal(Ideal(P[1]));
-				a := a * g^(-2 * Floor(val/2));
+				x := x * g^(-2 * Floor(val/2));
 			end if;
 		end for;
 	end for;
-	return a;
+	//preferred representatives of OK*/(OK*)^2
+	u1 := -1;
+	u2 := a^5 + a^4 - a^3 - 2*a^2 - a - 1;
+	u3 := -8*a^6 - 17*a^5 - 14*a^4 + 5*a^3 + 30*a^2 + 39*a + 14;
+	u4 := -a^6 + 4*a^5 - a^4 - 5*a^3 + 3*a^2 + 8*a - 11;
+	Us := [u2^e2 * u3^e3 * u4^e4 : e2,e3,e4 in [-1..1]];
+	// Scale by units
+	h := myheight(x);
+	repeat
+		changed := false;
+		x_tmp := x;
+		for u in Us do
+			x_new := x / u^2;
+			if  h gt myheight(x_new) then
+				h := myheight(x_new);
+				x_tmp := x_new;
+				changed := true;
+			end if;
+		end for;
+		x := x_tmp;
+	until not changed;
+
+	return x;
+end intrinsic;
+
+intrinsic MyDiagonalForm(C::CrvCon) -> CrvCon, MapSch
+{Brings C into simplified diagonal form and returns a map from C
+to the new curve.}
+	f,T := DiagonalForm(C);
+	A := AmbientSpace(C);
+	R := Parent(A.1);
+	r := Rank(R);
+	f_new := &+[MySquarefreePart(ConstantCoefficient(c)) * R.i^2 where c := Coefficient(f,i,2) : i in [1..r]];
+	scale := DiagonalMatrix([y where _,y := IsSquare(ConstantCoefficient(Coefficient(f,i,2) / Coefficient(f_new,i,2))) : i in [1..r]]);
+	trans := Vector([R.i : i in [1..r]]) * MatrixAlgebra(R,r)!(T^(-1) * scale);
+	D := Conic(A, f_new);
+	return D, map<C -> D | Eltseq(trans)>;
+end intrinsic
+
+intrinsic SimplifyUpToSquaresDiagonal(coords::SeqEnum) -> SeqEnum
+{}
+	K<a> := Parent(coords[1]);
+	coords_new := [MySquarefreePart(c) : c in coords];
+
+	//preferred representatives of OK*/(OK*)^2
+	u1 := -1;
+	u2 := a^5 + a^4 - a^3 - 2*a^2 - a - 1;
+	u3 := -8*a^6 - 17*a^5 - 14*a^4 + 5*a^3 + 30*a^2 + 39*a + 14;
+	u4 := -a^6 + 4*a^5 - a^4 - 5*a^3 + 3*a^2 + 8*a - 11;
+	Us := [u2^e2 * u3^e3 * u4^e4 : e2,e3,e4 in [-1..1]];
+	// Scale by units
+	res := [];
+	for c in coords_new do
+		c_new := c;
+		h := myheight(c_new);
+		repeat
+			changed := false;
+			c_new_tmp := c_new;
+			for u in Us do
+				c_new_new := c_new / u^2;
+				if  h gt myheight(c_new_new) then
+					h := myheight(c_new_new);
+					c_new_tmp := c_new_new;
+					changed := true;
+				end if;
+			end for;
+			c_new := c_new_tmp;
+		until not changed;
+		Append(~res, c_new);
+	end for;
+
+	return res;
 end intrinsic;
 
 intrinsic ConicMapInverse(p::Pt) -> MapSch
@@ -452,7 +562,7 @@ intrinsic ConicMapInverse(p::Pt) -> MapSch
 	P := par([X,Y])[1];
 	Q := par([X,Y])[2];
 	R := par([X,Y])[3];
-	b := SquarefreePart(Evaluate(P,[st[1],st[2],0]));
+	b := MySquarefreePart(Evaluate(P,[st[1],st[2],0]));
 	CX := Conic(P2, P - b * Z^2);
 	CZ := Conic(P2, R - 7*u * b * Z^2);
 	U := MyImproveParametrization(Parametrization(CX));
@@ -469,7 +579,17 @@ intrinsic ConicMapInverse(p::Pt) -> MapSch
 	uv := Uinv(pX);
 	xy := Vinv(pZ);
 
-	return S![uv[1]/uv[2], xy[1]/xy[2], 1], b;
+	_<t> := PolynomialRing(K);
+	f := DefiningPolynomial(S);
+	g := Evaluate(Discriminant(f,1), [0,t,1]);
+	H := HyperellipticCurve(g);
+	a0 := Term(f,X,2) div X^2;
+	a1 := Term(f,X,1) div X;
+	StoH := map< S -> H | [Y*Z, (2*a0*X + a1)*Z, Z^2]>;
+	inv := IsInvertible(StoH);
+	assert inv;
+
+	return StoH(S![uv[1]/uv[2], xy[1]/xy[2], 1]), b;
 end intrinsic;
 
 function MapCoefficients(f,p);
@@ -516,6 +636,8 @@ intrinsic LocalSearch(f::RngUPolElt, S::SeqEnum) -> SeqEnum
 		p := S[i];
 		Cp := LocalSearch(f,p);
 		if #Cp lt #ResidueClassField(p) then
+			Norm(Ideal(p));
+			1. * #Cp / #ResidueClassField(p);
 			Append(~Ps, p);
 			Append(~Cs, Cp);
 			_,g := IsPrincipal(Ideal(p));
@@ -621,8 +743,8 @@ intrinsic LocalSieve3(f::RngUPolElt, S::SeqEnum) -> BoolElt, .
 	//B := HermiteForm(MatrixAlgebra(ZZ,Degree(K))!M);
 	_,N := IsInvertible(MatrixAlgebra(QQ,7)!Matrix(B));
 
-	//L0 := [e1*B[1] + e2*B[2] + e3*B[3] + e4*B[4] + e5*B[5] + e6*B[6] + e7*B[7] : e1,e2,e3,e4,e5,e6,e7 in [-1..1]];
-	L0 := [L!0];
+	L0 := [e1*B[1] + e2*B[2] + e3*B[3] + e4*B[4] + e5*B[5] + e6*B[6] + e7*B[7] : e1,e2,e3,e4,e5,e6,e7 in [-1..1]];
+	//L0 := [L!0];
 
 	res := [];
 	for x in X do
@@ -700,6 +822,21 @@ intrinsic EltseqPolynomial(f::RngMPolElt) -> SeqEnum
 	fy := Evaluate(f,ys);
 	Ms := [[c * m : c in Eltseq(MonomialCoefficient(fy,m))] : m in Monomials(fy)];
 	X := [&+[c[i] : c in Ms] : i in [1..Degree(K)]];
+	return X;
+end intrinsic;
+
+intrinsic EltseqPolynomial(fs::SeqEnum) -> SeqEnum
+{}
+	K<a> := CoefficientRing(Parent(fs[1]));
+	r := Rank(Parent(fs[1]));
+	R<[x]> := PolynomialRing(K,r*Degree(K));
+	ys := [&+[x[Degree(K)*i + j+1] * K.1^j : j in [0..Degree(K)-1]] : i in [0..r-1]];
+	X := [];
+	for f in fs do
+		fy := Evaluate(f,ys);
+		Ms := [[c * m : c in Eltseq(MonomialCoefficient(fy,m))] : m in Monomials(fy)];
+		X cat:= [&+[c[i] : c in Ms] : i in [1..Degree(K)]];
+	end for;
 	return X;
 end intrinsic;
 
