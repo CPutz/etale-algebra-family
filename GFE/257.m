@@ -133,3 +133,60 @@ intrinsic Etale357(p::RngIntElt
 
 	return E0s, E1, E2, E3;
 end intrinsic;
+
+
+
+
+
+intrinsic Etale3511(p::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Neighbourhoods := false) -> SeqEnum
+{}
+	S<s> := PolynomialRing(Rationals());
+	R<t> := PolynomialRing(S);
+	F := (3*t^2 + t + 1)^5 * (1 - 5*t) - s;
+	Fs := SwitchVariables(F);
+
+	K := pAdicField(p, 500);
+	X := pAdicNbhds(K);
+
+	E0s := [];
+	for a in [2..(p-1)] do
+		F0 := SwitchVariables(Evaluate(Fs, a + p*t));
+		E0 := EtaleAlgebraFamily(F0, p : D := D);
+		E0 := [<E[1], [a + p * X!B : B in E[2]]> : E in E0];
+		Append(~E0s, E0);
+	end for;
+
+	F1 := SwitchVariables(Evaluate(Fs, p^5*t));
+	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
+	E1 := [<E[1], [p^5 * X!B : B in E[2]]> : E in E1];
+
+	F2 := SwitchVariables(Evaluate(Fs, 1 + p^3*t));
+	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(3)!0, D := D);
+	E2 := [<E[1], [1 + p^3 * X!B : B in E[2]]> : E in E2];
+
+	F3 := (243 + 4455*t + 46035*t^2 + 315810*t^3 + 1591755*t^4 + 
+ 6030761*t^5 + 17509305*t^6 + 38213010*t^7 + 61272585*t^8 + 
+ 65225655*t^9 + 39135393*t^10) * p^11 * s + 9765625*t^11;
+	E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(11)!0, D := D);
+	E3 := [<E[1], [Invert(p^11 * X!B) : B in E[2]]> : E in E3];
+
+	Es := {@ @};
+	Eis := E0s cat [E1,E2,E3];
+	for Ei in Eis do
+		for E in Ei do
+			Include(~Es, E[1]);
+		end for;
+	end for;
+
+	EBs := {@ @};
+	if Neighbourhoods then
+		for E in Es do
+			Include(~EBs, <E, [B : B in EB[2], EB in Ei, Ei in Eis | EB[1] eq E]>);
+		end for;
+		Es := EBs;
+	end if;
+
+	return SetToSequence(Es);
+end intrinsic;
