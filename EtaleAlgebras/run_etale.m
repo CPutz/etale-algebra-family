@@ -1,18 +1,18 @@
+AttachSpec("/home/cp/Git/etale-algebras/spec");
+
 Z := Integers();
 primes := [2,5,7];
-func := Etale257Linear;
+func := Etale257;
 data := LocalFieldDatabaseOctic2Adics();
 //root := "/home/cp/Git/congruences/input/";
-root := "/home/cp/PhD/257_degree7/input/";
+root := "/home/cp/Git/congruences/input/";
 
 l_discs := [];
 exps := [];
 
 for p in primes do
 	Zp := pAdicRing(p, 500);
-	E0, E1, E2, E3 := func(p : D := data);
-
-	Es := {E[1] : E in E0i, E0i in E0} join {E[1] : E in E1} join {E[1] : E in E2} join {E[1] : E in E3};
+	Es:= func(p : D := data);
 
 	vs := SetToSequence({Z!Valuation(Discriminant(E)) : E in Es});
 	Append(~l_discs, vs);
