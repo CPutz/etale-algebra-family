@@ -1,3 +1,5 @@
+Q := Rationals();
+
 intrinsic Etale257(p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false) -> SeqEnum
@@ -182,6 +184,95 @@ intrinsic Etale3511(p::RngIntElt
 
 	EBs := {@ @};
 	if Neighbourhoods then
+		for E in Es do
+			Include(~EBs, <E, [B : B in EB[2], EB in Ei, Ei in Eis | EB[1] eq E]>);
+		end for;
+		Es := EBs;
+	end if;
+
+	return SetToSequence(Es);
+end intrinsic;
+
+
+intrinsic Etale257Unramified(p::RngIntElt
+	: Neighbourhoods := false) -> SeqEnum
+{}
+	R<t> := PolynomialRing(GF(p));
+	psi := 25*t^3 + 20*t^2 + 14*t + 14;
+	phi := 4*t^5 * psi;
+
+	S<x> := PolynomialRing(pAdicField(p,500));
+	Phi := 10*x^4 + 4*x^3 + 2*x^2 + 2*x - 1;
+
+	Es := [];
+	for a in [2..(p-1)] do
+		Append(~Es, <{* Degree(f[1])^^f[2] : f in Factorization(phi - a) *},Q!a>);
+	end for;
+
+	for a in [2..(p-1)] do
+		Append(~Es, <{* Degree(f[1])^^f[2] : f in Factorization(psi * (t^5 - a)) *}, p^5 * a>);
+	end for;
+
+	for a in [2..(p-1)] do
+		Append(~Es, <{* Degree(f[1])^^f[2] : f in Factorization(Phi^2 - a*p^2*(4*x-1)) *}, 1 + p^2 * a>);
+	end for;
+
+	for a in [2..(p-1)] do
+		Append(~Es, <{* Degree(f[1])^^f[2] : f in Factorization(t * (t^7 - a)) *}, p^(-7) * a>);
+	end for;
+
+	Eis := {@ E[1] : E in Es @};
+	if not Neighbourhoods then
+		return Eis;
+	else
+		return {@ <E, {@ F[2] : F in Eis | F[1] eq E @}> : E in Eis @};
+	end if;
+end intrinsic;
+
+intrinsic Etale257Other(p::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Neighbourhoods := false) -> SeqEnum
+{}
+	S<s> := PolynomialRing(Rationals());
+	R<t> := PolynomialRing(S);
+	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
+	Fs := SwitchVariables(F);
+
+	K := pAdicField(p, 500);
+	X := pAdicNbhds(K);
+
+	E1s := [];
+	for k in [1..4] do
+		F1 := SwitchVariables(Evaluate(Fs, p^k*t));
+		E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
+		E1 := [<E[1], [p^k * X!B : B in E[2]]> : E in E1];
+		Append(~E1s, E1);
+	end for;
+
+	F2 := SwitchVariables(Evaluate(Fs, 1 + p*t));
+	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(2)!0, D := D);
+	E2 := [<E[1], [1 + p * X!B : B in E[2]]> : E in E2];
+
+	E3s := [];
+	for k in [1..6] do
+		k;
+		F3 := ReciprocalPolynomial(p^k * s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
+		E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(7)!0, D := D);
+		E3 := [<E[1], [Invert(p^k * X!B) : B in E[2]]> : E in E3];
+		Append(~E3s, E3);
+	end for;
+"combining";
+	Es := {@ @};
+	Eis := E1s cat [E2] cat E3s;
+	for Ei in Eis do
+		for E in Ei do
+			Include(~Es, E[1]);
+		end for;
+	end for;
+
+	EBs := {@ @};
+	if Neighbourhoods then
+		"neighbourhoods";
 		for E in Es do
 			Include(~EBs, <E, [B : B in EB[2], EB in Ei, Ei in Eis | EB[1] eq E]>);
 		end for;
