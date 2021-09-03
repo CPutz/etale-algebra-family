@@ -238,7 +238,7 @@ intrinsic Etale257Unramified(p::RngIntElt
 	if not Neighbourhoods then
 		return Eis;
 	else
-		return {@ <E, {@ F[2] : F in Eis | F[1] eq E @}> : E in Eis @};
+		return {@ <E, {@ F[2] : F in Es | F[1] eq E @}> : E in Eis @};
 	end if;
 end intrinsic;
 
