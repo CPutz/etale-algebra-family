@@ -12,7 +12,6 @@ defining polynomial of E}
     vs := Partition([c[i] : i in [1..Rank(E)]], [AbsoluteDegree(Ei) : Ei in Eis]);
     fs := [&+[v[i] * x^(i-1) : i in [1..#v]] : v in vs];
     coe := hom<PolynomialRing(BaseRing(E)) -> R | x>;
-    DefiningPolynomial(Eis[1], BaseRing(E));
     res := &*[Resultant(coe(DefiningPolynomial(Eif[1], BaseRing(E))), y - Eif[2], x) : Eif in Zip(Eis, fs)];
     return UnivariatePolynomial(res);
     //f := &+[c[i] * x^(i-1) : i in [1..Rank(E)]];
@@ -237,3 +236,31 @@ is D upto squares modulo m}
 end intrinsic;
 
 
+intrinsic GenerateCongruencesLift(E::EtAlg) -> .
+{}
+    p := Z!UniformizingElement(BaseRing(E));
+    n := 8;
+
+    T := Tschirnhaus(E);
+    R := PolynomialRing(Z,n);
+    S := RSpace(R,n);
+    f := S![R!fi : fi in Reverse(Coefficients(T)[1..n])];
+
+    Rp := PolynomialRing(GF(p),n);
+    Mp := MatrixAlgebra(Rp, n);
+    J := Mp!JacobianMatrix(Eltseq(f));
+    
+    Vp := RSpace(GF(p),n);
+    Vp2 := RSpace(Integers(p^2),n);
+    VZ := RSpace(Z,n);
+    C := {@ @};
+    for v in Vp do
+        vZ := Eltseq(VZ!v);
+        c := Vp2!Evaluate(f, vZ);
+        for w in Image(Evaluate(J, Eltseq(v))) do
+            Include(~C, c + p * Vp2!VZ!w);
+        end for;
+    end for;
+
+    return C;
+end intrinsic;
