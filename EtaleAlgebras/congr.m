@@ -235,6 +235,10 @@ is D upto squares modulo m}
     return GenerateCongruencesSquares(f, m);
 end intrinsic;
 
+intrinsic GenerateCongruencesLift(E::EtAlg) -> SetIndx
+{}
+    p := Z!UniformizingElement(BaseRing(E));
+    n := Rank(E);
 
 intrinsic GenerateCongruencesLift(E::EtAlg) -> .
 {}

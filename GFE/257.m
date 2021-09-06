@@ -181,9 +181,9 @@ intrinsic Etale3511(p::RngIntElt
 	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(3)!0, D := D);
 	E2 := [<E[1], [1 + p^3 * X!B : B in E[2]]> : E in E2];
 
-	F3 := (243 + 4455*t + 46035*t^2 + 315810*t^3 + 1591755*t^4 + 
- 6030761*t^5 + 17509305*t^6 + 38213010*t^7 + 61272585*t^8 + 
- 65225655*t^9 + 39135393*t^10) * p^11 * s + 9765625*t^11;
+	E2 := [];
+
+	F3 := ReciprocalPolynomial(p^11 * s * t * (3*t^2 + 11*t + 33)^5 - 5^10);
 	E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(11)!0, D := D);
 	E3 := [<E[1], [Invert(p^11 * X!B) : B in E[2]]> : E in E3];
 
