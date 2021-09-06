@@ -240,29 +240,25 @@ intrinsic GenerateCongruencesLift(E::EtAlg) -> SetIndx
     p := Z!UniformizingElement(BaseRing(E));
     n := Rank(E);
 
-intrinsic GenerateCongruencesLift(E::EtAlg) -> .
-{}
-    p := Z!UniformizingElement(BaseRing(E));
-    n := 8;
+    Rp := RSpace(GF(p), n);
+    Rp2 := RSpace(Integers(p^2), n);
+    RZ := RSpace(Z, n);
+
+    Sp2 := RSpace(PolynomialRing(Integers(p^2), n), n);
+    SZ  := RSpace(PolynomialRing(Z, n), n);
+
+    M := MatrixAlgebra(PolynomialRing(GF(p), n), n);
 
     T := Tschirnhaus(E);
-    R := PolynomialRing(Z,n);
-    S := RSpace(R,n);
-    f := S![R!fi : fi in Reverse(Coefficients(T)[1..n])];
+    f := Sp2!SZ!Reverse(Coefficients(T)[1..n]);
 
-    Rp := PolynomialRing(GF(p),n);
-    Mp := MatrixAlgebra(Rp, n);
-    J := Mp!JacobianMatrix(Eltseq(f));
-    
-    Vp := RSpace(GF(p),n);
-    Vp2 := RSpace(Integers(p^2),n);
-    VZ := RSpace(Z,n);
     C := {@ @};
-    for v in Vp do
-        vZ := Eltseq(VZ!v);
-        c := Vp2!Evaluate(f, vZ);
-        for w in Image(Evaluate(J, Eltseq(v))) do
-            Include(~C, c + p * Vp2!VZ!w);
+    J := Transpose(M!JacobianMatrix(Eltseq(f)));
+    for v in Rp do
+        w := Rp2!Evaluate(f, Eltseq(Rp2!RZ!v));
+        Jv := Evaluate(J, Eltseq(v));
+        for c in Image(Jv) do
+            Include(~C, Eltseq(RZ!(w + p*(Rp2!RZ!c))));
         end for;
     end for;
 
