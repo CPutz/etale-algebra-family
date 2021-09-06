@@ -219,7 +219,7 @@ intrinsic Etale257Unramified(p::RngIntElt
 
 	Es := [];
 	for a in [2..(p-1)] do
-		Append(~Es, <{* Degree(f[1])^^f[2] : f in Factorization(phi - a) *},Q!a>);
+		Append(~Es, <{* Degree(f[1])^^f[2] : f in Factorization(phi - a * (4*t - 1)) *},Q!a>);
 	end for;
 
 	for a in [2..(p-1)] do
