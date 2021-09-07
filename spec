@@ -20,6 +20,7 @@
         power.m
         filter_local.m
         completion.m
+        minimal.m
     }
 
     LocalFields
