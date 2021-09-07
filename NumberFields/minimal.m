@@ -12,7 +12,7 @@ intrinsic GeneralMinimalPolynomial(K::FldNum) -> RngUPolElt
 	return Determinant(M);
 end intrinsic;
 
-intrinsic MonogenicityPolynomial(K::FldNum) -> RngUPolElt
+intrinsic IndexFormMatrix(K::FldNum) -> RngUPolElt
 {}
 	R<[A]> := PolynomialRing(K,Degree(K));
 	S := PolynomialRing(Z,Degree(K));
@@ -28,7 +28,12 @@ intrinsic MonogenicityPolynomial(K::FldNum) -> RngUPolElt
 		Append(~M, row);
 	end for;
 
-	return Determinant(MatrixAlgebra(S,Degree(K))!M);
+	return MatrixAlgebra(S,Degree(K))!M;
+end intrinsic;
+
+intrinsic IndexForm(K::FldNum) -> RngUPolElt
+{}
+	return Determinant(IndexForm(K));
 end intrinsic;
 
 //http://dmat.cfm.cl/dmat/wp-content/uploads/2020/12/TesinaCarlosMunoz.pdf
