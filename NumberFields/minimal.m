@@ -30,3 +30,5 @@ intrinsic MonogenicityPolynomial(K::FldNum) -> RngUPolElt
 
 	return Determinant(MatrixAlgebra(S,Degree(K))!M);
 end intrinsic;
+
+//http://dmat.cfm.cl/dmat/wp-content/uploads/2020/12/TesinaCarlosMunoz.pdf
