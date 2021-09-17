@@ -242,6 +242,59 @@ intrinsic Etale257Unramified(p::RngIntElt
 	end if;
 end intrinsic;
 
+intrinsic Etale257Unramified2(p::RngIntElt) -> SeqEnum, SeqEnum, SeqEnum, SeqEnum
+{}
+	R<t> := PolynomialRing(GF(p));
+	psi := 25*t^3 + 20*t^2 + 14*t + 14;
+	phi := 4*t^5 * psi;
+
+	S<x> := PolynomialRing(pAdicField(p,500));
+	Phi := 10*x^4 + 4*x^3 + 2*x^2 + 2*x - 1;
+
+
+	Es := AssociativeArray();
+	for a in [2..(p-1)] do
+		par := {* Degree(f[1])^^f[2] : f in Factorization(phi - a * (4*t - 1)) *};
+		if IsDefined(Es, par) then
+			Append(~Es[par], GF(p)!a);
+		else
+			Es[par] := [GF(p)!a];
+		end if;
+	end for;
+
+	Es0 := AssociativeArray();
+	for a in [2..(p-1)] do
+		par := {* Degree(f[1])^^f[2] : f in Factorization(psi * (t^5 - a)) *};
+		if IsDefined(Es0, par) then
+			Append(~Es0[par], GF(p)!a);
+		else
+			Es0[par] := [GF(p)!a];
+		end if;
+	end for;
+
+	Es1 := AssociativeArray();
+	for a in [2..(p-1)] do
+		par := {* Degree(f[1])^^f[2] : f in Factorization(Phi^2 - a*p^2*(4*x-1)) *};
+		if IsDefined(Es1, par) then
+			Append(~Es1[par], GF(p)!a);
+		else
+			Es1[par] := [GF(p)!a];
+		end if;
+	end for;
+
+	Esoo := AssociativeArray();
+	for a in [2..(p-1)] do
+		par := {* Degree(f[1])^^f[2] : f in Factorization(t * (t^7 - a)) *};
+		if IsDefined(Esoo, par) then
+			Append(~Esoo[par], GF(p)!a);
+		else
+			Esoo[par] := [GF(p)!a];
+		end if;
+	end for;
+
+	return Es, Es0, Es1, Esoo;
+end intrinsic;
+
 intrinsic Etale257Other(p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false) -> SeqEnum
