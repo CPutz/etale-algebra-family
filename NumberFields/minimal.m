@@ -1,15 +1,22 @@
 Q := Rationals();
 Z := Integers();
 
-intrinsic GeneralMinimalPolynomial(K::FldNum) -> RngUPolElt
+intrinsic GeneralMinimalPolynomialMatrix(K::FldNum) -> RngUPolElt
 {}
 	R<[c]> := PolynomialRing(Q, Degree(K)-1);
 	S<x> := PolynomialRing(R);
 
-	Mrep := &+[c[i] * RepresentationMatrix(K.1^i) : i in [1..Degree(K)-1]];
+	B := IntegralBasis(K);
+
+	Mrep := &+[c[i] * RepresentationMatrix(B[i]) : i in [1..Degree(K)-1]];
 	M := IdentityMatrix(S,Degree(K)) * x - Mrep;
 
-	return Determinant(M);
+	return M;
+end intrinsic;
+
+intrinsic GeneralMinimalPolynomial(K::FldNum) -> RngUPolElt
+{}
+	return Determinant(GeneralMinimalPolynomialMatrix(K));
 end intrinsic;
 
 intrinsic IndexFormMatrix(K::FldNum) -> RngUPolElt
