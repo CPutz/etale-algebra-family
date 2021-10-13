@@ -6,6 +6,31 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::RngIntEl
 	p := Characteristic(Parent(x[1]));
 	RZ := RSpace(Z,7);
 	Rp := RSpace(GF(p),7);
+	MQ := MatrixAlgebra(Q,7);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	
+	for k := 1 to m do
+		Jx := Evaluate(JacobianMatrix(Eltseq(fs)), x);
+		b,Jxi := IsInvertible(Jx);
+		//assert b: "Jacobian matrix at p must be invertible";
+		assert b;
+		Jxi := Transpose(Jxi);
+
+		Zpe := Integers(p^(2^k));
+		Rpe := RSpace(Zpe, 7);
+		y := RZ!(-RSpace(Parent(x[1]),7)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1))) * Jxi);
+		x := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!y);
+	end for;
+
+	return x;
+end intrinsic;
+
+intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::RngIntElt) -> .
+{}
+	p := Characteristic(Parent(x[1]));
+	RZ := RSpace(Z,7);
+	Rp := RSpace(GF(p),7);
 	Mp := MatrixAlgebra(GF(p),7);
 
 	fs := RSpace(Parent(fs[1]), #fs)!fs;
@@ -20,7 +45,7 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::RngIntEl
 	for k := 2 to m do
 		Zpe := Integers(p^k);
 		Rpe := RSpace(Zpe, 7);
-		y := RZ!(Rp!-RSpace(Parent(x[1]),7)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1)) * Jxi);
+		y := RZ!(Rp!-(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1)) * Jxi);
 		x := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!y);
 	end for;
 
