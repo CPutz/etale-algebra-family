@@ -36,4 +36,9 @@
         257.m
         257_extra.m
     }
+
+    Belyi
+    {
+        padic.m
+    }
 }
