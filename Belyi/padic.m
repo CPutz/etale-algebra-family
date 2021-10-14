@@ -1,32 +1,86 @@
 Q := Rationals();
 Z := Integers();
 
-intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::RngIntElt) -> .
+intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIntElt) -> .
 {}
-	p := Characteristic(Parent(x[1]));
-	RZ := RSpace(Z,7);
-	Rp := RSpace(GF(p),7);
-	MQ := MatrixAlgebra(Q,7);
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	MQ := MatrixAlgebra(Q,n);
 
 	fs := RSpace(Parent(fs[1]), #fs)!fs;
 	
-	for k := 1 to m do
-		Jx := Evaluate(JacobianMatrix(Eltseq(fs)), x);
-		b,Jxi := IsInvertible(Jx);
-		//assert b: "Jacobian matrix at p must be invertible";
-		assert b;
-		Jxi := Transpose(Jxi);
+	xs := [x0];
 
-		Zpe := Integers(p^(2^k));
-		Rpe := RSpace(Zpe, 7);
-		y := RZ!(-RSpace(Parent(x[1]),7)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1))) * Jxi);
-		x := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!y);
+	for k := 1 to max do
+		xsnew := [];
+		for x in xs do
+			Zpe := Integers(p^(2^k));
+			Rpe := RSpace(Zpe,n);
+
+			Jx := Transpose(Evaluate(JacobianMatrix(Eltseq(fs)), x));
+			//inv,Jxi := IsInvertible(Jx);
+			
+			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1)));
+
+			if IsConsistent(Jx, target) then
+				y,Ker := Solution(Jx, target);
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
+					Append(~xsnew, xnew);
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
 	end for;
 
-	return x;
+	return xs;
 end intrinsic;
 
-intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::RngIntElt) -> .
+intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	Mp := RMatrixSpace(GF(p),n,m);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	
+	xs := [x0];
+	Jx := Mp!Transpose(Evaluate(JacobianMatrix(Eltseq(fs)), x0));
+	Kernel(Jx);
+	for k := 2 to max do
+		xsnew := [];
+		if k gt 8 then
+			xs := [xs[1]];
+		end if;
+		for x in xs do
+			Zpe := Integers(p^k);
+			Rpe := RSpace(Zpe,n);
+
+			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
+
+			if IsConsistent(Jx, target) then
+				y,Ker := Solution(Jx, target);
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
+					Append(~xsnew, xnew);
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
+intrinsic HenselLiftLinear2(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::RngIntElt) -> .
 {}
 	p := Characteristic(Parent(x[1]));
 	RZ := RSpace(Z,7);
@@ -37,8 +91,6 @@ intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::Rn
 
 	Jx := Mp!Evaluate(JacobianMatrix(Eltseq(fs)), x);
 	b,Jxi := IsInvertible(Jx);
-	//assert b: "Jacobian matrix at p must be invertible";
-	assert b;
 
 	Jxi := Transpose(Jxi);
 	
@@ -52,7 +104,19 @@ intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x::SeqEnum[FldFinElt], m::Rn
 	return x;
 end intrinsic;
 
-intrinsic Script257(p::RngIntElt, m::RngIntElt) -> .
+intrinsic FindAlgebraicRelation(a::., p::RngIntElt, n::RngIntElt, B::RngIntElt, N::RngIntElt) -> .
+{}
+	R := RMatrixSpace(Z, n+1, n+2);
+
+	//build matrix
+	M := R!0;
+	for i := 1 to n+1 do M[i][1] := N*Z!a^(n-i+1); end for;
+	for i := 1 to n+1 do M[i][i+1] := 1; end for;
+
+	return LLL(M, p, B, N);
+end intrinsic;
+
+intrinsic ExampleSijsling(p::RngIntElt, m::RngIntElt) -> .
 {}
 	R<a,b,c,d,e,f,g> := PolynomialRing(Z,7);
 	_<y> := PolynomialRing(R);
@@ -69,4 +133,50 @@ intrinsic Script257(p::RngIntElt, m::RngIntElt) -> .
 	Ps := RationalPoints(S);
 
 	return fs,HenselLift(fs, Eltseq(Ps[1]), m);
+end intrinsic;
+
+intrinsic ExampleRoberts2(p::RngIntElt, m::RngIntElt) -> .
+{}
+	R<a,b,c,d,e,f,x> := PolynomialRing(Z,7);
+	_<y> := PolynomialRing(R);
+
+	F := a * y^6 * (y-1)^4 * (y-x)^2;
+	G := (y-b)^3 * (y^2 + c*y + d)^2;
+	//H := a*(y^5 + e*y^4 + f*y^3 + g*y^2 + h*y + i)^2 * (y^2 + j*y + k);
+
+	Fd := Factorization(Derivative(F) * G - Derivative(G) * F)[7,1];
+	Fd;
+
+	fs := Coefficients(25 * (F - G) - a * Fd^2 * (y^2 + e*y + f));
+
+	A := AffineSpace(GF(p),7);
+	S := Scheme(A,fs);
+
+	Ps := RationalPoints(S);
+
+	return fs, Ps;
+end intrinsic;
+
+intrinsic Deg15(p::RngIntElt) -> .
+{}
+	R<a,b,c,d,e,f,g,h,i,j,x> := PolynomialRing(Z,11);
+	_<y> := PolynomialRing(R);	
+
+	F := a * y^5 * (y-1)^5 * (y-x)^5;
+	G := (y-b)^7*(y-c);
+
+	Fds := [fac[1] : fac in Factorization(Derivative(F)*G - Derivative(G)*F) |
+			Degree(fac[1]) eq 4 and fac[2] eq 1];
+	assert #Fds eq 1;
+	Fd := Fds[1];
+	cd := LeadingCoefficient(Fd);
+
+	fs := Coefficients(cd^2 * (F - G) - a * Fd^2 *
+			(y^7 + d*y^6 + e*y^5 + f*y^4 + g*y^3 + h*y^2 + i*y + j));
+	A := AffineSpace(GF(p),11);
+	S := Scheme(A, fs);
+
+	Ps := RationalPoints(S);
+
+	return fs, Ps;
 end intrinsic;

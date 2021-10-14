@@ -295,6 +295,24 @@ intrinsic Etale257Unramified2(p::RngIntElt) -> SeqEnum, SeqEnum, SeqEnum, SeqEnu
 	return Es, Es0, Es1, Esoo;
 end intrinsic;
 
+intrinsic Etale257Unramified3(p::RngIntElt) -> SetIndx
+{}
+	R<t> := PolynomialRing(GF(p));
+	psi := 25*t^3 + 20*t^2 + 14*t + 14;
+	phi := 4*t^5 * psi;
+
+	S<x> := PolynomialRing(pAdicField(p,500));
+	Phi := 10*x^4 + 4*x^3 + 2*x^2 + 2*x - 1;
+
+
+	Es := {@ {* Degree(f[1])^^f[2] : f in Factorization(phi - a * (4*t - 1)) *} : a in [2..(p-1)] @};
+
+	R<x> := PolynomialRing(Q);
+	f := x^8 + 2*x^7 + 84*x^5 - 700*x^4 - 2800*x^3 + 11760*x^2 + 18720*x - 61330;
+
+	return FactorizationPartition(f,p) in Es;
+end intrinsic;
+
 intrinsic Etale257Other(p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false) -> SeqEnum
