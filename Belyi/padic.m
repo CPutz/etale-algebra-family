@@ -1,6 +1,15 @@
 Q := Rationals();
 Z := Integers();
 
+function lifts(fs, x, J, p);
+	vfx := Min([Valuation(Evaluate(f,x),p) : f in fs]);
+	vJ := Valuation(Determinant(J),p);
+	if vJ lt vfx then
+		vfx, vJ;
+	end if;
+	return vJ lt vfx;
+end function;
+
 intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIntElt) -> .
 {}
 	n := #x0;
@@ -11,7 +20,8 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIn
 	MQ := MatrixAlgebra(Q,n);
 
 	fs := RSpace(Parent(fs[1]), #fs)!fs;
-	
+	J := JacobianMatrix(Eltseq(fs));
+
 	xs := [x0];
 
 	for k := 1 to max do
@@ -20,7 +30,7 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIn
 			Zpe := Integers(p^(2^k));
 			Rpe := RSpace(Zpe,n);
 
-			Jx := Transpose(Evaluate(JacobianMatrix(Eltseq(fs)), x));
+			Jx := Transpose(Evaluate(J, x));
 			//inv,Jxi := IsInvertible(Jx);
 			
 			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1)));
@@ -31,6 +41,47 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIn
 					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
 					Append(~xsnew, xnew);
 				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
+intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
+	xs0::SeqEnum, pstart::RngIntElt, max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	MQ := MatrixAlgebra(Q,n);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	J := JacobianMatrix(Eltseq(fs));
+
+	xs := xs0;
+
+	for k := 1 to max do
+		xsnew := [];
+		for x in xs do
+			Zpe := Integers(p^(pstart*2^k));
+			Rpe := RSpace(Zpe,n);
+
+			Jx := Transpose(Evaluate(J, x));
+			
+			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(pstart*2^(k-1)));
+
+			if IsConsistent(Jx, target) then
+				Append(~xsnew, x);
+				/*y,Ker := Solution(Jx, target);
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(pstart*2^(k-1))*Rpe!RZ!(y+y0));
+					Append(~xsnew, xnew);
+				end for;*/
 			end if;
 		end for;
 		xs := xsnew;
@@ -54,11 +105,113 @@ intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max:
 	xs := [x0];
 	Jx := Mp!Transpose(Evaluate(JacobianMatrix(Eltseq(fs)), x0));
 	Kernel(Jx);
+
+
 	for k := 2 to max do
 		xsnew := [];
-		if k gt 8 then
-			xs := [xs[1]];
-		end if;
+		for x in xs do
+			Zpe := Integers(p^k);
+			Rpe := RSpace(Zpe,n);
+
+			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
+
+			if IsConsistent(Jx, target) then
+				y,Ker := Solution(Jx, target);
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
+					Append(~xsnew, xnew);
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
+intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
+	xs0::SeqEnum, pstart::RngIntElt, max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	Mp := RMatrixSpace(GF(p),n,m);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	
+	xs := xs0;
+	Jx := Mp!Transpose(Evaluate(JacobianMatrix(Eltseq(fs)), x0));
+	Kernel(Jx);
+
+
+	for k := pstart+1 to max do
+		xsnew := [];
+		for x in xs do
+			Zpe := Integers(p^k);
+			Rpe := RSpace(Zpe,n);
+
+			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
+
+			if IsConsistent(Jx, target) then
+				y,Ker := Solution(Jx, target);
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
+					Append(~xsnew, xnew);
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
+intrinsic HenselLiftHybrid(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
+		swit::RngIntElt, max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	MQ := MatrixAlgebra(Q,n);
+	Mp := RMatrixSpace(GF(p),n,m);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	J := JacobianMatrix(Eltseq(fs));
+
+	xs := [x0];
+
+	for k := 1 to swit do
+		xsnew := [];
+		for x in xs do
+			Zpe := Integers(p^(2^k));
+			Rpe := RSpace(Zpe,n);
+
+			Jx := Transpose(Evaluate(J, x));
+			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1)));
+
+			if IsConsistent(Jx, target) then
+				y,Ker := Solution(Jx, target);
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
+					Append(~xsnew, xnew);
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	Jx := Mp!Transpose(Evaluate(JacobianMatrix(Eltseq(fs)), x0));
+	Kernel(Jx);
+
+	for k := 2^swit+1 to max do
+		xsnew := [];
 		for x in xs do
 			Zpe := Integers(p^k);
 			Rpe := RSpace(Zpe,n);
@@ -179,4 +332,31 @@ intrinsic Deg15(p::RngIntElt) -> .
 	Ps := RationalPoints(S);
 
 	return fs, Ps;
+end intrinsic;
+
+function trans(f);
+	_<y> := Parent(f);
+	return ReciprocalPolynomial(Evaluate(ReciprocalPolynomial(f), 7*y));
+end function;
+
+intrinsic Deg153(p::RngIntElt) -> .
+{}
+	R<a,b,c,x> := PolynomialRing(Z,4);
+	_<y> := PolynomialRing(R);	
+
+	F := a * y^5 * (y-1)^5 * (y-x)^5;
+	G := (y-b)^7*(y-c);
+
+	Fds := [fac[1] : fac in Factorization(Derivative(F)*G - Derivative(G)*F) |
+			Degree(fac[1]) eq 4 and fac[2] eq 1];
+	assert #Fds eq 1;
+	Fd := Fds[1];
+
+	fs := Coefficients(trans(F-G) mod (trans(Fd) div 7));
+	A := AffineSpace(GF(p),4);
+	S := Scheme(A, fs);
+
+	//Ps := RationalPoints(S);
+
+	return fs;
 end intrinsic;
