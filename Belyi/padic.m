@@ -35,12 +35,17 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIn
 			
 			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1)));
 
-			if IsConsistent(Jx, target) then
-				y,Ker := Solution(Jx, target);
-				for y0 in Ker do
-					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
+				if Dimension(Ker) eq 0 then
+					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y));
 					Append(~xsnew, xnew);
-				end for;
+				else
+					for y0 in Ker do
+						xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
+						Append(~xsnew, xnew);
+					end for;
+				end if;
 			end if;
 		end for;
 		xs := xsnew;
@@ -115,8 +120,8 @@ intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max:
 
 			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
 
-			if IsConsistent(Jx, target) then
-				y,Ker := Solution(Jx, target);
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
 				for y0 in Ker do
 					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
 					Append(~xsnew, xnew);
@@ -155,8 +160,8 @@ intrinsic HenselLiftLinear(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
 
 			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
 
-			if IsConsistent(Jx, target) then
-				y,Ker := Solution(Jx, target);
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
 				for y0 in Ker do
 					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
 					Append(~xsnew, xnew);
@@ -195,8 +200,8 @@ intrinsic HenselLiftHybrid(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
 			Jx := Transpose(Evaluate(J, x));
 			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1)));
 
-			if IsConsistent(Jx, target) then
-				y,Ker := Solution(Jx, target);
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
 				for y0 in Ker do
 					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
 					Append(~xsnew, xnew);
@@ -218,11 +223,102 @@ intrinsic HenselLiftHybrid(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
 
 			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
 
-			if IsConsistent(Jx, target) then
-				y,Ker := Solution(Jx, target);
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
 				for y0 in Ker do
 					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
 					Append(~xsnew, xnew);
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
+intrinsic HenselLiftHybridFilter(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
+	max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	Mp := RMatrixSpace(GF(p),n,m);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	
+	xs := [x0];
+	J := Transpose(JacobianMatrix(Eltseq(fs)));
+	Jx := Mp!Evaluate(J, x0);
+	Kernel(Jx);
+
+
+	for k := 2 to max do
+		xsnew := [];
+		Zpe := Integers(p^k);
+		Rpe := RSpace(Zpe,n);
+		for x in xs do
+			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
+
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
+					//if IsOdd(k) then
+						Jx2 := Evaluate(J, xnew);
+						target2 := -Rpe!(Evaluate(fs, Eltseq(RZ!xnew)) div p^k);
+						if IsConsistent(Jx2, target2) then
+							Append(~xsnew, xnew);
+						end if;
+					//else
+					//	Append(~xsnew, xnew);
+					//end if;
+				end for;
+			end if;
+		end for;
+		xs := xsnew;
+		#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
+intrinsic HenselLiftFilter(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(Z,n);
+	Rp := RSpace(GF(p),n);
+	MQ := MatrixAlgebra(Q,n);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	J := JacobianMatrix(Eltseq(fs));
+
+	xs := [x0];
+
+	for k := 1 to max do
+		xsnew := [];
+		for x in xs do
+			Zpe := Integers(p^(2^k));
+			Rpe := RSpace(Zpe,n);
+
+			Jx := Transpose(Evaluate(J, x));
+			
+			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(2^(k-1)));
+
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
+				for y0 in Ker do
+					xnew := Eltseq(Rpe!RZ!x + p^(2^(k-1))*Rpe!RZ!(y+y0));
+					target2 := -RSpace(Parent(xnew[1]),m)!(Evaluate(fs, Eltseq(RZ!xnew)) div p^(2^k));
+					Jx2 := Transpose(Evaluate(J, xnew));
+					if IsConsistent(Jx2, target2) then
+						Append(~xsnew, xnew);
+					end if;
 				end for;
 			end if;
 		end for;
@@ -334,9 +430,28 @@ intrinsic Deg15(p::RngIntElt) -> .
 	return fs, Ps;
 end intrinsic;
 
+intrinsic Deg152(p::RngIntElt) -> .
+{}
+	R<a,b,c,d,e,f,g,h,i,j,k,l,m,n,x> := PolynomialRing(Z,15);
+	_<y> := PolynomialRing(R);	
+
+	F := a * y^5 * (y-1)^5 * (y-x)^5;
+	G := (y-b)^7*(y-c);
+	H := a * (y^4 + k*y^3 + l*y^2 + m*y + n)^2 * (y^7 + d*y^6 + e*y^5 + f*y^4 + g*y^3 + h*y^2 + i*y + j);
+
+	fs := Coefficients(F - G - H);
+
+	A := AffineSpace(GF(p),15);
+	S := Scheme(A, fs);
+
+	Ps := RationalPoints(S);
+
+	return fs, Ps;
+end intrinsic;
+
 function trans(f);
 	_<y> := Parent(f);
-	return ReciprocalPolynomial(Evaluate(ReciprocalPolynomial(f), 7*y));
+	return ReciprocalPolynomial(Evaluate(ReciprocalPolynomial(f),7*y));
 end function;
 
 intrinsic Deg153(p::RngIntElt) -> .
@@ -354,6 +469,7 @@ intrinsic Deg153(p::RngIntElt) -> .
 
 	fs := Coefficients(trans(F-G) mod (trans(Fd) div 7));
 	A := AffineSpace(GF(p),4);
+
 	S := Scheme(A, fs);
 
 	//Ps := RationalPoints(S);
