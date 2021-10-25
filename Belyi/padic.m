@@ -49,7 +49,7 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIn
 			end if;
 		end for;
 		xs := xsnew;
-		#xs;
+		//#xs;
 	end for;
 
 	return xs;
@@ -260,6 +260,7 @@ intrinsic HenselLiftHybridFilter(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt]
 		xsnew := [];
 		Zpe := Integers(p^k);
 		Rpe := RSpace(Zpe,n);
+		Rpem := RSpace(Zpe,m);
 		for x in xs do
 			target := -RSpace(GF(p),m)!(Evaluate(fs, Eltseq(RZ!x)) div p^(k-1));
 
@@ -269,7 +270,7 @@ intrinsic HenselLiftHybridFilter(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt]
 					xnew := Eltseq(Rpe!RZ!x + p^(k-1)*Rpe!RZ!(y+y0));
 					//if IsOdd(k) then
 						Jx2 := Evaluate(J, xnew);
-						target2 := -Rpe!(Evaluate(fs, Eltseq(RZ!xnew)) div p^k);
+						target2 := -Rpem!(Evaluate(fs, Eltseq(RZ!xnew)) div p^k);
 						if IsConsistent(Jx2, target2) then
 							Append(~xsnew, xnew);
 						end if;
@@ -384,7 +385,7 @@ intrinsic ExampleSijsling(p::RngIntElt, m::RngIntElt) -> .
 	return fs,HenselLift(fs, Eltseq(Ps[1]), m);
 end intrinsic;
 
-intrinsic ExampleRoberts2(p::RngIntElt, m::RngIntElt) -> .
+intrinsic ExampleRoberts2(p::RngIntElt) -> .
 {}
 	R<a,b,c,d,e,f,x> := PolynomialRing(Z,7);
 	_<y> := PolynomialRing(R);
@@ -398,12 +399,12 @@ intrinsic ExampleRoberts2(p::RngIntElt, m::RngIntElt) -> .
 
 	fs := Coefficients(25 * (F - G) - a * Fd^2 * (y^2 + e*y + f));
 
-	A := AffineSpace(GF(p),7);
-	S := Scheme(A,fs);
+	//A := AffineSpace(GF(p),7);
+	//S := Scheme(A,fs);
 
-	Ps := RationalPoints(S);
+	//Ps := RationalPoints(S);
 
-	return fs, Ps;
+	return fs;
 end intrinsic;
 
 intrinsic Deg15(p::RngIntElt) -> .
@@ -475,4 +476,78 @@ intrinsic Deg153(p::RngIntElt) -> .
 	//Ps := RationalPoints(S);
 
 	return fs;
+end intrinsic;
+
+intrinsic Deg154() -> .
+{}
+	R<a,b,c,x> := PolynomialRing(Q,4);
+	_<y> := PolynomialRing(R);	
+
+	F := a * y^5 * (y-1)^5 * (y-x)^5;
+	G := (y-b)^7*(y-c);
+
+	Fds := [fac[1] : fac in Factorization(Derivative(F)*G - Derivative(G)*F) |
+			Degree(fac[1]) eq 4 and fac[2] eq 1];
+	assert #Fds eq 1;
+	Fd := Fds[1];
+
+	fs := Coefficients((F-G) mod Fd);
+
+	d := LCM([Denominator(r) : r in Coefficients(f), f in fs]);
+	d2 := LCM([Denominator(r) : r in Coefficients(f), f in Coefficients(Fd)]);
+
+	RZ<a,b,c,x> := PolynomialRing(Z,4);
+
+	return [RZ!(d*f) : f in fs],PolynomialRing(RZ)!(d2*Fd);
+end intrinsic;
+
+intrinsic Deg15Solution(p::RngIntElt) -> .
+{}
+	fs,Fd := Deg154();
+	_<a,b,c,x> := Parent(fs[1]);
+	disc := Discriminant(Fd);
+	fs2 := [fs[1] div (b*c)] cat fs[[2..#fs]];
+	
+
+	Rp := RSpace(GF(p),4);
+	time Ps := [r : r in Rp | forall {f : f in fs2 |
+		Evaluate(f,Eltseq(r)) eq 0}];
+	J := Transpose(JacobianMatrix(fs2));
+
+	good := [r : r in Ps | Dimension(Kernel(Evaluate(J,Eltseq(r)))) eq 0];
+
+	sols := [];
+	"number of good solutions", #good;
+	for r in good do
+		lift := HenselLift(fs2, Eltseq(r), 10)[1];
+		if Evaluate(disc, Eltseq(lift)) ne 0 and
+			lift[3] ne 1 and lift[3] ne lift[4] then
+			Append(~sols, lift);
+		end if;
+	end for;
+
+	return sols;
+end intrinsic;
+
+//F := a * y^6 * (y-1)^4 * (y-x)^2;
+//G := (y-b)^3 * (y^2 + c*y + d)^2;
+intrinsic Roberts2Solution(p::RngIntElt) -> .
+{}
+	fs := ExampleRoberts2(p);
+	_<a,b,c,d,e,f,x> := Parent(fs[1]);
+
+	Rp := RSpace(GF(p),7);
+	time Ps := [r : r in Rp | forall {f : f in fs | Evaluate(f,Eltseq(r)) eq 0}];
+	J := Transpose(JacobianMatrix(fs));
+
+	good := [r : r in Ps | Dimension(Kernel(Evaluate(J,Eltseq(r)))) eq 0];
+
+	sols := [];
+	"number of good solutions", #good;
+	for r in good do
+		lift := HenselLift(fs, Eltseq(r), 10);
+		Append(~sols,lift);
+	end for;
+
+	return sols;
 end intrinsic;
