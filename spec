@@ -34,7 +34,8 @@
         235.m
         7sqrt5.m
         257.m
-        257_extra.m
+        257_degree7.m
+        parameter.m
     }
 
     Belyi
