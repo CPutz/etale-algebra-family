@@ -169,3 +169,26 @@ Ext;
 
      return discs;
 end intrinsic;
+
+
+intrinsic Etale257Unramified_degree7(p::RngIntElt, B::SeqEnum) -> SeqEnum
+{}
+     Qp := pAdicField(p,500);
+     R<t> := PolynomialRing(Qp);
+     K<a> := QuadraticField(21);
+
+     for P in Decomposition(K,p) do
+          P;
+          Kp,phi := Completion(K,P[1]);
+          T<x> := PolynomialRing(Kp);
+          S<s> := PolynomialRing(T);
+          b := phi(a);
+          F := x^5 * (378 + 84*b + (-315 - 70*b)*x + (960 + 210*b)*x^2) - 9*s;
+          
+          for c in B do
+               {* Degree(f[1])^^f[2] : f in (Factorization(Evaluate(F,c))) *};
+          end for;
+     end for;
+
+     return [];
+end intrinsic;
