@@ -1,3 +1,5 @@
+Z := Integers();
+
 intrinsic Etale257Degree7(p::RngIntElt
      : D := LocalFieldDatabase(),
        Neighbourhoods := false) -> SeqEnum
@@ -156,17 +158,22 @@ intrinsic FindDiscriminant7() -> .
      discs := {@ @};
      Cs := [a/7^(7*k) : k in [1..3], a in [0..7^3] | a mod 7 ne 0] cat
                [a : a in [0..7^3] | a mod 7 eq 4 and a mod 49 ne 32];
-
+     Cs0 := [];
      for c in Cs do
           _,_,Ext := Factorization(Evaluate(F, c) : Extensions := true);
-Ext;
+
           disc := 0;
           for E in Ext do
-               disc +:= Valuation(Discriminant(E`Extension, K));
+               disc +:= Valuation(Discriminant(E`Extension, Qp));
           end for;
+
+          if disc eq 11 then
+               Append(~Cs0,c);
+          end if;
           Include(~discs, disc);
      end for;
 
+<<<<<<< Updated upstream
      return discs;
 end intrinsic;
 
@@ -191,4 +198,96 @@ intrinsic Etale257Unramified_degree7(p::RngIntElt, B::SeqEnum) -> SeqEnum
      end for;
 
      return [];
+=======
+     return discs,Cs0;
+end intrinsic;
+
+intrinsic Etale257_degree7(p::RngIntElt) -> .
+{}
+     Qp := pAdicField(p,500);
+     Zp := pAdicRing(p,100);
+     R<t> := PolynomialRing(Qp);
+     S<s> := PolynomialRing(R);
+     F := (27*s^2 - 2268*s*t^5 + 1890*s*t^6 - 5760*s*t^7 - 1764*t^10 +
+          2940*t^11 - 6265*t^12 + 4200*t^13 - 1500*t^14) / 27;
+
+     if p eq 7 then
+          Cs := [a/7^(7*k) : k in [1..3], a in [0..7^3] | a mod 7 ne 0] cat
+               [a : a in [0..7^3] | a mod 7 eq 4 and a mod 49 ne 32];
+     elif p eq 5 then
+          Cs := [a * 5^(5*k) : k in [1..3], a in [0..5^3] | a mod 5 ne 0];
+     elif p eq 3 then
+          Cs := [a/3^(7*k) : k in [1..3], a in [0..3^5] | a mod 3 eq 2];
+     elif p eq 2 then
+          Cs := [1 - (1+8*a)*2^(2*k) : k in [2..5], a in [0..2^3]] cat [1 - (20 + 2^5*a) : a in [0..2^3]];
+     else
+          Cs := [];
+     end if;
+//Cs := Cs0;
+#Cs;
+     Es := {@ @};
+
+     for c in Cs do
+          fac := Factorization(Evaluate(F, c));
+          time Esi := [<Components(EtaleAlgebra(f[1]))[1,1], f[2]> : f in fac];
+          
+          /*Esinew := [];
+          for i := 1 to #Esi do
+               Ei := Esi[i];
+               if Degree(Ei[1],Zp) eq 2 then
+               //     Append(~Esinew,<UnramifiedExtension(B,1), Esi[i,2]>);
+               //     BaseRing(Esinew[#Esinew][1]) eq B;
+               else
+                    Append(~Esinew, Ei);
+               end if;
+          end for;*/
+
+          E := EtaleAlgebra(Esi);
+          E;
+          //time E := EtaleAlgebra(Evaluate(F,c));
+          Include(~Es, E);
+     end for;
+
+     return Es;
+end intrinsic;
+
+
+intrinsic Etale257_degree7_7() -> .
+{}
+     Q7 := pAdicField(7,500);
+     S<s> := PolynomialRing(Q7);
+     K2<a> := ext<Q7 | s^2 - 21>;
+     R<t> := PolynomialRing(K2);
+     phi := t^5 * ((960 + 210*a)*t^2 - (315 + 70*a)*t + (378 + 84*a)) / 9;
+
+     Cs := [a/7^7 : a in [0..7^2-1] | a mod 7 ne 0] cat
+          [a : a in [0..7^2-1] | a mod 7 eq 4];
+     
+     _,_,Ext1 := Factorization(t^7 - 5 : Extensions := true);
+     E1 := Ext1[1]`Extension;
+     E2a := ext<K2 | t^3 - 3*a>;
+     Es := {@ @};
+
+     for c in Cs do
+          fac,_,ext := Factorization(phi - c : Extensions := true);
+          if #fac eq 1 then
+               if not IsIsomorphic(ext[1]`Extension,E1) then
+                    c;
+               end if;
+          else
+               if #fac ne 3 then
+                    c;
+               end if;
+               for i := 1 to 3 do
+                    if Degree(fac[i,1]) ne 1 then
+                         if not IsIsomorphic(ext[i]`Extension,E2a) then
+                              c;
+                         end if;
+                    end if;
+               end for;
+          end if;
+     end for;
+
+     return 0;
+>>>>>>> Stashed changes
 end intrinsic;
