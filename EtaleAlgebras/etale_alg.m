@@ -300,6 +300,154 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 	return E;
 end intrinsic;
 
+
+
+
+
+intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Precision := 500,
+	  Filter := Integers(1)!0) -> SeqEnum
+{}
+	R := Parent(F); //Z[s][t] or Q[s][t]
+	S := BaseRing(R); //Z[s] or Q[s]
+	//require ISA(Type(BaseRing(S)), RngInt) or ISA(Type(BaseRing(S)), FldRat):
+	//	"Argument 1 must be defined over Z or Q";
+	//require ISA(Type(BaseRing(S)), FldRat): "Argument 1 must be defined over Q";
+
+	s := S.1;
+	t := R.1;
+	K := BaseRing(S);
+	OK := Integers(K);
+	X := pAdicNbhds(K);
+	pi := K!p;
+
+	//TODO: make monic and integral
+	lc := LeadingCoefficient(LeadingCoefficient(F));
+	F /:= lc; //creates rounding errors
+	while exists {cs : cs in Coefficients(ct), ct in Coefficients(F) | Valuation(cs) lt 0} do
+		F := p^Degree(F) * Evaluate(F, t/p);
+	end while;
+
+	vprintf EtaleAlg: "computing discriminant\n";
+	disc := Discriminant(F);
+	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
+
+	SK<sK> := PolynomialRing(K);
+	RK<tK> := PolynomialRing(SK);
+	FK := RK!F;
+
+	OKp := quo<OK | pi^Precision>;
+	SOKp := PolynomialRing(OKp);
+	ROKp := PolynomialRing(SOKp);
+	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
+	Nbhds_oo := [];
+
+	for r in roots do
+		// Evaluate F at s = r
+		f := Evaluate(SwitchVariables(FK), r);
+		// The coefficient of s in F
+		g := Coefficient(SwitchVariables(FK), 1);
+
+		fs,unit := Factorization(f);
+		f_hats := [f div fi[1]^fi[2] : fi in fs];
+
+		c,cs := XGCD(f_hats);
+		min_val := Min([Valuation(ci) : ci in Coefficients(c), c in cs] cat [0]);
+		c *:= pi^min_val;
+		cs := [pi^min_val * c : c in cs];
+		cs := [LeadingCoefficient(c) : c in cs];
+
+		//assert that sum_i cs[i] * f_hats[i] = d
+		d := c;
+		assert forall {c : c in Coefficients(c - &+[fc[1]*fc[2] : fc in Zip(cs, f_hats)]) | K!0 in c};
+
+		//TODO: is this assumption needed?
+		//assert that d is the constant 1
+		assert K!0 in (unit - 1);
+		assert Degree(d) eq 0;
+		d := ConstantCoefficient(d);
+		assert K!0 in (d - 1);
+
+		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
+
+		// Construction of the Fi = fi^ki + s*ri
+		Fis := [Evaluate(fr[1][1]^fr[1][2], tK) + sK * Evaluate(fr[2], tK) : fr in Zip(fs, rs)];
+
+		// Translate the variable s in F by r
+		F_r := SwitchVariables(Evaluate(SwitchVariables(F), t + r));
+
+		bound := 0;
+		for i := 1 to #fs do
+			fi := fs[i][1];
+			ki := fs[i][2];
+			ri := rs[i] / cs[i];
+			fi;
+			sigf := Separant(fi);
+			sigfr := Separant(fi, ri);
+
+		end for;
+
+		Append(~Nbhds_disc, r + O(pi^bound));
+
+		k := LCM([fi[2] : fi in fs]);
+		vprintf EtaleAlg: "k = %o\n", k;
+		v := k * Ceiling(bound / k);
+		v_power := 2*Valuation(K!k) + 1;
+		OKmOKk := quo<OK | pi^v_power>; // OK / (OK)^k
+		// representatives for OK* / (OK*)^k would be sufficient here
+		//TODO: something separate with 0 here...?
+		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKp!r, (K!c) * pi^(v + w), k) : c in OKmOKk, w in [0..k-1]];
+	end for;
+
+	vprintf EtaleAlg: "computing nbhds\n";
+
+	//gen_sep_K := RK!SwitchVariables(gen_sep);
+	//min_val_s := Min([Valuation(cs, p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
+
+	// Split up in neighborhoods
+	Nbhds := [O(K!1)];
+	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
+	repeat
+		Nbhds_new := [];
+		for N in Nbhds do
+			if exists { Nd : Nd in Nbhds_disc | Nd in N } then
+				Nbhds_new cat:= Subdivide(N, AbsolutePrecision(N) + 1);
+			else
+				/*vals := ValuationsOfRoots(Evaluate(gen_sep_K, N));
+				mu := Sup([v[1] : v in vals]) - min_val_s;
+
+				if mu lt AbsolutePrecision(N) then
+					Append(~Nbhds_end, N);
+				elif exists { Nd : Nd in Nbhds_disc | N in Nd } then
+					//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
+				else //if sep lt Infinity() then
+					Nbhds_new cat:= Subdivide(N, Floor(mu + 1));
+				end if;*/
+			end if;
+		end for;
+		Nbhds := Nbhds_new;
+
+		// Filter
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKp!N, pi^AbsolutePrecision(N), 1), Filter)];
+	until IsEmpty(Nbhds);
+
+	// Add neighborhoods around the roots of the discriminant
+	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKp!n, pi^AbsolutePrecision(n), 1) : n in Nbhds_end];
+
+	// Filter neighborhoods
+	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
+
+	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
+	E := EtaleAlgebraListIsomorphism2(F, Nbhds : D := D);
+
+	return E;
+end intrinsic;
+
+
+
+
+
 intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 {}
 	r := AbsolutePrecision(x);
