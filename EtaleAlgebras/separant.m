@@ -112,3 +112,19 @@ intrinsic SeparantMPol(f::RngMPolElt, g::RngMPolElt, v::MPolElt) -> .
 	//return SwitchVariables(ConstantCoefficient(res));
 	return ConstantCoefficient(res);
 end intrinsic;
+
+intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt
+{}
+	R := BaseRing(Parent(f));
+	S<e> := PolynomialRing(R);
+	T<x> := PolynomialRing(S);
+	df := Derivative(f);
+	res := S!Resultant(e - Evaluate(df, x) * Evaluate(g, x), Evaluate(f, x));
+
+	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
+	d := Degree(GCD(f,g));
+	res := res div e^d;
+
+	m, _ := k * Valuation(R!k) + Sup([v[1] : v in ValuationsOfRoots(res)]);
+	return m;
+end intrinsic;

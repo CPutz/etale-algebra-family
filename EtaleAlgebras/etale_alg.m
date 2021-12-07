@@ -331,7 +331,8 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 
 	vprintf EtaleAlg: "computing discriminant\n";
 	disc := Discriminant(F);
-	roots := [r[1] : r in Roots(disc, K) | IsIntegral(r[1])];
+	vd0 := Valuation(LeadingCoefficient(disc));
+	roots := [r[1] : r in Roots(disc div pi^vd0, K) | IsIntegral(r[1])];
 
 	SK<sK> := PolynomialRing(K);
 	RK<tK> := PolynomialRing(SK);
@@ -342,6 +343,9 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 	ROKp := PolynomialRing(SOKp);
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
+
+	//TODO: fix this
+	roots := [ChangePrecision(r, Precision) : r in roots];
 
 	for r in roots do
 		// Evaluate F at s = r
@@ -354,20 +358,20 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 
 		c,cs := XGCD(f_hats);
 		min_val := Min([Valuation(ci) : ci in Coefficients(c), c in cs] cat [0]);
-		c *:= pi^min_val;
+		d := c * pi^min_val;
 		cs := [pi^min_val * c : c in cs];
-		cs := [LeadingCoefficient(c) : c in cs];
+		//cs := [LeadingCoefficient(c) : c in cs];
 
 		//assert that sum_i cs[i] * f_hats[i] = d
-		d := c;
-		assert forall {c : c in Coefficients(c - &+[fc[1]*fc[2] : fc in Zip(cs, f_hats)]) | K!0 in c};
+		assert forall {c : c in Coefficients(d - &+[fc[1]*fc[2] : fc in Zip(cs, f_hats)]) | K!0 in c};
 
 		//TODO: is this assumption needed?
 		//assert that d is the constant 1
 		assert K!0 in (unit - 1);
 		assert Degree(d) eq 0;
 		d := ConstantCoefficient(d);
-		assert K!0 in (d - 1);
+		assert Valuation(d) le 0;
+		//assert K!0 in (d - 1);
 
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
 
@@ -381,12 +385,22 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 		for i := 1 to #fs do
 			fi := fs[i][1];
 			ki := fs[i][2];
-			ri := rs[i] / cs[i];
-			fi;
+			ri := rs[i] / d;
+			min_val_s := Min([Valuation(cs) : cs in Coefficients(ri)]);
+			ri := ri / pi^min_val_s;
+			Fi := SwitchVariables(fi^ki - tK*ri);
+			disci := Discriminant(Fi);
+
+			ci := Valuation(ki * LeadingCoefficient(fi) * Coefficient(disci, Degree(Fi) - Degree(fi)));
 			sigf := Separant(fi);
 			sigfr := Separant(fi, ri);
+			bi := StabilityBound(fi, ri, ki);
+			boundi := Max([ki*sigf, ki*sigfr, bi, ci]) - min_val_s;
 
+			bound := Max(bound, boundi);
 		end for;
+		vprintf EtaleAlg: "bound = %o\n", bound;
+		bound := Ceiling(bound);
 
 		Append(~Nbhds_disc, r + O(pi^bound));
 
@@ -403,27 +417,30 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::RngIntElt
 	vprintf EtaleAlg: "computing nbhds\n";
 
 	//gen_sep_K := RK!SwitchVariables(gen_sep);
-	//min_val_s := Min([Valuation(cs, p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
+	min_val_s := Min([Valuation(cs) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
 	// Split up in neighborhoods
 	Nbhds := [O(K!1)];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
 	repeat
 		Nbhds_new := [];
+		//Separant(PolynomialRing(Q)!Evaluate(SwitchVariables(F), Nbhds[1]), p) - min_val_s;
 		for N in Nbhds do
 			if exists { Nd : Nd in Nbhds_disc | Nd in N } then
 				Nbhds_new cat:= Subdivide(N, AbsolutePrecision(N) + 1);
 			else
-				/*vals := ValuationsOfRoots(Evaluate(gen_sep_K, N));
-				mu := Sup([v[1] : v in vals]) - min_val_s;
+				//vals := ValuationsOfRoots(Evaluate(gen_sep_K, N));
+				FN := Evaluate(SwitchVariables(F), N);
+				//sig := Separant(FN);
+				sig := Separant(PolynomialRing(Q)!FN, p) - min_val_s;
 
-				if mu lt AbsolutePrecision(N) then
+				if sig lt AbsolutePrecision(N) then
 					Append(~Nbhds_end, N);
 				elif exists { Nd : Nd in Nbhds_disc | N in Nd } then
 					//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 				else //if sep lt Infinity() then
-					Nbhds_new cat:= Subdivide(N, Floor(mu + 1));
-				end if;*/
+					Nbhds_new cat:= Subdivide(N, Floor(sig + 1));
+				end if;
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
