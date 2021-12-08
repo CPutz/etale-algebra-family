@@ -55,6 +55,51 @@ intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIn
 	return xs;
 end intrinsic;
 
+intrinsic HenselLiftQp(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt], max::RngIntElt) -> .
+{}
+	n := #x0;
+	m := #fs;
+	p := Characteristic(Parent(x0[1]));
+	RZ := RSpace(UnramifiedExtension(pAdicField(p,1024),2),n);
+	Rp := RSpace(GF(p),n);
+	MQ := MatrixAlgebra(Q,n);
+
+	fs := RSpace(Parent(fs[1]), #fs)!fs;
+	J := JacobianMatrix(Eltseq(fs));
+
+	xs := [x0];
+
+	for k := 1 to max do
+		xsnew := [];
+		for x in xs do
+			Zpe := Integers(p^(2^k));
+			Rpe := RSpace(Zpe,n);
+
+			Jx := Transpose(Evaluate(J, x));
+			//inv,Jxi := IsInvertible(Jx);
+			
+			target := -RSpace(Parent(x[1]),m)!(Evaluate(fs, Eltseq(RZ!x)) / p^(2^(k-1)));
+
+			hassol, y, Ker := IsConsistent(Jx, target);
+			if hassol then
+				if Dimension(Ker) eq 0 then
+					xnew := Eltseq(RZ!x + p^(2^(k-1))*RZ!(y));
+					Append(~xsnew, xnew);
+				else
+					for y0 in Ker do
+						xnew := Eltseq(RZ!x + p^(2^(k-1))*RZ!(y+y0));
+						Append(~xsnew, xnew);
+					end for;
+				end if;
+			end if;
+		end for;
+		xs := xsnew;
+		//#xs;
+	end for;
+
+	return xs;
+end intrinsic;
+
 intrinsic HenselLift(fs::SeqEnum[RngMPolElt], x0::SeqEnum[FldFinElt],
 	xs0::SeqEnum, pstart::RngIntElt, max::RngIntElt) -> .
 {}
@@ -366,6 +411,24 @@ intrinsic FindAlgebraicRelation(a::., p::RngIntElt, n::RngIntElt, B::RngIntElt, 
 	return LLL(M, p, B, N);
 end intrinsic;
 
+intrinsic FindAlgebraicRelation2(a::., p::RngIntElt, n::RngIntElt, B::RngIntElt, N::RngIntElt) -> .
+{}
+	R := RMatrixSpace(Z, 2*(n+1)-1, 2*(n+1));
+
+	//build matrix
+	M := R!0;
+	for i := 1 to n+1 do
+		as := [N*Z!ai : ai in Eltseq(a^(n-i+1))];
+		M[2*i-1][1] := as[1];
+		if i ne n+1 then
+			M[2*i][1] := as[2];
+		end if;		
+	end for;
+	for i := 1 to 2*(n+1)-1 do M[i][i+1] := 1; end for;
+
+	return LLL(M, p, B, N);
+end intrinsic;
+
 intrinsic ExampleSijsling(p::RngIntElt, m::RngIntElt) -> .
 {}
 	R<a,b,c,d,e,f,g> := PolynomialRing(Z,7);
@@ -512,6 +575,7 @@ intrinsic Deg15Solution(p::RngIntElt) -> .
 	Rp := RSpace(GF(p),4);
 	time Ps := [r : r in Rp | forall {f : f in fs2 |
 		Evaluate(f,Eltseq(r)) eq 0}];
+
 	J := Transpose(JacobianMatrix(fs2));
 
 	good := [r : r in Ps | Dimension(Kernel(Evaluate(J,Eltseq(r)))) eq 0];
@@ -526,6 +590,104 @@ intrinsic Deg15Solution(p::RngIntElt) -> .
 		end if;
 	end for;
 
+	return sols;
+end intrinsic;
+
+intrinsic Deg15Solution2(p::RngIntElt) -> .
+{}
+	fs,Fd := Deg154();
+	_<a,b,c,x> := Parent(fs[1]);
+	disc := Discriminant(Fd);
+	fs2 := [fs[1] div (b*c)] cat fs[[2..#fs]];
+	
+
+	Rp := RSpace(GF(p^2),4);
+	time Ps := [r : r in Rp | forall {f : f in fs2 |
+		Evaluate(f,Eltseq(r)) eq 0}];
+
+	J := Transpose(JacobianMatrix(fs2));
+
+	good := [r : r in Ps | Dimension(Kernel(Evaluate(J,Eltseq(r)))) eq 0];
+
+	sols := [];
+	"number of good solutions", #good;
+
+	//return [r : r in good | Evaluate(disc, Eltseq(r)) ne 0];
+
+	for r in good do
+		time lift := HenselLiftQp(fs2, Eltseq(r), 10)[1];
+		if Evaluate(disc, Eltseq(lift)) ne 0 and
+			lift[3] ne 1 and lift[3] ne lift[4] then
+			Append(~sols, lift);
+		end if;
+	end for;
+
+	"number of good lifts:", #sols;
+	return sols;
+end intrinsic;
+
+intrinsic Deg15Solution2b(p::RngIntElt) -> .
+{}
+	fs,Fd := Deg154();
+	_<a,b,c,x> := Parent(fs[1]);
+	disc := Discriminant(Fd);
+	fs2 := [fs[1] div (b*c)] cat fs[[2..#fs]];
+	
+
+	Rp := RSpace(GF(p^2),4);
+	J := Transpose(JacobianMatrix(fs2));
+
+	good := [];
+	for r in Rp do
+		if forall {f : f in fs2 | Evaluate(f,Eltseq(r)) eq 0} and
+			Dimension(Kernel(Evaluate(J,Eltseq(r)))) eq 0 then
+			Append(~good, r);
+			r;
+		end if;
+	end for;
+
+	sols := [];
+	"number of good solutions", #good;
+
+	//return [r : r in good | Evaluate(disc, Eltseq(r)) ne 0];
+
+	for r in good do
+		time lift := HenselLiftQp(fs2, Eltseq(r), 10)[1];
+		if Evaluate(disc, Eltseq(lift)) ne 0 and
+			lift[3] ne 1 and lift[3] ne lift[4] then
+			Append(~sols, lift);
+		end if;
+	end for;
+
+	"number of good lifts:", #sols;
+	return sols;
+end intrinsic;
+
+intrinsic Deg15Solution(p::RngIntElt, sols::SeqEnum) -> .
+{}
+	fs,Fd := Deg154();
+	_<a,b,c,x> := Parent(fs[1]);
+	disc := Discriminant(Fd);
+	fs2 := [fs[1] div (b*c)] cat fs[[2..#fs]];
+	
+	Rp := RSpace(GF(p),4);
+	time Ps := [Rp!sol : sol in sols];
+
+	J := Transpose(JacobianMatrix(fs2));
+
+	good := [r : r in Ps | Dimension(Kernel(Evaluate(J,Eltseq(r)))) eq 0];
+
+	sols := [];
+	"number of good solutions:", #good;
+	for r in good do
+		lift := HenselLift(fs2, Eltseq(r), 10)[1];
+		if Evaluate(disc, Eltseq(lift)) ne 0 and
+			lift[3] ne 1 and lift[3] ne lift[4] then
+			Append(~sols, lift);
+		end if;
+	end for;
+
+	"number of good lifts:", #sols;
 	return sols;
 end intrinsic;
 
@@ -550,4 +712,123 @@ intrinsic Roberts2Solution(p::RngIntElt) -> .
 	end for;
 
 	return sols;
+end intrinsic;
+
+intrinsic Deg14(p::RngIntElt) -> .
+{}
+	R<a,b,c,d,e,f,g,h,i,j,k,l,m,x> := PolynomialRing(Z,14);
+	_<y> := PolynomialRing(R);	
+
+	F := a * y^5 * (y - x)^5 * (y^4 + b*y^3 + c*y^2 + d*y + e);
+	G := (y-1)^7;
+	H := a * (y^6 + f*y^5 + g*y^4 + h*y^3 + i*y^2 + j*y + k)^2 * (y^2 + l*y + m);
+
+	fs := Coefficients(F - G - H);
+
+	//A := AffineSpace(GF(p),14);
+	//S := Scheme(A, fs);
+	//Ps := RationalPoints(S);
+
+	//Rp := RSpace(GF(p),14);
+	//Ps := [r : r in Rp | forall {f : f in fs | Evaluate(f,Eltseq(r)) eq 0}];
+
+	return fs, F,G,H;
+end intrinsic;
+
+intrinsic Deg10() -> .
+{}
+	R<a,b,c,d,e,f,g,h,i,x> := PolynomialRing(Q,10);
+	_<y> := PolynomialRing(R);	
+
+	F := (1 + b + c + d) * y^5 * (y - x)^5;
+	G := (1 - x)^5 * (y^3 + b*y^2 + c*y + d);
+	H := (1 + b + c + d) * ((y-1) * (y^3 + e*y^2 + f*y + g))^2 * (y^2 + h*y + i);
+
+	fs := Coefficients(a * F - G - a * H);
+
+	return fs;
+end intrinsic;
+
+intrinsic Deg7() -> .
+{}
+	R<a,b,c,d,e,f,x> := PolynomialRing(Q,7);
+	_<y> := PolynomialRing(R);	
+
+	F := y^5 * (y^2 + b*y + c);
+	H := (y - 1)^2 * (y - x)^2 * (y^3 + d*y^2 + e*y + f);
+
+	fs := Coefficients(F - (1 + b + c) - H);
+
+	return fs;
+end intrinsic;
+
+intrinsic Deg84() -> .
+{}
+	R<a,b,c,d,e,f,g,x> := PolynomialRing(Q,8);
+	_<y> := PolynomialRing(R);	
+
+	F := (1 - g) * y^5 * (y^3 + b*y^2 + c*y + d);
+	G := (1 + b + c + d) * (y - g);
+	H := (1 - g) * (y - 1)^4 * (y - x)^2 * (y^2 + e*y + f);
+
+	fs := Coefficients(F - G - H);
+
+	return fs;
+end intrinsic;
+
+intrinsic Deg94() -> .
+{}
+	R<a,b,c,d,e,f,g,h,x> := PolynomialRing(Q,9);
+	_<y> := PolynomialRing(R);	
+
+	F := (1 + g + h) * y^5 * (y^4 + b*y^3 + c*y^2 + d*y + e);
+	G := (1 + b + c + d + e) * (y^2 + g*y + h);
+	H := (1 + g + h) * (y - 1)^4 * (y - x)^4 * (y - f);
+
+	fs := Coefficients(F - G - H);
+
+	return fs;
+end intrinsic;
+
+intrinsic Deg104() -> .
+{}
+	R<a,b,c,d,e,f,g,h,i,x> := PolynomialRing(Q,10);
+	_<y> := PolynomialRing(R);	
+
+	F := (1 + g + h + i) * y^5 * (y - x)^5;
+	G := (1 - x)^5 * (y^3 + g*y^2 + h*y + i);
+	H := (1 + g + h + i) * (y - 1)^4 * (y - b)^2 * (y^4 + c*y^3 + d*y^2 + e*y + f);
+
+	fs := Coefficients(F - G - H);
+
+	return fs;
+end intrinsic;
+
+
+intrinsic Deg9357() -> .
+{}
+	R<a,b,c,d,e,f,g,h,x> := PolynomialRing(Q,9);
+	_<y> := PolynomialRing(R);	
+
+	F := (1 + g + h) * (y-x)^5 * (y^4 + b*y^3 + c*y^2 + d*y + e);
+	G := (1-x)^5 * (1 + b + c + d + e) * (y^2 + g*y + h);
+	H := (1 + g + h) * (y-1)^3 * y^3 * (y-f)^3;
+
+	fs := Coefficients(F - G - H);
+
+	return fs;
+end intrinsic;
+
+intrinsic Deg10357() -> .
+{}
+	R<a,b,c,d,e,f,g,h,i,j,x> := PolynomialRing(Q,11);
+	_<y> := PolynomialRing(R);	
+
+	F := (1 + h + i + j) * y^5 * (y-x)^5;
+	G := (1-x)^5 * (y^3 + h*y^2 + i*y + j);
+	H := (1 + h + i + j) * ((y-1) * (y^2 + b*y + c))^2 * (y^4 + d*y^3 + e*y^2 + f*y + g);
+
+	fs := Coefficients(F - G - H);
+
+	return fs;
 end intrinsic;

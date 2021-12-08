@@ -173,7 +173,6 @@ intrinsic FindDiscriminant7() -> .
           Include(~discs, disc);
      end for;
 
-<<<<<<< Updated upstream
      return discs;
 end intrinsic;
 
@@ -198,8 +197,6 @@ intrinsic Etale257Unramified_degree7(p::RngIntElt, B::SeqEnum) -> SeqEnum
      end for;
 
      return [];
-=======
-     return discs,Cs0;
 end intrinsic;
 
 intrinsic Etale257_degree7(p::RngIntElt) -> .
@@ -289,5 +286,70 @@ intrinsic Etale257_degree7_7() -> .
      end for;
 
      return 0;
->>>>>>> Stashed changes
+end intrinsic;
+
+
+intrinsic Etale257_degree7_test(p::RngIntElt) -> .
+{}
+     K21<a> := QuadraticField(21);
+     pl := Decomposition(K21, p)[1,1];
+
+     Kp,phi := Completion(K21, pl);
+     S<s> := PolynomialRing(Kp);
+     R<t> := PolynomialRing(S);
+     F := t^5 * ((960 + 210*phi(a))*t^2 - (315 + 70*phi(a))*t + (378 + 84*phi(a))) / 9;
+
+     E1 := EtaleAlgebraFamily2(F - p^5 * s : Filter := Integers(5)!0);
+
+     //Qp := pAdicField(p,500);
+     //_<x> := PolynomialRing(Qp);
+     //K21<a> := ext<Qp | x^2 - 21>;
+
+     //S<s> := PolynomialRing(K21);
+     //R<t> := PolynomialRing(S);
+     //phi := t^5 * ((960 + 210*a)*t^2 - (315 + 70*a)*t + (378 + 84*a)) / 9;
+
+     //E1 := EtaleAlgebraFamily2(phi - p^5 * s : Filter := Integers(5)!0);
+
+     Es := {@ @};
+     Eis := [E1];
+     for Ei in Eis do
+          for E in Ei do
+               Include(~Es, E[1]);
+          end for;
+     end for;
+
+     return Es;
+end intrinsic;
+
+intrinsic Etale257_degree7_test2(p::RngIntElt) -> .
+{}
+     K<a> := QuadraticField(21);
+     pl := Decomposition(K, p)[1,1];
+
+     S<s> := PolynomialRing(K);
+     R<t> := PolynomialRing(S);
+     F := t^5 * ((960 + 210*a)*t^2 - (315 + 70*a)*t + (378 + 84*a)) / 9;
+
+     E1 := EtaleAlgebraFamily2(F - p^5 * s, pl : Filter := Integers(5)!0);
+
+     //Qp := pAdicField(p,500);
+     //_<x> := PolynomialRing(Qp);
+     //K21<a> := ext<Qp | x^2 - 21>;
+
+     //S<s> := PolynomialRing(K21);
+     //R<t> := PolynomialRing(S);
+     //phi := t^5 * ((960 + 210*a)*t^2 - (315 + 70*a)*t + (378 + 84*a)) / 9;
+
+     //E1 := EtaleAlgebraFamily2(phi - p^5 * s : Filter := Integers(5)!0);
+
+     Es := {@ @};
+     Eis := [E1];
+     for Ei in Eis do
+          for E in Ei do
+               Include(~Es, E[1]);
+          end for;
+     end for;
+
+     return Es;
 end intrinsic;

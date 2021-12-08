@@ -186,10 +186,11 @@ used for searching.}
             B := BaseRing(Parent(P));
             p := UniformizingElement(B);
             f := DefiningPolynomial(Ext, B);
-            s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
-            R := quo<B | p^s>;
+            //s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
+            //R := quo<B | p^s>;
             //reduce coefficients modulo p^s
-            fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
+            //fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
+            fR := f;
             _,_,Exts := Factorization(fR : Extensions := true);
             assert #Exts eq 1;
             return Exts[1]`Extension;

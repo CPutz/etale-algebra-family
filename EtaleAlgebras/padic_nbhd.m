@@ -43,6 +43,23 @@ intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::FldPadElt, k::RngIntEl
 	return N;
 end intrinsic;
 
+intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::FldPadElt, k::RngIntElt) -> PadNbhdElt
+{}
+	K := AmbientSpace(X);
+	requirege k, 1;
+	require Parent(r) eq K: "Argument 3 must have the the ambient space of Argument 1 as its parent";
+	require Valuation(r) ge 0: "Argument 3 must be integral";
+	require IsCoercible(K, m): "Argument 2 and 3 must be coercible into Argument 1";
+
+	N := New(PadNbhdElt);
+	N`Parent := X;
+	N`Middle := m;
+	N`Radius := r;
+	N`Exponent := k;
+	N`Inverted := false;
+	return N;
+end intrinsic;
+
 intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
