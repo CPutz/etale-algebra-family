@@ -538,7 +538,11 @@ intrinsic Deg153(p::RngIntElt) -> .
 
 	//Ps := RationalPoints(S);
 
+<<<<<<< Updated upstream
 	return fs;
+=======
+	return fs,F,G,trans(Fd) div 7, (trans(F-G) mod (trans(Fd) div 7));
+>>>>>>> Stashed changes
 end intrinsic;
 
 intrinsic Deg154() -> .
@@ -555,6 +559,7 @@ intrinsic Deg154() -> .
 	Fd := Fds[1];
 
 	fs := Coefficients((F-G) mod Fd);
+<<<<<<< Updated upstream
 
 	d := LCM([Denominator(r) : r in Coefficients(f), f in fs]);
 	d2 := LCM([Denominator(r) : r in Coefficients(f), f in Coefficients(Fd)]);
@@ -831,4 +836,13 @@ intrinsic Deg10357() -> .
 	fs := Coefficients(F - G - H);
 
 	return fs;
+=======
+	//A := AffineSpace(GF(p),4);
+
+	//S := Scheme(A, fs);
+
+	//Ps := RationalPoints(S);
+
+	return fs,F,G,Fd, (F-G) mod Fd;
+>>>>>>> Stashed changes
 end intrinsic;
