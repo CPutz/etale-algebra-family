@@ -301,9 +301,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::RngIntElt
 end intrinsic;
 
 
-
-
-
 intrinsic EtaleAlgebraFamily2(F::RngUPolElt[RngUPol[FldPad]]
 	: D := LocalFieldDatabase(),
 	  Precision := 500,
@@ -473,8 +470,9 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 
 	Kp,phi := Completion(K,p : Precision := Precision);
 	OKp := Integers(Kp);
-	X := pAdicNbhds(Kp);
+	piKp := UniformizingElement(Kp);
 	Sp,StoSp := ChangeRing(S, Kp, phi);
+
 
 	//TODO: make monic and integral
 	lc := LeadingCoefficient(LeadingCoefficient(F));
@@ -490,7 +488,13 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 	rootsKp := [r[1] : r in Roots(StoSp(disc), Kp) | Valuation(r[1]) ge 0];
 	require #rootsK eq #rootsKp: "The integral roots of the discriminant over K_p should be defined over K";
 
-	OKpq := quo<OKp | phi(pi)^Precision>;
+	KpP := ChangePrecision(Kp, Precision);
+	//KpP := pAdicField(2,500);
+	psi := Coercion(Kp, KpP);
+	OKP := Integers(KpP);
+	piKpP := KpP!phi(pi);
+	OKpq := quo<OKP | piKpP^Precision>;
+	X := pAdicNbhds(KpP);
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
@@ -500,20 +504,21 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 		// The coefficient of s in F
 		g := Coefficient(SwitchVariables(F), 1);
 
-		facp,unitp := Factorization(StoSp(f));
+		fac := Factorization(f);
+		/*facp,unitp := Factorization(StoSp(f));
 		facp;
 		facp[1,1];
 		S;
-		Parent(facp[1,1]);
-		K!(Kp!5);
-		psi := Coercion(Kp, K);
+		Parent(facp[1,1]);*/
+		//K!(Kp!5);
+		//psi := Coercion(Kp, K);
 
-		__, SptoS := ChangeRing(Sp, K, psi);
-		SptoS;
-		SptoS(facp[1,1]);
+		//__, SptoS := ChangeRing(Sp, K, psi);
+		//SptoS;
+		//SptoS(facp[1,1]);
 
-		fs := [<S!fi[1],fi[2]> : fi in facp];
-		unit := K!unitp;
+		fs := [<fi[1],fi[2]> : fi in fac];
+		//unit := unitp;
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 
 		c,cs := XGCD(f_hats);
@@ -556,16 +561,16 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 		vprintf EtaleAlg: "bound = %o\n", bound;
 		bound := Ceiling(bound);
 
-		Append(~Nbhds_disc, r + O(pi^bound));
+		Append(~Nbhds_disc, phi(r) + O(piKp^bound));
 
 		k := LCM([fi[2] : fi in fs]);
 		vprintf EtaleAlg: "k = %o\n", k;
 		v := k * Ceiling(bound / k);
 		v_power := 2*Valuation(K!k, p) + 1;
-		OKmOKk := quo<OKp | pi^v_power>; // OK / (OK)^k
+		OKmOKk := quo<OKp | piKp^v_power>; // OK / (OK)^k
 		// representatives for OK* / (OK*)^k would be sufficient here
 		//TODO: something separate with 0 here...?
-		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r, (K!c) * pi^(v + w), k) : c in OKmOKk, w in [0..k-1]];
+		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r, (KpP!c) * piKpP^(v + w), k) : c in OKmOKk, w in [0..k-1]];
 	end for;
 
 	vprintf EtaleAlg: "computing nbhds\n";
@@ -573,49 +578,50 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 	//gen_sep_K := RK!SwitchVariables(gen_sep);
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
+	Sp,StoSp := ChangeRing(S, Kp, phi);
+	Rp,RtoRp := ChangeRing(R, Sp, StoSp);
+
 	// Split up in neighborhoods
-	Nbhds := [O(K!1)];
+	Nbhds := [<K!0,0>];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
 	repeat
 		Nbhds_new := [];
 		for N in Nbhds do
-			if exists { Nd : Nd in Nbhds_disc | Nd in N } then
-				Nbhds_new cat:= Subdivide(N, AbsolutePrecision(N) + 1);
-			elif exists { Nd : Nd in Nbhds_disc | N in Nd } then
+			Np := phi(N[1]) + O(piKp^N[2]);
+			if exists { Nd : Nd in Nbhds_disc | Nd in Np } then
+				Nbhds_new cat:= Subdivide(N[1], N[2], N[2] + 1, p);
+			elif exists { Nd : Nd in Nbhds_disc | Np in Nd } then
 				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 			else
-				FN := Evaluate(SwitchVariables(F), N);
-				//hack since computing the separant over K or OK crashes Magma
-				//prec := Ceiling(1.5 * Degree(FN) * Valuation(Discriminant(FN)));
-				prec := Ceiling(1.5 * Degree(FN) * Valuation(Evaluate(disc,N),p));
-				//prec := 2000;
-				OKv := ChangePrecision(OKp,prec);
-				OKpv := quo<OKv | UniformizingElement(OKv)^prec>;
-				sig := Separant(PolynomialRing(OKpv)!FN) - min_val_s;
-
-				require sig lt Infinity(): "Insufficient precision to compute separant";
-				//sig := Separant(FN) - min_val_s;
-				if sig lt AbsolutePrecision(N) then
+				FN := Evaluate(SwitchVariables(F), N[1]);
+				time sig := Separant(FN, p) - min_val_s;
+				FN;
+				if sig lt N[2] then
 					Append(~Nbhds_end, N);
 				else
-					Nbhds_new cat:= Subdivide(N, Floor(sig + 1));
+					Nbhds_new cat:= Subdivide(N[1], N[2], Floor(sig + 1), p);
 				end if;
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
 
 		// Filter
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKp!N, pi^AbsolutePrecision(N), 1), Filter)];
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter)];
 	until IsEmpty(Nbhds);
 
 	// Add neighborhoods around the roots of the discriminant
-	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKp!n, pi^AbsolutePrecision(n), 1) : n in Nbhds_end];
+	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1) : N in Nbhds_end];
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
 
 	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
-	E := EtaleAlgebraListIsomorphism2(F, Nbhds : D := D);
+
+	
+	Sp,StoSp := ChangeRing(S, KpP, phi * psi);
+	Rp,RtoRp := ChangeRing(R, Sp, StoSp);
+
+	E := EtaleAlgebraListIsomorphism2(RtoRp(F), Nbhds : D := D);
 
 	return E;
 end intrinsic;
@@ -637,6 +643,21 @@ intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 		S := quo<OK | pi^n>;
 
 		return SetToSequence({K!((S!x) + pi^r * y) : y in R});
+	end if;
+end intrinsic;
+
+intrinsic Subdivide(x::FldNumElt, r::RngIntElt, n::RngIntElt, p::PlcNumElt) -> SeqEnum
+{}
+	if n le r then
+		return [x];
+	else
+		K := Parent(x);
+		OK := Integers(K);
+		pi := UniformizingElement(p);
+		R := quo<OK | pi^(n - r)>;
+		S := quo<OK | pi^n>;
+
+		return SetToSequence({<K!(OK!S!x + pi^r * OK!y), n> : y in R});
 	end if;
 end intrinsic;
 

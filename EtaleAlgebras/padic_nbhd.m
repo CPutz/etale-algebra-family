@@ -11,6 +11,13 @@ intrinsic pAdicNbhds(K::FldPad) -> PAdicNbhd
 	return X;
 end intrinsic;
 
+intrinsic pAdicNbhds(K::RngPadRes) -> PAdicNbhd
+{The space of p-adic neighbourhoods of the form c + r * (OK)^k}
+	X := New(PadNbhd);
+	X`AmbientSpace := K;
+	return X;
+end intrinsic;
+
 intrinsic AmbientSpace(X::PadNbhd) -> FldPad
 {}
 	return X`AmbientSpace;

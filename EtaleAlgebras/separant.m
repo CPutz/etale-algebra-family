@@ -39,12 +39,12 @@ intrinsic SeparantRng(f::RngUPolElt, g::RngUPolElt) -> RngIntElt
 	return m;
 end intrinsic;
 
-intrinsic Separant(f::RngUPolElt, p::RngIntElt) -> RngIntElt
+intrinsic Separant(f::RngUPolElt, p::.) -> RngIntElt
 {Returns the separant of f}
 	return Separant(f, f, p);
 end intrinsic;
 
-intrinsic Separant(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngIntElt
+intrinsic Separant(f::RngUPolElt, g::RngUPolElt, p::.) -> RngIntElt
 {Returns the separant of f with respect to g}
 	R := BaseRing(Parent(f));
 	require BaseRing(Parent(g)) eq R: "Argument 1 and 2 must be defined over the same ring.";
@@ -52,6 +52,8 @@ intrinsic Separant(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngIntElt
 		return SeparantUPol(f, g);
 	elif ISA(Type(R), RngInt) or ISA(Type(R), FldRat) then
 		return SeparantRng(f, g, p);
+	elif ISA(Type(R), FldNum) then
+		return SeparantFldNum(f, g, p);
 	else
 		error("Polynomials must be defined over Z, Q or a polynomial ring over Z or Q.");
 	end if;
@@ -70,6 +72,22 @@ intrinsic SeparantRng(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngIntElt
 	res := res div e^d;
 
 	m, _ := Sup([v[1] : v in ValuationsOfRoots(res, p)]);
+	return m;
+end intrinsic;
+
+intrinsic SeparantFldNum(f::RngUPolElt, g::RngUPolElt, p::PlcNumElt) -> RngIntElt
+{}
+	R := BaseRing(Parent(f));
+	S<e> := PolynomialRing(R);
+	T<x,y> := PolynomialRing(S,2);
+	df := Derivative(f);
+	res := S!Resultant(Resultant(e - Evaluate(df, x) * (x - y), Evaluate(f, x), 1), Evaluate(g, y), 2);
+
+	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
+	d := Degree(GCD(f,g));
+	res := res div e^d;
+
+	m, _ := Sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
 	return m;
 end intrinsic;
 
@@ -126,5 +144,21 @@ intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntEl
 	res := res div e^d;
 
 	m, _ := k * Valuation(R!k) + Sup([v[1] : v in ValuationsOfRoots(res)]);
+	return m;
+end intrinsic;
+
+intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt
+{}
+	R := BaseRing(Parent(f));
+	S<e> := PolynomialRing(R);
+	T<x> := PolynomialRing(S);
+	df := Derivative(f);
+	res := S!Resultant(e - Evaluate(df, x) * Evaluate(g, x), Evaluate(f, x));
+
+	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
+	d := Degree(GCD(f,g));
+	res := res div e^d;
+
+	m, _ := k * Valuation(R!k, p) + Sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
 	return m;
 end intrinsic;
