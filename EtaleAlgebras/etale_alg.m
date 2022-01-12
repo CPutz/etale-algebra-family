@@ -454,6 +454,26 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt[RngUPol[FldPad]]
 	return E;
 end intrinsic;
 
+intrinsic EtaleAlgebraFamily2(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Precision := 500,
+	  Filter := Integers(1)!0) -> SeqEnum
+{}
+	R := Parent(F);
+	S := BaseRing(R);
+	Q := BaseRing(S);
+
+	Qnf := RationalsAsNumberField();
+	QtoQnf := Coercion(Q, Qnf);
+	Snf,StoSnf := ChangeRing(S, Qnf, QtoQnf);
+	Rnf,RtoRnf := ChangeRing(R, Snf, StoSnf);
+
+	pl := Decomposition(Qnf, p)[1,1];
+
+	return EtaleAlgebraFamily2(RtoRnf(F), pl
+		: D := D, Precision := Precision, Filter := Filter);
+end intrinsic;
+
 intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500,
@@ -505,38 +525,23 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 		g := Coefficient(SwitchVariables(F), 1);
 
 		fac := Factorization(f);
-		/*facp,unitp := Factorization(StoSp(f));
-		facp;
-		facp[1,1];
-		S;
-		Parent(facp[1,1]);*/
-		//K!(Kp!5);
-		//psi := Coercion(Kp, K);
-
-		//__, SptoS := ChangeRing(Sp, K, psi);
-		//SptoS;
-		//SptoS(facp[1,1]);
-
 		fs := [<fi[1],fi[2]> : fi in fac];
-		//unit := unitp;
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 
 		c,cs := XGCD(f_hats);
+		cs;
+		f_hats;
+		[cs[i] * f_hats[i] : i in [1..#cs]];
 		min_val := Min([Valuation(ci,p) : ci in Coefficients(c), c in cs] cat [0]);
 		d := c * pi^min_val;
 		cs := [pi^min_val * c : c in cs];
-		//cs := [LeadingCoefficient(c) : c in cs];
 
 		//assert that sum_i cs[i] * f_hats[i] = d
 		//assert forall {c : c in Coefficients(d - &+[fc[1]*fc[2] : fc in Zip(cs, f_hats)]) | K!0 in c};
-
-		//TODO: is this assumption needed?
-		//assert that d is the constant 1
-		//assert K!0 in (unit - 1);
+		assert &+[fc[1]*fc[2] : fc in Zip(cs, f_hats)] eq d;
 		assert Degree(d) eq 0;
 		d := ConstantCoefficient(d);
-		assert Valuation(d,p) le 0;
-		//assert K!0 in (d - 1);
+		assert d eq 1;
 
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in Zip(cs, fs)];
 
@@ -594,8 +599,8 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt, p::PlcNumElt
 				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 			else
 				FN := Evaluate(SwitchVariables(F), N[1]);
-				time sig := Separant(FN, p) - min_val_s;
-				FN;
+				sig := Separant(FN, p) - min_val_s;
+
 				if sig lt N[2] then
 					Append(~Nbhds_end, N);
 				else
