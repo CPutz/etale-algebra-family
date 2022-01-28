@@ -765,8 +765,11 @@ intrinsic EtaleAlgebraFamily3(F::RngUPolElt, p::PlcNumElt
 	// Split up in neighborhoods
 	Nbhds := [<K!0,0>];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
+	depth := 0;
 	repeat
 		Nbhds_new := [];
+		vprintf EtaleAlg: "depth %o with %o nbhds\n", depth, #Nbhds;
+		depth +:= 1;
 		for N in Nbhds do
 			Np := phi(N[1]) + O(piKp^N[2]);
 			if exists { Nd : Nd in Nbhds_disc | Nd in Np } then
@@ -785,6 +788,9 @@ intrinsic EtaleAlgebraFamily3(F::RngUPolElt, p::PlcNumElt
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
+		//"#Nbhds before:", #Nbhds;
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter)];
+		//"#Nbhds after:", #Nbhds;
 
 		// Filter
 		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter)];
@@ -795,7 +801,7 @@ intrinsic EtaleAlgebraFamily3(F::RngUPolElt, p::PlcNumElt
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
-
+Nbhds;
 	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
 
 	

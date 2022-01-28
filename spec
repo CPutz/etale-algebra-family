@@ -35,6 +35,7 @@
         7sqrt5.m
         257.m
         257_degree7.m
+        3511.m
     }
 
     Belyi

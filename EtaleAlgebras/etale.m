@@ -185,7 +185,14 @@ used for searching.}
         if HasRoot(R ! P) then
             B := BaseRing(Parent(P));
             p := UniformizingElement(B);
-            f := DefiningPolynomial(Ext, B);
+            //f := DefiningPolynomial(Ext, B)
+            if IsCoercible(BaseRing(Ext), B) then
+                f := DefiningPolynomial(Ext, BaseRing(Ext));
+            else
+                f := DefiningPolynomial(Ext, BaseRing(BaseRing(Ext)));
+            end if;
+            f := ChangeRing(f, B);
+
             //s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
             //R := quo<B | p^s>;
             //reduce coefficients modulo p^s
