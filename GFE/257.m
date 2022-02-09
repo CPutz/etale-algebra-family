@@ -256,7 +256,7 @@ end intrinsic;
 
 
 
-intrinsic Etale3511(p::RngIntElt
+/*intrinsic Etale3511(p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false) -> SeqEnum
 {}
@@ -307,7 +307,7 @@ intrinsic Etale3511(p::RngIntElt
 	end if;
 
 	return SetToSequence(Es);
-end intrinsic;
+end intrinsic;*/
 
 
 intrinsic Etale257Unramified(p::RngIntElt
