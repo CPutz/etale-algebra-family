@@ -302,8 +302,11 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
+	//make sure we do not choose a zero of the discriminant as a representative for a neighbourhood
+	assert forall {N : N in Nbhds | Valuation(x) lt AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
+
 	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);
-	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] : D := D);
+	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] : D := D, Data := Nbhds);
 
 	return E;
 end intrinsic;
@@ -340,63 +343,6 @@ intrinsic Subdivide(x::FldNumElt, r::RngIntElt, n::RngIntElt, p::PlcNumElt) -> S
 		return SetToSequence({<K!(OK!S!x + pi^r * OK!y), n> : y in R});
 	end if;
 end intrinsic;
-
-
-
-FactorizationStructureList := function(L)
-    return Sort([<Degree(Ki[1]), Ki[2]> : Ki in L]);
-end function;
-
-intrinsic EtaleAlgebraListIsomorphism2(F::RngUPolElt, B::SeqEnum
-  : D := LocalFieldDatabase()) -> SeqEnum[Tup]
-{Creates a list of etale algebra given a polynomial F in K[s][t] where K is a local field
-and a list B of parameter values for s}
-    if IsEmpty(B) then
-        return [];
-    end if;
-
-    Res := [];
-    OK := ISA(Type(Universe(B)), PadNbhd) select AmbientSpace(Parent(B[1])) else RingOfIntegers(Parent(B[1]));
-    //R := PolynomialRing(OK);
-    Fs := PolynomialRing(PolynomialRing(OK)) ! SwitchVariables(F);
-
-    //TODO: use MakeMonicIntegral only once
-    //factorizations := [<Factorization(MakeMonicIntegral(Evaluate(Fs, OK!Representative(s)))),
-   // 	Evaluate(Fs, OK!Representative(s)), s> : s in B];
-    factorizations := [<Factorization((Evaluate(Fs, OK!Representative(s)))),
-    	Evaluate(Fs, OK!Representative(s)), s> : s in B];
-    Fstructures := {@ FactorizationStructureList(fac[1]) : fac in factorizations @};
-    Fss := [[F : F in factorizations | FactorizationStructureList(F[1]) eq Fstruct] : Fstruct in Fstructures];
-
-    for Fss0 in Fss do
-    	res := [];
-    	for FP in Fss0 do
-            found := false;
-            for i := 1 to #res do
-                if IsDefiningPolynomialEtale(res[i][1], FP[1]) then
-                    found := true;
-                	found_i := i;
-                    break;
-                end if;
-            end for;
-            if found then //add witness
-            	Append(~res[found_i][2], FP[3]);
-            else
-                Append(~res, <EtaleAlgebra(FP[2]: D := D), [FP[3]]>);
-            end if;
-        end for;
-
-    	Res cat:= res;
-    end for;
-
-    return Res;
-end intrinsic;
-
-intrinsic Representative(N::FldPadElt) -> FldPadElt
-{}
-	return N;
-end intrinsic;
-
 
 
 intrinsic GeneralizeNbhds(S::SeqEnum[PadNbhdElt]) -> SeqEnum[PadNbhdElt]

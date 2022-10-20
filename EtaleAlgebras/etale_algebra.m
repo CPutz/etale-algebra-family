@@ -119,6 +119,14 @@ intrinsic SetData(~E::EtAlg, D::.)
     E`Data := D;
 end intrinsic;
 
+intrinsic AddData(~E::EtAlg, D::.)
+{Adds D to the mata data attached to E}
+    if not assigned E`Data then
+        E`Data := [];
+    end if;
+    Append(~E`Data, D);
+end intrinsic;
+
 intrinsic Rank(E::EtAlg) -> RngIntElt
 {The rank of E over its base ring}
     return &+[C[2] * Degree(C[2]) : C in Components(E)];
@@ -277,7 +285,7 @@ intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
             end for;
             if found then //add meta data
                 if use_data then
-                    SetData(~Ec, Append(Data(Ec), FP[3])); 
+                    AddData(~Ec, FP[3]); 
                 end if;
             else
                 if use_data then
