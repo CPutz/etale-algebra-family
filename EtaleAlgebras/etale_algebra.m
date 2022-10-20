@@ -253,11 +253,12 @@ intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
 {Creates a list of etale algebra given a sequence of polynomials over a local field}
     require Data eq [] or #L eq #Data: "L and Data must have the same length";
 
+    use_data := Data ne [];
     Res := [];
-    if Data eq [] then
-        Fs := [<Factorization(P : Certificates := true), P> : P in L];
-    else
+    if use_data then
         Fs := [<Factorization(L[i]), L[i], Data[i]> : i in [1..#L]];
+    else
+        Fs := [<Factorization(P : Certificates := true), P> : P in L];
     end if;
     Fstructures := {@ factorization_structure_list(F[1]) : F in Fs @};
     Fss := [[F : F in Fs | factorization_structure_list(F[1]) eq Fstruct] : Fstruct in Fstructures];
@@ -275,12 +276,14 @@ intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
                 end if;
             end for;
             if found then //add meta data
-                SetData(~Ec, Append(Data(Ec), FP[3])); 
+                if use_data then
+                    SetData(~Ec, Append(Data(Ec), FP[3])); 
+                end if;
             else
-                if Data eq [] then
-                    Append(~res, EtaleAlgebra(FP[2]: D := D));
-                else
+                if use_data then
                     Append(~res, EtaleAlgebra(FP[2]: D := D, Data := [FP[3]]));
+                else
+                    Append(~res, EtaleAlgebra(FP[2]: D := D));
                 end if;
             end if;
         end for;

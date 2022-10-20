@@ -182,16 +182,12 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	disc := Discriminant(F);
 	vd0 := Valuation(LeadingCoefficient(disc), p);
 	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge 0];
-	//We assume that all roots of disc in K_p are defined over K
+	//We assume that all integral roots of the discriminant over K_p are defined over K
 	disc0 := disc div prod([(s - r[1])^r[2] : r in rootsK]);
 	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge 0];
 	require IsEmpty(roots0Kp): "The integral roots of the discriminant over K_p should be defined over K";
 
-	//rootsKp := [r[1] : r in Roots(StoSp(disc), Kp) | Valuation(r[1]) ge 0];
-	//require #rootsK eq #rootsKp: "The integral roots of the discriminant over K_p should be defined over K";
-
 	KpP := ChangePrecision(Kp, Precision);
-	//KpP := pAdicField(2,500);
 	psi := Coercion(Kp, KpP);
 	OKP := Integers(KpP);
 	piKpP := KpP!phi(pi);
@@ -260,13 +256,9 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 	vprintf EtaleAlg: "computing nbhds\n";
 
-	//gen_sep_K := RK!SwitchVariables(gen_sep);
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
-	Sp,StoSp := ChangeRing(S, Kp, phi);
-	Rp,RtoRp := ChangeRing(R, Sp, StoSp);
-
-	// Split up in neighborhoods
+	// Subdivide in neighborhoods
 	Nbhds := [<K!0,0>];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
 	depth := 0;
@@ -305,14 +297,13 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
-Nbhds;
+
 	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
+	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
+	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
-	
-	Sp,StoSp := ChangeRing(S, KpP, phi * psi);
-	Rp,RtoRp := ChangeRing(R, Sp, StoSp);
-
-	E := EtaleAlgebraListIsomorphism2(RtoRp(F), Nbhds : D := D);
+	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);
+	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] : D := D);
 
 	return E;
 end intrinsic;
