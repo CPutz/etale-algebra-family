@@ -421,19 +421,24 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt[RngUPol[FldPad]]
 				FN := Evaluate(SwitchVariables(F), N);
 				//hack since computing the separant over K or OK crashes Magma
 				//prec := Ceiling(1.5 * Degree(FN) * Valuation(Discriminant(FN)));
-				prec := Ceiling(1.5 * Degree(FN) * Valuation(Evaluate(disc,N)));
-				//prec := 2000;
-				OKv := ChangePrecision(OK,prec);
-				OKpv := quo<OKv | UniformizingElement(OKv)^prec>;
-				sig := Separant(PolynomialRing(OKpv)!FN) - min_val_s;
+				fac := 2;
+
+				repeat
+					prec := Ceiling(fac * Degree(FN) * Valuation(Evaluate(disc,N)));
+					//prec := 2000;
+					OKv := ChangePrecision(OK,prec);
+					OKpv := quo<OKv | UniformizingElement(OKv)^prec>;
+					sig := Separant(PolynomialRing(OKpv)!FN) - min_val_s;
+					fac *:= 2;
+					//sig := Separant(FN) - min_val_s;
+				until sig lt Infinity() or prec gt 20000;
 
 				require sig lt Infinity(): "Insufficient precision to compute separant";
-				//sig := Separant(FN) - min_val_s;
 				if sig lt AbsolutePrecision(N) then
-					Append(~Nbhds_end, N);
-				else
-					Nbhds_new cat:= Subdivide(N, Floor(sig + 1));
-				end if;
+						Append(~Nbhds_end, N);
+					else
+						Nbhds_new cat:= Subdivide(N, Floor(sig + 1));
+					end if;
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
@@ -449,6 +454,7 @@ intrinsic EtaleAlgebraFamily2(F::RngUPolElt[RngUPol[FldPad]]
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
 
 	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
+
 	E := EtaleAlgebraListIsomorphism2(F, Nbhds : D := D);
 
 	return E;

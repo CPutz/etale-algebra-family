@@ -292,24 +292,19 @@ end intrinsic;
 intrinsic Etale257_degree7_test(p::RngIntElt) -> .
 {}
      K21<a> := QuadraticField(21);
-     pl := Decomposition(K21, p)[1,1];
+     pl := Decomposition(K21, p)[2,1];
 
-     Kp,phi := Completion(K21, pl);
+     Kp,phi_ex := Completion(K21, pl);
+     Kp`DefaultPrecision := 200; //needed to make phi(a) have high precision
+     ChangePrecision(~Kp, 200);
+     //map from K21 to the completion at pl with finite precision
+     phi := phi_ex * Coercion(Codomain(phi_ex), Kp);
+
      S<s> := PolynomialRing(Kp);
      R<t> := PolynomialRing(S);
      F := t^5 * ((960 + 210*phi(a))*t^2 - (315 + 70*phi(a))*t + (378 + 84*phi(a))) / 9;
 
      E1 := EtaleAlgebraFamily2(F - p^5 * s : Filter := Integers(5)!0);
-
-     //Qp := pAdicField(p,500);
-     //_<x> := PolynomialRing(Qp);
-     //K21<a> := ext<Qp | x^2 - 21>;
-
-     //S<s> := PolynomialRing(K21);
-     //R<t> := PolynomialRing(S);
-     //phi := t^5 * ((960 + 210*a)*t^2 - (315 + 70*a)*t + (378 + 84*a)) / 9;
-
-     //E1 := EtaleAlgebraFamily2(phi - p^5 * s : Filter := Integers(5)!0);
 
      Es := {@ @};
      Eis := [E1];
@@ -342,6 +337,34 @@ intrinsic Etale257_degree7_test2(p::RngIntElt) -> .
      //phi := t^5 * ((960 + 210*a)*t^2 - (315 + 70*a)*t + (378 + 84*a)) / 9;
 
      //E1 := EtaleAlgebraFamily2(phi - p^5 * s : Filter := Integers(5)!0);
+
+     Es := {@ @};
+     Eis := [E1];
+     for Ei in Eis do
+          for E in Ei do
+               Include(~Es, E[1]);
+          end for;
+     end for;
+
+     return Es;
+end intrinsic;
+
+intrinsic Etale257_degree7_test3(p::RngIntElt) -> .
+{}
+     K21<a> := QuadraticField(21);
+     pl := Decomposition(K21, p)[1,1];
+
+     Kp,phi_ex := Completion(K21, pl);
+     Kp`DefaultPrecision := 2000; //needed to make phi(a) have high precision
+     ChangePrecision(~Kp, 2000);
+     //map from K21 to the completion at pl with finite precision
+     phi := phi_ex * Coercion(Codomain(phi_ex), Kp);
+
+     S<s> := PolynomialRing(Kp);
+     R<t> := PolynomialRing(S);
+     F := t^5 * ((960 + 210*phi(a))*t^2 - (315 + 70*phi(a))*t + (378 + 84*phi(a))) / 9;
+
+     E1 := EtaleAlgebraFamily2(ReciprocalPolynomial(p^7 * s * F - 1) : Filter := Integers(7)!0);
 
      Es := {@ @};
      Eis := [E1];

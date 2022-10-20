@@ -1,5 +1,3 @@
-import "utils.m" : sup;
-
 Q := Rationals();
 
 intrinsic Separant(f::RngUPolElt) -> RngIntElt
@@ -37,7 +35,7 @@ intrinsic SeparantRng(f::RngUPolElt, g::RngUPolElt) -> RngIntElt
 	d := Degree(GCD(f,g));
 	res := res div e^d;
 
-	m, _ := sup([v[1] : v in ValuationsOfRoots(res)]);
+	m, _ := Sup([v[1] : v in ValuationsOfRoots(res)]);
 	return m;
 end intrinsic;
 
@@ -73,7 +71,7 @@ intrinsic SeparantRng(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngIntElt
 	d := Degree(GCD(f,g));
 	res := res div e^d;
 
-	m, _ := sup([v[1] : v in ValuationsOfRoots(res, p)]);
+	m, _ := Sup([v[1] : v in ValuationsOfRoots(res, p)]);
 	return m;
 end intrinsic;
 
@@ -89,7 +87,7 @@ intrinsic SeparantFldNum(f::RngUPolElt, g::RngUPolElt, p::PlcNumElt) -> RngIntEl
 	d := Degree(GCD(f,g));
 	res := res div e^d;
 
-	m, _ := sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
+	m, _ := Sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
 	return m;
 end intrinsic;
 
@@ -145,7 +143,7 @@ intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntEl
 	d := Degree(GCD(f,g));
 	res := res div e^d;
 
-	m, _ := k * Valuation(R!k) + sup([v[1] : v in ValuationsOfRoots(res)]);
+	m, _ := k * Valuation(R!k) + Sup([v[1] : v in ValuationsOfRoots(res)]);
 	return m;
 end intrinsic;
 
@@ -161,6 +159,6 @@ intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumEl
 	d := Degree(GCD(f,g));
 	res := res div e^d;
 
-	m, _ := k * Valuation(R!k, p) + sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
+	m, _ := k * Valuation(R!k, p) + Sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
 	return m;
 end intrinsic;

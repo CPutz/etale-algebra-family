@@ -1,14 +1,20 @@
  
-{    
+{
     EtaleAlgebras
     {
-        etale_algebra.m
-        etale_algebra_family.m
+        etale.m
+        etale_alg.m
         separant.m
-        padic_nbhd.m
         utils.m
+        padic_nbhd.m
+        pad_mod_pow.m
+        congr.m
+        dessin.m
+    	poly.m
+        test.m
+        pseudo.m
     }
-
+    
     NumberFields
     {
         power.m
@@ -35,5 +41,10 @@
     Belyi
     {
         padic.m
+    }
+    
+    EtaleAlgebras2
+    {
+    	etale_algebras2.m
     }
 }
