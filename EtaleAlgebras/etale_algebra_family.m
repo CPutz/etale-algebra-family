@@ -44,19 +44,17 @@ intrinsic ValuationsInRootsOfQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPol
 	return ValuationsOfRoots(ValuationsInRootsOfUPolQuotient(f1,f2,g), p);
 end intrinsic;
 
-
-
-/*intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
+intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
 {Returns the maximal valuation of f at roots of g}
-	return MaxValuationOfRootsMPol(ValuationsInRootsOfUPol(f,g));
+	return Max([x[1] : x in ValuationsOfRoots(ValuationsInRootsOfUPol(f,g))]);
 end intrinsic;
 
 intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
 {Returns the maximal valuation of f at roots of g}
-	return MaxValuationOfRootsMPol(ValuationsInRootsOfUPol(f,g), p);
+	return Max([x[1] : x in ValuationsOfRoots(ValuationsInRootsOfUPol(f,g), p)]);
 end intrinsic;
 
-intrinsic MinValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
+/*intrinsic MinValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
 {Returns the minimal valuation of f at roots of g}
 	return MinValuationOfRootsMPol(ValuationsInRootsOfUPol(f,g));
 end intrinsic;
@@ -180,7 +178,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 	vprintf EtaleAlg: "computing discriminant\n";
 	disc := Discriminant(F);
-	vd0 := Valuation(LeadingCoefficient(disc), p);
 	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge 0];
 	//We assume that all integral roots of the discriminant over K_p are defined over K
 	disc0 := disc div prod([(s - r[1])^r[2] : r in rootsK]);
@@ -229,16 +226,30 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 			min_val_s := Min([Valuation(cs) : cs in Coefficients(ri)]);
 			ri := ri / phi(pi)^min_val_s;
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
-			//TODO: this discriminant and separant computations crash magma if Fi is not exact
+			//TODO: these discriminant and separant computations crash magma if Fi is not exact
 			disci := Discriminant(PolynomialRing(PolynomialRing(OKpq))!Fi);
 			ci := Valuation(ki * LeadingCoefficient(fi) * Coefficient(disci, Degree(Fi) - Degree(fi)));
 			sigf := Separant(PolynomialRing(OKpq)!fi);
 			sigfr := Separant(PolynomialRing(OKpq)!fi, PolynomialRing(OKpq)!ri);
 			bi := StabilityBound(PolynomialRing(OKpq)!fi, PolynomialRing(OKpq)!ri, ki);
-			boundi := Max([ki*sigf, ki*sigfr, bi, ci]) - min_val_s;
+			nu_i := MaxValuationInRootsOf(f_hats[i], fs[i,1]);
+			boundi := Max([ki*sigf, ki*sigfr, ki * (Valuation(c) + bi + nu_i), ci]) - min_val_s;
 
 			bound := Max(bound, boundi);
 		end for;
+
+		for i := 1 to #fs do
+			for j := 1 to #fs do
+				if i ne j then
+					fi := fs[i][1];
+					fj := fs[j][1];
+					mu_ij := MaxValuationInRootsOf(fj, fi);
+					kj := fs[j][2];
+					bound := Max(bound, 2 * Valuation(c) + kj * mu_ij);
+				end if;
+			end for;
+		end for;
+
 		vprintf EtaleAlg: "bound = %o\n", bound;
 		bound := Ceiling(bound);
 
