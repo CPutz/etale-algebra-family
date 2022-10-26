@@ -93,18 +93,6 @@ intrinsic SeparantFldNum(f::RngUPolElt, g::RngUPolElt, p::PlcNumElt) -> RngIntEl
 	return m;
 end intrinsic;
 
-intrinsic SwitchVariables(f::RngUPolElt) -> RngUPolElt
-{For a polynomial f in K[x][y] switches x and y}
-	require ISA(Type(BaseRing(Parent(f))), RngUPol): "Argument 1 must be defined over R[x][y] for some ring R";
-	S := Parent(f);
-	R := BaseRing(S);
-	T := PolynomialRing(BaseRing(R), 2);
-	phi1 := hom<R -> T | T.1>;
-	phi2 := hom<S -> T | phi1, T.2>;
-	phi3 := hom<T -> S | S.1, R.1>;
-	return phi3(phi2(f));
-end intrinsic;
-
 intrinsic SeparantUPol(f::RngUPolElt) -> .
 {Returns the general separant polynomial of f when f is defined over a polynomial ring in one variable}
 	return SeparantUPol(f, f);
@@ -133,34 +121,8 @@ intrinsic SeparantMPol(f::RngMPolElt, g::RngMPolElt, v::MPolElt) -> .
 	return ConstantCoefficient(res);
 end intrinsic;
 
-intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt
-{}
-	R := BaseRing(Parent(f));
-	S<e> := PolynomialRing(R);
-	T<x> := PolynomialRing(S);
-	df := Derivative(f);
-	res := S!Resultant(e - Evaluate(df, x) * Evaluate(g, x), Evaluate(f, x));
-
-	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
-	d := Degree(GCD(f,g));
-	res := res div e^d;
-
-	m, _ := k * Valuation(R!k) + sup([v[1] : v in ValuationsOfRoots(res)]);
-	return m;
-end intrinsic;
-
-intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt
-{}
-	R := BaseRing(Parent(f));
-	S<e> := PolynomialRing(R);
-	T<x> := PolynomialRing(S);
-	df := Derivative(f);
-	res := S!Resultant(e - Evaluate(df, x) * Evaluate(g, x), Evaluate(f, x));
-
-	// Degree of the GCD is the number of common roots of f and g (f and g are separable by assumption)
-	d := Degree(GCD(f,g));
-	res := res div e^d;
-
-	m, _ := k * Valuation(R!k, p) + sup([v[1] : v in ValuationsOfRoots(res, Ideal(p))]);
-	return m;
+//TODO: where to put?
+intrinsic ConstantCoefficient(P::RngMPolElt) -> RngElt
+{Returns the constant coefficient of a multivariate polynomial}
+	return Evaluate(P, [0 : i in [1..Rank(Parent(P))]]);
 end intrinsic;

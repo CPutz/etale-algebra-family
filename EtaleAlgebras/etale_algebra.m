@@ -127,6 +127,11 @@ intrinsic AddData(~E::EtAlg, D::.)
     Append(~E`Data, D);
 end intrinsic;
 
+intrinsic ClearData(~E::EtAlg)
+{Clear the mete data attached to E}
+    delete E`Data;
+end intrinsic;
+
 intrinsic Rank(E::EtAlg) -> RngIntElt
 {The rank of E over its base ring}
     return &+[C[2] * Degree(C[2]) : C in Components(E)];

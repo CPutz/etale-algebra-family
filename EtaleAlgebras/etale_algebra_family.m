@@ -54,85 +54,55 @@ intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> R
 	return Max([x[1] : x in ValuationsOfRoots(ValuationsInRootsOfUPol(f,g), p)]);
 end intrinsic;
 
-/*intrinsic MinValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
-{Returns the minimal valuation of f at roots of g}
-	return MinValuationOfRootsMPol(ValuationsInRootsOfUPol(f,g));
+intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt, .
+{Bound on the valuation of s from [1,Theorem 32]  for which f^k - sg is structurally stable
+together with the constant c from [1,Proposition 24]}
+	R := Parent(f);
+	K := BaseRing(R);
+	_<s> := PolynomialRing(R);
+	F := SwitchVariables(f^k - s*g);
+	disc := Discriminant(F);
+	F0 := LeadingCoefficient(F);
+	c := Coefficient(F0 * disc, Degree(F) - Degree(f));
+	df := Derivative(f);
+
+	sigf := Separant(f);
+	sigfg := Separant(f,g);
+	//this bound is slightly worse than the real bound but easier to compute
+	b := k * Valuation(K!k) + k * MaxValuationInRootsOf(df * g, f);
+	vc := Valuation(c);
+	b_mu := k * MaxValuationInRootsOf(df,f) + vc / Degree(f);
+
+	return Max([k*sigf, k*sigfg, b, vc, b_mu]), c;
 end intrinsic;
 
-intrinsic MinValuationInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
-{Returns the minimal valuation of f at roots of g}
-	return MinValuationOfRootsMPol(ValuationsInRootsOfUPol(f,g), p);
+intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt, .
+{Bound on the valuation of s from [1,Theorem 32]  for which f^k - sg is structurally stable
+together with the constant c from [1,Proposition 24]}
+	R := Parent(f);
+	K := BaseRing(R);
+	_<s> := PolynomialRing(R);
+	F := SwitchVariables(f^k - s*g);
+	disc := Discriminant(F);
+	F0 := LeadingCoefficient(F);
+	c := Coefficient(F0 * disc, Degree(F) - Degree(f));
+	df := Derivative(f);
+
+	sigf := Separant(f,p);
+	sigfg := Separant(f,g,p);
+	//this bound is slightly worse than the real bound but easier to compute
+	b := k * Valuation(K!k,p) + k * MaxValuationInRootsOf(df * g, f, p);
+	vc := Valuation(c,p);
+	b_mu := k * MaxValuationInRootsOf(df,f,p) + vc / Degree(f);
+
+	return Max([k*sigf, k*sigfg, b, vc, b_mu]), c;
 end intrinsic;
-
-intrinsic MaxValuationDiffRoots(f::RngUPolElt) -> RngUPolElt, RngIntElt
-{}
-	return MaxValuationDiffRoots(f, f);
-end intrinsic;
-
-intrinsic MaxValuationDiffRoots(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
-{}
-	R := BaseRing(Parent(f));
-	E<e> := PolynomialRing(R);
-	T<x,y> := PolynomialRing(E,2);
-	res := ConstantCoefficient(Resultant(Resultant(e - (x - y), Evaluate(f, x), x), Evaluate(g, y), y));
-	return res;
-	return MaxValuationOfRootsMPol(res div e^Valuation(res));
-end intrinsic;
-
-intrinsic MaxValuationDiffRoots(f::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
-{}
-	return MaxValuationDiffRoots(f, f, p);
-end intrinsic;
-
-intrinsic MaxValuationDiffRoots(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
-{}
-	R := BaseRing(Parent(f));
-	E<e> := PolynomialRing(R);
-	T<x,y> := PolynomialRing(E,2);
-	res := ConstantCoefficient(Resultant(Resultant(e - (x - y), Evaluate(f, x), x), Evaluate(g, y), y));
-	return MaxValuationOfRootsMPol(res div e^Valuation(res), p);
-end intrinsic;
-*/
-
-intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngElt
-{}
-	R := BaseRing(Parent(f));
-	M := Max(0, k * Separant(f));
-	M := Max(M, k * Separant(f, g));
-	M := Max(M, k * Separant(f, Derivative(g)));
-
-	vs := [v[1] : v in ValuationsInRootsOfQuotient(Derivative(f)^k * g^(k-1), Derivative(g)^k, f) | v[1] ne Infinity()];
-	M := Max(M, sup(vs));
-
-	//for i := 0 to k*Degree(f) do
-	//	M := Max(M, Valuation(Coefficient(f^k, i)) - Valuation(Coefficient(g, i)));
-	//end for;
-
-	return M;
-end intrinsic;
-
-intrinsic BoundPower(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::RngIntElt) -> RngElt
-{}
-	R := BaseRing(Parent(f));
-	M := Max(0, k * Separant(f, p));
-	M := Max(M, k * Separant(f, g, p));
-	M := Max(M, k * Separant(f, Derivative(g), p));
-
-	vs := [v[1] : v in ValuationsInRootsOfQuotient(Derivative(f)^k * g^(k-1), Derivative(g)^k, f, p) | v[1] ne Infinity()];
-	M := Max(M, sup(vs));
-
-	//for i := 0 to k*Degree(f) do
-	//	M := Max(M, Valuation(Coefficient(f^k, i), p) - Valuation(Coefficient(g, i), p));
-	//end for;
-
-	return M;
-end intrinsic;
-
 
 intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500,
-	  Filter := Integers(1)!0) -> SeqEnum
+	  Filter := Integers(1)!0,
+	  MinVal := 0) -> SeqEnum
 {}
 	R := Parent(F);
 	S := BaseRing(R);
@@ -146,13 +116,14 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	pl := Decomposition(Qnf, p)[1,1];
 
 	return EtaleAlgebraFamily(RtoRnf(F), pl
-		: D := D, Precision := Precision, Filter := Filter);
+		: D := D, Precision := Precision, Filter := Filter, MinVal := MinVal);
 end intrinsic;
 
 intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500,
-	  Filter := Integers(1)!0) -> SeqEnum
+	  Filter := Integers(1)!0,
+	  MinVal := 0) -> SeqEnum
 {}
 	R := Parent(F);
 	S := BaseRing(R);
@@ -189,7 +160,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	OKP := Integers(KpP);
 	piKpP := KpP!phi(pi);
 	OKpq := quo<OKP | piKpP^Precision>;
-	X := pAdicNbhds(KpP);
+	X := pAdicNbhds(KpP, OKpq);
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
@@ -204,36 +175,37 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 		f_hats := [f div fi[1]^fi[2] : fi in fs];
 
 		c,cs := XGCD(f_hats);
-		min_val := Min([Valuation(ci) : ci in Coefficients(c), c in cs] cat [0]);
-		d := c * phi(pi)^min_val;
-		cs := [phi(pi)^min_val * c : c in cs];
+		min_val_ci := Min([Valuation(ci) : ci in Coefficients(c), c in cs] cat [0]);
+		c := c * phi(pi)^(-min_val_ci);
+		cs := [phi(pi)^(-min_val_ci) * c : c in cs];
 
 		//assert that sum_i cs[i] * f_hats[i] = d
 		//assert forall {c : c in Coefficients(d - &+[fc[1]*fc[2] : fc in zip(cs, f_hats)]) | K!0 in c};
 		
 		//assert &+[fc[1]*fc[2] : fc in zip(cs, f_hats)] eq d;
-		assert Degree(d) eq 0;
-		d := ConstantCoefficient(d);
-		//assert d eq 1;
+		assert Degree(c) eq 0;
+		c := ConstantCoefficient(c);
 
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in zip(cs, fs)];
 
+		//TODO: can use min_val here to reduce bound by a lot
 		bound := 0;
+		ROKpq := PolynomialRing(OKpq);
+		// Theorem 34
 		for i := 1 to #fs do
 			fi := fs[i][1];
 			ki := fs[i][2];
-			ri := rs[i] / d;
-			min_val_s := Min([Valuation(cs) : cs in Coefficients(ri)]);
-			ri := ri / phi(pi)^min_val_s;
+			ri := rs[i];
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
-			//TODO: these discriminant and separant computations crash magma if Fi is not exact
-			disci := Discriminant(PolynomialRing(PolynomialRing(OKpq))!Fi);
-			ci := Valuation(ki * LeadingCoefficient(fi) * Coefficient(disci, Degree(Fi) - Degree(fi)));
-			sigf := Separant(PolynomialRing(OKpq)!fi);
-			sigfr := Separant(PolynomialRing(OKpq)!fi, PolynomialRing(OKpq)!ri);
-			bi := StabilityBound(PolynomialRing(OKpq)!fi, PolynomialRing(OKpq)!ri, ki);
+			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
+			stabi,ci := StabilityBound(ROKpq!fi, ROKpq!ri, ki);
+			bi := Valuation(ci) / (Degree(fi)*ki);
 			nu_i := MaxValuationInRootsOf(f_hats[i], fs[i,1]);
-			boundi := Max([ki*sigf, ki*sigfr, ki * (Valuation(c) + bi + nu_i), ci]) - min_val_s;
+			boundi := Max(stabi, ki * (Valuation(c) + bi + nu_i));
+
+			"stabi", stabi;
+			"val ci", Valuation(ci);
+			"nu_i bound", ki * (Valuation(c) + bi + nu_i), ki, Valuation(c), bi, nu_i;
 
 			bound := Max(bound, boundi);
 		end for;
@@ -246,6 +218,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 					mu_ij := MaxValuationInRootsOf(fj, fi);
 					kj := fs[j][2];
 					bound := Max(bound, 2 * Valuation(c) + kj * mu_ij);
+					"mu_ij", 2 * Valuation(c) + kj * mu_ij, i, j;
 				end if;
 			end for;
 		end for;
@@ -269,6 +242,9 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
+	vprintf EtaleAlg: "computing general separant\n";
+	gen_sep := SwitchVariables(SeparantUPol(F) div t^Degree(F));
+
 	// Subdivide in neighborhoods
 	Nbhds := [<K!0,0>];
 	Nbhds_end := [];  // The neighborhoods that do not contain a root of the discriminant
@@ -284,36 +260,38 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 			elif exists { Nd : Nd in Nbhds_disc | Np in Nd } then
 				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 			else
-				FN := Evaluate(SwitchVariables(F), N[1]);
-				sig := Separant(FN, p) - min_val_s;
+				sN := Evaluate(gen_sep, N[1]);
+				sig := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]);
 
-				if sig lt N[2] then
+				if sig - min_val_s lt N[2] then
 					Append(~Nbhds_end, N);
 				else
-					Nbhds_new cat:= Subdivide(N[1], N[2], Floor(sig + 1), p);
+					Nbhds_new cat:= Subdivide(N[1], N[2], Floor(sig - min_val_s + 1), p);
+				//#Subdivide(N[1], N[2], Floor(sig + 1), p);
+				//N[1]; N[2]; Floor(sig + 1);
 				end if;
 			end if;
 		end for;
 		Nbhds := Nbhds_new;
-		//"#Nbhds before:", #Nbhds;
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter)];
-		//"#Nbhds after:", #Nbhds;
 
 		// Filter
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter)];
+		//"#Nbhds before:", #Nbhds;
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter, MinVal)];
+		//"#Nbhds after:", #Nbhds;
 	until IsEmpty(Nbhds);
 
 	// Add neighborhoods around the roots of the discriminant
 	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1) : N in Nbhds_end];
 
 	// Filter neighborhoods
-	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter)];
+	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter, MinVal)];
 
 	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
 	//make sure we do not choose a zero of the discriminant as a representative for a neighbourhood
+	{N : N in Nbhds | Valuation(x) ge AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
 	assert forall {N : N in Nbhds | Valuation(x) lt AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
 
 	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);

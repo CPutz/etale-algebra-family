@@ -21,3 +21,15 @@ function prod(L);
 		return &*L;
 	end if;
 end function;
+
+intrinsic SwitchVariables(f::RngUPolElt) -> RngUPolElt
+{For a polynomial f in K[x][y] switches x and y}
+	require ISA(Type(BaseRing(Parent(f))), RngUPol): "Argument 1 must be defined over R[x][y] for some ring R";
+	S := Parent(f);
+	R := BaseRing(S);
+	T := PolynomialRing(BaseRing(R), 2);
+	phi1 := hom<R -> T | T.1>;
+	phi2 := hom<S -> T | phi1, T.2>;
+	phi3 := hom<T -> S | S.1, R.1>;
+	return phi3(phi2(f));
+end intrinsic;
