@@ -287,8 +287,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
 	//make sure we do not choose a zero of the discriminant as a representative for a neighbourhood
-	{N : N in Nbhds | Valuation(x) ge AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
-	assert forall {N : N in Nbhds | Valuation(x) lt AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
+	//assert forall {N : N in Nbhds | Valuation(x) lt AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
 
 	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);
 	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] : D := D, Data := Nbhds);
