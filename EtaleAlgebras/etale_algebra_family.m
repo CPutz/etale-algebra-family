@@ -160,7 +160,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	OKP := Integers(KpP);
 	piKpP := KpP!phi(pi);
 	OKpq := quo<OKP | piKpP^Precision>;
-	X := pAdicNbhds(KpP, OKpq);
+	piOKpq := OKpq!piKpP;
+	X := pAdicNbhds(OKpq);
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
@@ -202,11 +203,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 			bi := Valuation(ci) / (Degree(fi)*ki);
 			nu_i := MaxValuationInRootsOf(f_hats[i], fs[i,1]);
 			boundi := Max(stabi, ki * (Valuation(c) + bi + nu_i));
-
-			"stabi", stabi;
-			"val ci", Valuation(ci);
-			"nu_i bound", ki * (Valuation(c) + bi + nu_i), ki, Valuation(c), bi, nu_i;
-
 			bound := Max(bound, boundi);
 		end for;
 
@@ -218,7 +214,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 					mu_ij := MaxValuationInRootsOf(fj, fi);
 					kj := fs[j][2];
 					bound := Max(bound, 2 * Valuation(c) + kj * mu_ij);
-					"mu_ij", 2 * Valuation(c) + kj * mu_ij, i, j;
 				end if;
 			end for;
 		end for;
@@ -233,9 +228,10 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 		v := k * Ceiling(bound / k);
 		v_power := 2*Valuation(K!k, p) + 1;
 		OKmOKk := quo<OKp | piKp^v_power>; // OK / (OK)^k
+
 		// representatives for OK* / (OK*)^k would be sufficient here
 		//TODO: something separate with 0 here...?
-		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r[1], (KpP!c) * piKpP^(v + w), k) : c in OKmOKk, w in [0..k-1]];
+		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r[1], (OKpq!a) * piOKpq^(v + w), k) : a in OKmOKk, w in [0..k-1] | a ne 0];
 	end for;
 
 	vprintf EtaleAlg: "computing nbhds\n";
@@ -276,12 +272,12 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 		// Filter
 		//"#Nbhds before:", #Nbhds;
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1), Filter, MinVal)];
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piOKpq^N[2], 1), Filter, MinVal)];
 		//"#Nbhds after:", #Nbhds;
 	until IsEmpty(Nbhds);
 
 	// Add neighborhoods around the roots of the discriminant
-	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!N[1], piKpP^N[2], 1) : N in Nbhds_end];
+	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!N[1], piOKpq^N[2], 1) : N in Nbhds_end];
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter, MinVal)];
@@ -333,65 +329,7 @@ intrinsic Subdivide(x::FldNumElt, r::RngIntElt, n::RngIntElt, p::PlcNumElt) -> S
 	end if;
 end intrinsic;
 
-
-intrinsic GeneralizeNbhds(S::SeqEnum[PadNbhdElt]) -> SeqEnum[PadNbhdElt]
-{}
-	if IsEmpty(S) then
-		return [];
-	end if;
-	
-	X := Parent(S[1]);
-
-	S_new := [];
-	cks := {@ <Middle(s), Exponent(s)> : s in S @};
-	for ck in cks do
-		Ss := GeneralizeNbhds([Radius(s) : s in S | Middle(s) eq ck[1] and Exponent(s) eq ck[2]]);
-		S_new cat:= [CreatePAdicNbhd(X, ck[1], s, ck[2]) : s in Ss];
-	end for;
-
-	S1 := [s : s in S_new | Exponent(s) eq 1];
-	while exists (s1) { s : s in S1 |
-			exists { t : t in S1 | t ne s and
-				Valuation(Middle(s) - Middle(t)) ge Valuation(Radius(t)) and
-				Valuation(Radius(s)) ge Valuation(Radius(t)) } } do
-		Exclude(~S1, s1);
-		Exclude(~S_new, s1);
-	end while;
-
-	return S_new;
-end intrinsic;
-
-intrinsic GeneralizeNbhds(S::SeqEnum[FldPadElt]) -> SeqEnum[FldPadElt]
-{}
-	if IsEmpty(S) then
-		return [];
-	end if;
-	
-	R := Parent(S[1]);
-	p := UniformizingElement(R);
-	rs := ResidueSystem(R);
-	repeat
-		change := false;
-		Stemp := S;
-		for x in Stemp do
-			prec := AbsolutePrecision(x);
-
-			if prec eq 0 then
-				return [x];
-			elif exists {y : y in S | AbsolutePrecision(y) lt prec and x in y} then
-				Exclude(~S, x);
-				change := true;
-			elif forall {r : r in rs | exists { y : y in S | x + r * p^(prec-1) in y } } then
-				Exclude(~S, x);
-				Include(~S, x + O(p^(prec-1)));
-				change := true;
-			end if;
-		end for;
-	until change eq false;
-
-	return S;
-end intrinsic;
-
+//TODO: Make obsolete
 intrinsic 'in'(x::FldPadElt, y::FldPadElt) -> BoolElt
 {Return whether x (as a p-adic ball) is contained in y.}
 	return AbsolutePrecision(y) le AbsolutePrecision(x) and Precision(x - y) eq 0;

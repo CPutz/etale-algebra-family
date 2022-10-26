@@ -9,10 +9,6 @@ intrinsic Etale257(p::RngIntElt
 	R<t> := PolynomialRing(S);
 	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
 
-	//K := pAdicField(p, 500);
-	//OK := Integers(K);
-	//X := pAdicNbhds(K, quo<OK | 5^500>);
-
 	E0s := [];
 	for a in [2..(p-1)] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));

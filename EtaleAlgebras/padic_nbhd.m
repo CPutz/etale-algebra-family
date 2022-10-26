@@ -1,38 +1,31 @@
 Z := Integers();
 
 declare type PadNbhd[PadNbhdElt];
-declare attributes PadNbhd: AmbientSpace, AmbientSpaceFin;
+declare attributes PadNbhd: AmbientSpace;
 declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent, Inverted;
 
-intrinsic pAdicNbhds(Kr::FldPad, Km::RngPadRes) -> PAdicNbhd
+intrinsic pAdicNbhds(K::RngPadRes) -> PAdicNbhd
 {The space of p-adic neighbourhoods of the form c + r * (OK)^k}
 	X := New(PadNbhd);
-	X`AmbientSpace := Kr;
-	X`AmbientSpaceFin := Km;
+	X`AmbientSpace := K;
 	return X;
 end intrinsic;
 
-intrinsic pAdicNbhds(Kr::FldPad, Km::RngPadResExt) -> PAdicNbhd
+intrinsic pAdicNbhds(K::RngPadResExt) -> PAdicNbhd
 {The space of p-adic neighbourhoods of the form c + r * (OK)^k}
 	X := New(PadNbhd);
-	X`AmbientSpace := Kr;
-	X`AmbientSpaceFin := Km;
+	X`AmbientSpace := K;
 	return X;
 end intrinsic;
 
-intrinsic AmbientSpace(X::PadNbhd) -> FldPad
+intrinsic AmbientSpace(X::PadNbhd) -> .
 {}
 	return X`AmbientSpace;
 end intrinsic;
 
-intrinsic AmbientSpaceFin(X::PadNbhd) -> RngPadRes
-{}
-	return X`AmbientSpaceFin;
-end intrinsic;
-
 intrinsic Print(X::PadNbhd)
 {Print X}
-	printf "The space of p-adic neighbourhoods of the form c + r * (OK*)^k where K = %o", AmbientSpace(X);
+	printf "The space of p-adic neighbourhoods of the form c + r * (OK*)^k with K = %o", AmbientSpace(X);
 end intrinsic;
 
 intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt
@@ -40,36 +33,34 @@ intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt
 	return AmbientSpace(X1) eq AmbientSpace(X2);
 end intrinsic;
 
-intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::FldPadElt, k::RngIntElt) -> PadNbhdElt
+intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIntElt) -> PadNbhdElt
 {}
 	K := AmbientSpace(X);
-	Kf := AmbientSpaceFin(X);
 	requirege k, 1;
-	require Parent(r) eq K: "Argument 3 must have the the ambient space of Argument 1 as its parent";
+	require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
 	require Valuation(r) ge 0: "Argument 3 must be integral";
-	require IsCoercible(Kf, m): "Argument 2 and 3 must be coercible into Argument 1";
+	require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
-	N`Middle := Kf!m;
+	N`Middle := K!m;
 	N`Radius := K!r;
 	N`Exponent := k;
 	N`Inverted := false;
 	return N;
 end intrinsic;
 
-intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::FldPadElt, k::RngIntElt) -> PadNbhdElt
+intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::RngPadResExtElt, k::RngIntElt) -> PadNbhdElt
 {}
 	K := AmbientSpace(X);
-	Kf := AmbientSpaceFin(X);
 	requirege k, 1;
-	require IsCoercible(K, r): "Argument 3 must be coercible to the ambient space of Argument 1";
+	require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
 	require Valuation(r) ge 0: "Argument 3 must be integral";
-	require IsCoercible(Kf, m): "Argument 2 must be coercible to the finite ambient space of Argument 1";
+	require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
-	N`Middle := Kf!m;
+	N`Middle := K!m;
 	N`Radius := K!r;
 	N`Exponent := k;
 	N`Inverted := false;
@@ -79,8 +70,7 @@ end intrinsic;
 intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
-	Kf := AmbientSpaceFin(X);
-	if ISA(Type(x), PadNbhdElt) and IsCoercible(Kf, Middle(x)) and IsCoercible(K, Radius(x)) then
+	if ISA(Type(x), PadNbhdElt) and IsCoercible(K, Middle(x)) and IsCoercible(K, Radius(x)) then
 		N := CreatePAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
 		if IsInverted(x) then
 			Invert(~N);
@@ -150,19 +140,19 @@ intrinsic 'eq'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 	return Middle(N1) eq Middle(N2) and Radius(N1) eq Radius(N2) and Exponent(N1) eq Exponent(N2);
 end intrinsic;
 
-intrinsic Representative(N::PadNbhdElt) -> FldPadElt
+intrinsic Representative(N::PadNbhdElt) -> .
 {Returns a nonzero element of N}
 	K := AmbientSpace(Parent(N));
 	prec := Precision(K);
 	if prec eq Infinity() then
 		prec := K`DefaultPrecision;
 	end if;
-	c := K!(Middle(N) + ChangePrecision(Radius(N), prec));
-	if Valuation(c) ge AbsolutePrecision(c) then //c is zero
+	c := Middle(N) + Radius(N);
+	/*if Valuation(c) ge AbsolutePrecision(c) then //c is zero
 		p := Prime(K);
 		c := ChangePrecision(c,1);
 		c +:= p^AbsolutePrecision(Radius(N)) + ChangePrecision(Radius(N), prec);
-	end if;
+	end if;*/
 	if IsInverted(N) then
 		c := c^(-1);
 	end if;
