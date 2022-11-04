@@ -73,6 +73,12 @@ together with the constant c from [1,Proposition 24]}
 	vc := Valuation(c);
 	b_mu := k * MaxValuationInRootsOf(df,f) + vc / Degree(f);
 
+	"sigf", sigf;
+	"sigfg", sigfg;
+	"b", b;
+	"vc", vc;
+	"b_mu", b_mu;
+
 	return Max([k*sigf, k*sigfg, b, vc, b_mu]), c;
 end intrinsic;
 
@@ -139,29 +145,26 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	piKp := UniformizingElement(Kp);
 	Sp,StoSp := ChangeRing(S, Kp, phi);
 	Rp,RtoRp := ChangeRing(R, Sp, StoSp);
+	OKpq := quo<OKp | piKp^Precision>;
+	piOKpq := OKpq!piKp;
+	X := pAdicNbhds(OKpq);
 
 	//TODO: make monic and integral
 	lc := LeadingCoefficient(LeadingCoefficient(F));
-	F /:= lc;
+	vlc := Valuation(lc, p);
+	F *:= pi^(-vlc);
 	while exists {cs : cs in Coefficients(ct), ct in Coefficients(F) | Valuation(cs, p) lt 0} do
 		F := pi^Degree(F) * Evaluate(F, t/pi);
 	end while;
 
 	vprintf EtaleAlg: "computing discriminant\n";
 	disc := Discriminant(F);
-	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge 0];
+	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge MinVal];
 	//We assume that all integral roots of the discriminant over K_p are defined over K
 	disc0 := disc div prod([(s - r[1])^r[2] : r in rootsK]);
-	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge 0];
+	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge MinVal];
 	require IsEmpty(roots0Kp): "The integral roots of the discriminant over K_p should be defined over K";
-
-	KpP := ChangePrecision(Kp, Precision);
-	psi := Coercion(Kp, KpP);
-	OKP := Integers(KpP);
-	piKpP := KpP!phi(pi);
-	OKpq := quo<OKP | piKpP^Precision>;
-	piOKpq := OKpq!piKpP;
-	X := pAdicNbhds(OKpq);
+	
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
@@ -199,10 +202,16 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 			ri := rs[i];
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
+			fi, ri, ki;
 			stabi,ci := StabilityBound(ROKpq!fi, ROKpq!ri, ki);
 			bi := Valuation(ci) / (Degree(fi)*ki);
 			nu_i := MaxValuationInRootsOf(f_hats[i], fs[i,1]);
 			boundi := Max(stabi, ki * (Valuation(c) + bi + nu_i));
+			"boundi", boundi;
+			"stabi", stabi;
+			fi; ri;
+			"bi", bi;
+			"vc", Valuation(c);
 			bound := Max(bound, boundi);
 		end for;
 
@@ -212,6 +221,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 					fi := fs[i][1];
 					fj := fs[j][1];
 					mu_ij := MaxValuationInRootsOf(fj, fi);
+					"mu_ij", mu_ij;
 					kj := fs[j][2];
 					bound := Max(bound, 2 * Valuation(c) + kj * mu_ij);
 				end if;
@@ -219,7 +229,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 		end for;
 
 		vprintf EtaleAlg: "bound = %o\n", bound;
-		bound := Ceiling(bound);
+		bound := Ceiling(bound) + 1;
 
 		Append(~Nbhds_disc, phi(r[1]) + O(piKp^bound));
 
@@ -239,7 +249,17 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
 	vprintf EtaleAlg: "computing general separant\n";
-	gen_sep := SwitchVariables(SeparantUPol(F) div t^Degree(F));
+	if Degree(K) eq 1 then // K = Q
+		// Compute the separant over Q because it is faster
+		KtoQ := Coercion(K, Q);
+		SQ,StoSQ := ChangeRing(S, Q, KtoQ);
+		RQ,RtoRQ := ChangeRing(R, SQ, StoSQ);
+		gen_sep := SwitchVariables(SeparantUPol(RtoRQ(F)) div t^Degree(F));
+	else
+		//gen_sep := SwitchVariables(SeparantUPol(F) div t^Degree(F));
+		gen_sep := ValuationsInRootsOfUPol(Derivative(F), F);
+	end if;
+	
 
 	// Subdivide in neighborhoods
 	Nbhds := [<K!0,0>];
@@ -272,17 +292,20 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 		// Filter
 		//"#Nbhds before:", #Nbhds;
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!N[1], piOKpq^N[2], 1), Filter, MinVal)];
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1), Filter, MinVal)];
 		//"#Nbhds after:", #Nbhds;
 	until IsEmpty(Nbhds);
 
 	// Add neighborhoods around the roots of the discriminant
-	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!N[1], piOKpq^N[2], 1) : N in Nbhds_end];
+	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1) : N in Nbhds_end];
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, Filter, MinVal)];
 
 	vprintf EtaleAlg: "computing etale algebras for %o nbhds\n", #Nbhds;
+	//use finite precision for last step
+	KpP := ChangePrecision(Kp, Precision);
+	psi := Coercion(Kp, KpP);
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 

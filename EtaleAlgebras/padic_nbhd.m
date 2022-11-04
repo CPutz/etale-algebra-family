@@ -37,14 +37,16 @@ intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIn
 {}
 	K := AmbientSpace(X);
 	requirege k, 1;
-	require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
+	//require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
+	//require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
 	require Valuation(r) ge 0: "Argument 3 must be integral";
-	require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
-	N`Middle := K!m;
-	N`Radius := K!r;
+	//N`Middle := K!m;
+	//N`Radius := K!r;
+	N`Middle := m;
+	N`Radius := r;
 	N`Exponent := k;
 	N`Inverted := false;
 	return N;
@@ -54,14 +56,16 @@ intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::RngPadResExtElt, k:
 {}
 	K := AmbientSpace(X);
 	requirege k, 1;
-	require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
+	//require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
+	//require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
 	require Valuation(r) ge 0: "Argument 3 must be integral";
-	require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
-	N`Middle := K!m;
-	N`Radius := K!r;
+	//N`Middle := K!m;
+	//N`Radius := K!r;
+	N`Middle := m;
+	N`Radius := r;
 	N`Exponent := k;
 	N`Inverted := false;
 	return N;
@@ -70,7 +74,11 @@ end intrinsic;
 intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
-	if ISA(Type(x), PadNbhdElt) and IsCoercible(K, Middle(x)) and IsCoercible(K, Radius(x)) then
+	//if ISA(Type(x), PadNbhdElt) and IsCoercible(K, Middle(x)) and IsCoercible(K, Radius(x)) then
+	if ISA(Type(x), PadNbhdElt) then
+		//phim := Coercion(Parent(Middle(x)),K);
+		//phir := Coercion(Parent(Radius(x)),K);
+		//N := CreatePAdicNbhd(X, phim(Middle(x)), phir(Radius(x)), Exponent(x));
 		N := CreatePAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
 		if IsInverted(x) then
 			Invert(~N);
@@ -83,6 +91,10 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 			return true, CreatePAdicNbhd(X, y, UniformizingElement(K)^AbsolutePrecision(x), 1);
 		end if;
 	end if;
+
+	K;
+	AmbientSpace(Parent(x));
+	Coercion(K, AmbientSpace(Parent(x)));
 
 	return false, "Coercion into X failed";
 end intrinsic;
@@ -163,7 +175,7 @@ intrinsic '+'(x::., N::PadNbhdElt) -> PadNbhdElt
 {x + N}
 	R := Parent(Middle(N));
 	b, xR := IsCoercible(R, x);
-	error if not b, "Could not coerce Argument 1 into the ring over which Argument 2 is defined";
+	error if not b, "PadNbhdElt: Could not coerce Argument 1 into the ring over which Argument 2 is defined";
 	return CreatePAdicNbhd(Parent(N), xR + Middle(N), Radius(N), Exponent(N));
 end intrinsic;
 
@@ -171,7 +183,7 @@ intrinsic '*'(x::., N::PadNbhdElt) -> PadNbhdElt
 {x * N}
 	R := Parent(Middle(N));
 	b, xR := IsCoercible(R, x);
-	error if not b, "Could not coerce Argument 1 into the ring over which Argument 2 is defined";
+	error if not b, "PadNbhdElt: Could not coerce Argument 1 into the ring over which Argument 2 is defined";
 	return CreatePAdicNbhd(Parent(N), xR * Middle(N), xR * Radius(N), Exponent(N));
 end intrinsic;
 

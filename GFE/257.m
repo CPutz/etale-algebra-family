@@ -14,6 +14,7 @@ intrinsic Etale257(p::RngIntElt
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));
 		E0 := EtaleAlgebraFamily(F0, p : D := D);
 		for i := 1 to #E0 do
+			"0: this is where the error occurs?";
 			SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
 		end for;
 		Append(~E0s, E0);
@@ -24,12 +25,14 @@ intrinsic Etale257(p::RngIntElt
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
 	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, Filter := Integers(2)!0, D := D);
 	for i := 1 to #E2 do
+		"1: this is where the error occurs?";
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
 	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, Filter := Integers(7)!0, D := D);
 	for i := 1 to #E3 do
+		"2: this is where the error occurs?";
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
 
@@ -44,6 +47,7 @@ intrinsic Etale257(p::RngIntElt
 	for Ei in Eis do
 		if exists (i) {i : i in [1..#Es] | IsIsomorphic(Es[i], Ei)} then
 			if Neighbourhoods then
+				"3: this is where the error occurs?";
 				AddData(~Es[i], Data(Ei));
 			end if;
 		else
@@ -84,118 +88,11 @@ intrinsic RemoveLinearFactor(E::EtAlg) -> EtAlg
 	return EtaleAlgebra(Csnew);
 end intrinsic;
 
-intrinsic Etale357(p::RngIntElt
-	: D := LocalFieldDatabase(),
-	  Neighbourhoods := false) -> .
-{}
-	S<s> := PolynomialRing(Rationals());
-	R<t> := PolynomialRing(S);
-	F := 15*t^7 - 35*t^6 + 21*t^5 - s;
-	Fs := SwitchVariables(F);
-
-	K := pAdicField(p, 500);
-	X := pAdicNbhds(K);
-
-	E0s := [];
-	for a in [2..(p-1)] do
-		F0 := SwitchVariables(Evaluate(Fs, a + p*t));
-		E0 := EtaleAlgebraFamily(F0, p : D := D);
-		E0 := [<E[1], [a + p * X!B : B in E[2]]> : E in E0];
-		Append(~E0s, E0);
-	end for;
-	
-	F1 := SwitchVariables(Evaluate(Fs, p^5*t));
-	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
-	E1 := [<E[1], [p^5 * X!B : B in E[2]]> : E in E1];
-
-	F2 := SwitchVariables(Evaluate(Fs, 1 + p^3*t));
-	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(3)!0, D := D);
-	E2 := [<E[1], [1 + p^2 * X!B : B in E[2]]> : E in E2];
-
-	F3 := ReciprocalPolynomial(p^7 * s * (15*t^7 - 35*t^6 + 21*t^5) - 1);
-	E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(7)!0, D := D);
-	E3 := [<E[1], [Invert(p^7 * X!B) : B in E[2]]> : E in E3];
-
-	Es := {@ @};
-	Eis := E0s cat [E1,E2,E3];
-	for Ei in Eis do
-		for E in Ei do
-			Include(~Es, E[1]);
-		end for;
-	end for;
-
-	EBs := {@ @};
-	if Neighbourhoods then
-		for E in Es do
-			Include(~EBs, <E, [B : B in EB[2], EB in Ei, Ei in Eis | EB[1] eq E]>);
-		end for;
-		Es := EBs;
-	end if;
-
-	return SetToSequence(Es);
-end intrinsic;
-
-
-
-
-
-/*intrinsic Etale3511(p::RngIntElt
-	: D := LocalFieldDatabase(),
-	  Neighbourhoods := false) -> SeqEnum
-{}
-	S<s> := PolynomialRing(Rationals());
-	R<t> := PolynomialRing(S);
-	F := (3*t^2 + t + 1)^5 * (1 - 5*t) - s;
-	Fs := SwitchVariables(F);
-
-	K := pAdicField(p, 500);
-	X := pAdicNbhds(K);
-
-	E0s := [];
-	for a in [2..(p-1)] do
-		F0 := SwitchVariables(Evaluate(Fs, a + p*t));
-		E0 := EtaleAlgebraFamily(F0, p : D := D);
-		E0 := [<E[1], [a + p * X!B : B in E[2]]> : E in E0];
-		Append(~E0s, E0);
-	end for;
-
-	F1 := SwitchVariables(Evaluate(Fs, p^5*t));
-	E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
-	E1 := [<E[1], [p^5 * X!B : B in E[2]]> : E in E1];
-
-	F2 := SwitchVariables(Evaluate(Fs, 1 + p^3*t));
-	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(3)!0, D := D);
-	E2 := [<E[1], [1 + p^3 * X!B : B in E[2]]> : E in E2];
-
-	E2 := [];
-
-	F3 := ReciprocalPolynomial(p^11 * s * t * (3*t^2 + 11*t + 33)^5 - 5^10);
-	E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(11)!0, D := D);
-	E3 := [<E[1], [Invert(p^11 * X!B) : B in E[2]]> : E in E3];
-
-	Es := {@ @};
-	Eis := E0s cat [E1,E2,E3];
-	for Ei in Eis do
-		for E in Ei do
-			Include(~Es, E[1]);
-		end for;
-	end for;
-
-	EBs := {@ @};
-	if Neighbourhoods then
-		for E in Es do
-			Include(~EBs, <E, [B : B in EB[2], EB in Ei, Ei in Eis | EB[1] eq E]>);
-		end for;
-		Es := EBs;
-	end if;
-
-	return SetToSequence(Es);
-end intrinsic;*/
-
 
 intrinsic Etale257Unramified(p::RngIntElt
 	: Neighbourhoods := false) -> SeqEnum
 {}
+	require p notin [2,5,7]: "Argument 1 must be unequal to 2, 5 or 7";
 	R<t> := PolynomialRing(GF(p));
 	psi := 25*t^3 + 20*t^2 + 14*t + 14;
 	phi := 4*t^5 * psi;
@@ -281,59 +178,6 @@ intrinsic Etale257Unramified2(p::RngIntElt) -> SeqEnum, SeqEnum, SeqEnum, SeqEnu
 	return Es, Es0, Es1, Esoo;
 end intrinsic;
 
-
-intrinsic Etale257Other(p::RngIntElt
-	: D := LocalFieldDatabase(),
-	  Neighbourhoods := false) -> SeqEnum
-{}
-	S<s> := PolynomialRing(Rationals());
-	R<t> := PolynomialRing(S);
-	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
-	Fs := SwitchVariables(F);
-
-	K := pAdicField(p, 500);
-	X := pAdicNbhds(K);
-
-	E1s := [];
-	for k in [1..4] do
-		F1 := SwitchVariables(Evaluate(Fs, p^k*t));
-		E1 := EtaleAlgebraFamily(F1, p : Filter := Integers(5)!0, D := D);
-		E1 := [<E[1], [p^k * X!B : B in E[2]]> : E in E1];
-		Append(~E1s, E1);
-	end for;
-
-	F2 := SwitchVariables(Evaluate(Fs, 1 + p*t));
-	E2 := EtaleAlgebraFamily(F2, p : Filter := Integers(2)!0, D := D);
-	E2 := [<E[1], [1 + p * X!B : B in E[2]]> : E in E2];
-
-	E3s := [];
-	for k in [1..6] do
-		k;
-		F3 := ReciprocalPolynomial(p^k * s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
-		E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(7)!0, D := D);
-		E3 := [<E[1], [Invert(p^k * X!B) : B in E[2]]> : E in E3];
-		Append(~E3s, E3);
-	end for;
-"combining";
-	Es := {@ @};
-	Eis := E1s cat [E2] cat E3s;
-	for Ei in Eis do
-		for E in Ei do
-			Include(~Es, E[1]);
-		end for;
-	end for;
-
-	EBs := {@ @};
-	if Neighbourhoods then
-		"neighbourhoods";
-		for E in Es do
-			Include(~EBs, <E, [B : B in EB[2], EB in Ei, Ei in Eis | EB[1] eq E]>);
-		end for;
-		Es := EBs;
-	end if;
-
-	return SetToSequence(Es);
-end intrinsic;
 
 intrinsic FindParameter() -> .
 {}
@@ -423,4 +267,122 @@ intrinsic FindParameter() -> .
 	end for;
 
 	return C;
+end intrinsic;
+
+intrinsic Etale257Degree7Relative(p::PlcNumElt
+	: D := LocalFieldDatabase(),
+	  Neighbourhoods := false) -> SeqEnum
+{}
+	K<a> := NumberField(p);
+	S<s> := PolynomialRing(K);
+	R<t> := PolynomialRing(S);
+	F := t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9 * s;
+
+	pi := UniformizingElement(p);
+
+	E0s := [];
+	//TODO: take representatives of residue field here
+	for a in [2..(#ResidueClassField(p)-1)] do
+		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + pi*t));
+		E0 := EtaleAlgebraFamily(F0, p : D := D);
+		for i := 1 to #E0 do
+			SetData(~E0[i], [a + pi * B : B in Data(E0[i])]);
+		end for;
+		Append(~E0s, E0);
+	end for;
+
+	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, Filter := Integers(5)!0, D := D);
+
+	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
+	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, Filter := Integers(2)!0, D := D);
+	for i := 1 to #E2 do
+		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
+	end for;
+
+	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, Filter := Integers(7)!0, D := D);
+	for i := 1 to #E3 do
+		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
+	end for;
+
+	Es := [];
+	Eis := (&cat E0s) cat E1 cat E2 cat E3;
+	if not Neighbourhoods then
+		for i := 1 to #Eis do
+			ClearData(~Eis[i]);
+		end for;
+	end if;
+
+	for Ei in Eis do
+		if exists (i) {i : i in [1..#Es] | IsIsomorphic(Es[i], Ei)} then
+			if Neighbourhoods then
+				AddData(~Es[i], Data(Ei));
+			end if;
+		else
+			Append(~Es, Ei);
+		end if;
+	end for;
+
+	return Es;
+end intrinsic;
+
+
+
+
+
+
+
+intrinsic Etale257Degree7(p::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Neighbourhoods := false) -> SeqEnum
+{}
+	S<s> := PolynomialRing(Rationals());
+	R<t> := PolynomialRing(S);
+	F := (27*s^2 - 2268*s*t^5 + 1890*s*t^6 - 5760*s*t^7 - 1764*t^10 +
+		2940*t^11 - 6265*t^12 + 4200*t^13 - 1500*t^14) / 27;
+
+	E0s := [];
+	for a in [2..(p-1)] do
+		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));
+		E0 := EtaleAlgebraFamily(F0, p : D := D);
+		for i := 1 to #E0 do
+			SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
+		end for;
+	Append(~E0s, E0);
+	end for;
+
+	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, Filter := Integers(5)!0, D := D);
+
+	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
+	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, Filter := Integers(2)!0, D := D);
+	for i := 1 to #E2 do
+		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
+	end for;
+
+	//F3 := ReciprocalPolynomial(p^7 * s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
+	//E3 := EtaleAlgebraFamily(F3, p : Filter := Integers(7)!0, D := D);
+	//for i := 1 to #E3 do
+	//	SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
+	//end for;
+	E3 := [];
+
+	Es := [];
+	Eis := (&cat E0s) cat E1 cat E2 cat E3;
+	if not Neighbourhoods then
+		for i := 1 to #Eis do
+			ClearData(~Eis[i]);
+		end for;
+	end if;
+
+	for Ei in Eis do
+		if exists (i) {i : i in [1..#Es] | IsIsomorphic(Es[i], Ei)} then
+			if Neighbourhoods then
+				AddData(~Es[i], Data(Ei));
+			end if;
+		else
+			Append(~Es, Ei);
+		end if;
+	end for;
+
+	return Es;
 end intrinsic;

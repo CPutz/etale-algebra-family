@@ -50,8 +50,8 @@ intrinsic EtaleAlgebra(L::SeqEnum[Tup]
     K := BaseRing(L[1][1]);
     require ISA(Type(K), FldPad) or ISA(Type(K), RngPad):
         "Components should be defined over a p-adic field or ring";
-    require forall {Li : Li in L | BaseRing(Li[1]) eq K}:
-        "All components in Parameter 1 must be defined over the same ring";
+    //require forall {Li : Li in L | BaseRing(Li[1]) eq K}:
+    //    "All components in Parameter 1 must be defined over the same ring";
 
     E := New(EtAlg);
     //E`DefiningPolynomial := &* [DefiningPolynomial(Li[1])^Li[2] : Li in L];
@@ -120,11 +120,18 @@ intrinsic SetData(~E::EtAlg, D::.)
 end intrinsic;
 
 intrinsic AddData(~E::EtAlg, D::.)
-{Adds D to the mata data attached to E}
+{Adds D to the meta data attached to E}
     if not assigned E`Data then
         E`Data := [];
     end if;
-    Append(~E`Data, D);
+    if ISA(Type(D), SeqEnum) then
+        for d in D do
+            Append(~E`Data, d);
+        end for;
+        //E`Data cat:= D;
+    else
+        Append(~E`Data, D);
+    end if;
 end intrinsic;
 
 intrinsic ClearData(~E::EtAlg)
@@ -178,6 +185,7 @@ used for searching.}
             B := BaseRing(Parent(P));
             p := UniformizingElement(B);
             //f := DefiningPolynomial(Ext, B)
+
             if IsCoercible(BaseRing(Ext), B) then
                 f := DefiningPolynomial(Ext, BaseRing(Ext));
             else
@@ -190,9 +198,9 @@ used for searching.}
             //reduce coefficients modulo p^s
             //fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
             fR := f;
-            _,_,Exts := Factorization(fR : Extensions := true);
-            assert #Exts eq 1;
-            return Exts[1]`Extension;
+            _,_,Extsf := Factorization(fR : Extensions := true);
+            assert #Extsf eq 1;
+            return Extsf[1]`Extension;
         end if;
     end for;
     return BaseRing(P);
