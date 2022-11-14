@@ -25,16 +25,9 @@
 
     GFE
     {
-        235.m
-        7sqrt5.m
         257.m
         357.m
         257_degree7.m
         3511.m
-    }
-
-    Belyi
-    {
-        padic.m
     }
 }
