@@ -99,6 +99,11 @@ intrinsic DefiningPolynomial(E::EtAlg) -> RngUPolElt
     return E`DefiningPolynomial;
 end intrinsic;
 
+intrinsic MonogenicDefiningPolynomial(E::EtAlg) -> RngUPolElt
+{A defining polynomial for E that is monogenic}
+    return &* [MinimalPolynomial(K[1].1 + BaseRing(K[1]).1, BaseRing(E))^K[2] : K in Components(E)];
+end intrinsic;
+
 intrinsic Components(E::EtAlg) -> SeqEnum
 {E as a sequence of fields with multiplicities}
 	return E`Components;
