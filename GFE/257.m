@@ -179,6 +179,13 @@ intrinsic Etale257Unramified2(p::RngIntElt) -> SeqEnum, SeqEnum, SeqEnum, SeqEnu
 end intrinsic;
 
 
+intrinsic FactorizationPartition(f::RngUPolElt, p::RngIntElt) -> SetMulti
+{}
+	Rp := PolynomialRing(pAdicField(p,500));
+	fac := Factorization(Rp!f);
+	return {* Degree(d[1])^^d[2] : d in fac *};
+end intrinsic;
+
 intrinsic FindParameter() -> .
 {}
 	Dx := [5];
@@ -328,9 +335,9 @@ end intrinsic;
 
 
 
-
-
-
+/*
+ * The other Belyi map for signature (2,5,7), which is defined over Q(Sqrt(21)).
+ */
 
 intrinsic Etale257Degree7(p::RngIntElt
 	: D := LocalFieldDatabase(),

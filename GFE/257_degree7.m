@@ -1,6 +1,6 @@
 Z := Integers();
 
-intrinsic Etale257Degree7(p::RngIntElt
+/*intrinsic Etale257Degree7(p::RngIntElt
      : D := LocalFieldDatabase(),
        Neighbourhoods := false) -> SeqEnum
 {}
@@ -51,7 +51,7 @@ intrinsic Etale257Degree7(p::RngIntElt
      end if;
 
      return SetToSequence(Es);
-end intrinsic;
+end intrinsic;*/
 
 intrinsic FindDiscriminant(p::RngIntElt) -> .
 {}
@@ -288,7 +288,7 @@ intrinsic Etale257_degree7_7() -> .
      return 0;
 end intrinsic;
 
-
+/*
 intrinsic Etale257_degree7_test(p::RngIntElt) -> .
 {}
      K21<a> := QuadraticField(21);
@@ -376,3 +376,4 @@ intrinsic Etale257_degree7_test3(p::RngIntElt) -> .
 
      return Es;
 end intrinsic;
+*/

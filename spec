@@ -9,14 +9,6 @@
         utils.m
     }
 
-    NumberFields
-    {
-        power.m
-        filter_local.m
-        completion.m
-        minimal.m
-    }
-
     LocalFields
     {
         subfields.m

@@ -1,7 +1,8 @@
 intrinsic Etale357(p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false) -> SeqEnum
-{}
+{Computes the isomorphism classes of local etale algebras at p attached to
+the GFE with signature (3,5,7) and Belyi map 15t^7 - 35t^6 + 21t^5.}
 	S<s> := PolynomialRing(Rationals());
 	R<t> := PolynomialRing(S);
 	F := 15*t^7 - 35*t^6 + 21*t^5 - s;
