@@ -81,6 +81,34 @@ intrinsic EtaleAlgebra(K::FldPad
     return E;
 end intrinsic;
 
+intrinsic EtaleAlgebra(K::FldNum[FldRat], p::RngIntElt
+    : D := LocalFieldDatabase(),
+      Precision := 500) -> EtAlg
+{For a number field K over Q, returns an etale algebra isomorphic to K ⊗ Q_p.}
+    require IsPrime(p): "p must be prime";
+
+    Qp := pAdicField(p,Precision);
+    Rp := PolynomialRing(Qp);
+    return EtaleAlgebra(Rp!DefiningPolynomial(K) : D := D);
+end intrinsic;
+
+intrinsic EtaleAlgebra(L::FldNum, p::PlcNumElt
+    : D := LocalFieldDatabase(),
+      Precision := 500) -> EtAlg
+{For a number field L over K, returns an etale algebra isomorphic to L ⊗ K_p.}
+    K := BaseRing(L);
+    require K eq NumberField(p): "p must be a place of the base field of K";
+
+    Kp,KtoKp := Completion(K,p : Precision := Precision);
+    //make Kp finite precision
+    Kpf := ChangePrecision(Kp,Precision);
+    KptoKpf := Coercion(Kp,Kpf);
+    R := PolynomialRing(K);
+    Rp,RtoRp := ChangeRing(R, Kpf, KtoKp * KptoKpf);
+    return EtaleAlgebra(RtoRp(DefiningPolynomial(L)) : D := D);
+end intrinsic;
+
+
 intrinsic Print(E::EtAlg)
 {Print E}
     printf "Etale algebra with components %o", Components(E);
@@ -184,26 +212,24 @@ used for searching.}
         "Optional database parameter D must be local field database";
     Exts := AllExtensions(D, BaseRing(P), d);
 
+    require IsIrreducible(P): "P must be irreducible";
+
     for Ext in Exts do
         R := PolynomialRing(Ext);
         if HasRoot(R ! P) then
             B := BaseRing(Parent(P));
             p := UniformizingElement(B);
-            //f := DefiningPolynomial(Ext, B)
 
-            if IsCoercible(BaseRing(Ext), B) then
+            if Degree(BaseRing(Ext)) eq Degree(B) then
                 f := DefiningPolynomial(Ext, BaseRing(Ext));
+            //if Ext is a double extension (totally ramified of unramified)
+            //then we need to take a BaseRing twice
             else
                 f := DefiningPolynomial(Ext, BaseRing(BaseRing(Ext)));
             end if;
             f := ChangeRing(f, B);
 
-            //s := Z!Floor(Separant(PolynomialRing(Q)!f, Z!p) + 1);
-            //R := quo<B | p^s>;
-            //reduce coefficients modulo p^s
-            //fR := PolynomialRing(B)![Z!(R!c) : c in Coefficients(f)];
-            fR := f;
-            _,_,Extsf := Factorization(fR : Extensions := true);
+            _,_,Extsf := Factorization(f : Extensions := true);
             assert #Extsf eq 1;
             return Extsf[1]`Extension;
         end if;
