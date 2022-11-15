@@ -176,21 +176,38 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 		fac := Factorization(f);
 		fs := [<fi[1],fi[2]> : fi in fac];
-		f_hats := [f div fi[1]^fi[2] : fi in fs];
+		//f_hats := [f div fi[1]^fi[2] : fi in fs];
+		if #fs eq 1 then
+			f_hats := [f div fi[1]^fi[2] : fi in fs];
+		else
+			f_hats := [&*[fs[i,1] ^ fs[i,2] : i in [1..#fs] | i ne j] : j in [1..#fs]];
+		end if;
 
 		c,cs := XGCD(f_hats);
+
+		/*if #fs eq 3 then
+			c1,cs11,cs12 := XGCD(fs[1,1]^fs[1,2],fs[2,1]^fs[2,2]);
+			c2,cs21,cs22 := XGCD(fs[1,1]^fs[1,2] * fs[2,1]^fs[2,2], c1*fs[3,1]^fs[3,2]);
+			c := c2;
+			cs := [cs12 * cs22, cs11 * cs22, cs21]; 
+
+			"should be 1:",cs21 * f_hats[3] + cs22 * cs11 * f_hats[2] + cs22 * cs12 * f_hats[1]; 
+		end if;*/
+		cs;
+		c;
+
 		min_val_ci := Min([Valuation(ci) : ci in Coefficients(c), c in cs] cat [0]);
 		c := c * phi(pi)^(-min_val_ci);
 		cs := [phi(pi)^(-min_val_ci) * c : c in cs];
 
-		//assert that sum_i cs[i] * f_hats[i] = d
-		//assert forall {c : c in Coefficients(d - &+[fc[1]*fc[2] : fc in zip(cs, f_hats)]) | K!0 in c};
+		//assert that sum_i cs[i] * f_hats[i] = c
+		assert forall {co : co in Coefficients(c - &+[fc[1]*fc[2] : fc in zip(cs, f_hats)]) | OKpq!co eq 0};
 		
-		//assert &+[fc[1]*fc[2] : fc in zip(cs, f_hats)] eq d;
 		assert Degree(c) eq 0;
 		c := ConstantCoefficient(c);
 
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in zip(cs, fs)];
+		rs;
 
 		//TODO: can use min_val here to reduce bound by a lot
 		bound := 0;
@@ -292,7 +309,11 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 		// Filter
 		//"#Nbhds before:", #Nbhds;
+
+		{* Valuation(c[1],p) : c in Nbhds *};
 		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1), Filter, MinVal)];
+		{* Valuation(c[1],p) : c in Nbhds *};
+
 		//"#Nbhds after:", #Nbhds;
 	until IsEmpty(Nbhds);
 
@@ -320,7 +341,7 @@ end intrinsic;
 
 
 
-intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
+/*intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 {}
 	r := AbsolutePrecision(x);
 	if n le r then
@@ -334,7 +355,7 @@ intrinsic Subdivide(x::FldPadElt, n::RngIntElt) -> SeqEnum
 
 		return SetToSequence({K!((S!x) + pi^r * y) : y in R});
 	end if;
-end intrinsic;
+end intrinsic;*/
 
 intrinsic Subdivide(x::FldNumElt, r::RngIntElt, n::RngIntElt, p::PlcNumElt) -> SeqEnum
 {}
@@ -344,10 +365,17 @@ intrinsic Subdivide(x::FldNumElt, r::RngIntElt, n::RngIntElt, p::PlcNumElt) -> S
 		K := Parent(x);
 		OK := Integers(K);
 		pi := UniformizingElement(p);
-		R := quo<OK | pi^(n - r)>;
+
+		Kp,KtoKp := Completion(K,p);
+		OKp := Integers(Kp);
+		pip := UniformizingElement(Kp);
+
+		//R := quo<OK | pi^(n - r)>;
+		R := quo<OKp | pip^(n - r)>;
+		phi := Coercion(OKp, R);
 		S := quo<OK | pi^n>;
 
-		return SetToSequence({<K!(OK!S!x + pi^r * OK!y), n> : y in R});
+		return SetToSequence({<K!(OK!S!x + pi^r * (y@@phi)@@KtoKp), n> : y in R});
 	end if;
 end intrinsic;
 
