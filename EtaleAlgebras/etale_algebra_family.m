@@ -257,7 +257,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 		gen_sep := SwitchVariables(SeparantUPol(RtoRQ(F)) div t^Degree(F));
 	else
 		//gen_sep := SwitchVariables(SeparantUPol(F) div t^Degree(F));
-		gen_sep := ValuationsInRootsOfUPol(Derivative(F), F);
+		gen_sep := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
 	end if;
 	
 

@@ -206,7 +206,7 @@ intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt, min::.) -> 
 	else
 		//check whether N contains an element of valuation >= min
 		//TODO: check whether use of IsPower is correct
-		if vc lt min and (vc ne vr or not IsPower(-(K!c) / r, k)) then
+		if vc lt min and (vc ne vr or not IsPower(-(K!c) div r, k)) then
 			return false;
 		end if;
 
@@ -225,7 +225,7 @@ intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt, min::.) -> 
 		end if;
 		
 		//TODO: not completely correct I think
-		b,_ := IsPower(-(K!c) / r, k);
+		b,_ := IsPower(-(K!c) div r, k);
 		return b;
 	end if;
 end intrinsic;
