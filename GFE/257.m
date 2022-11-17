@@ -14,7 +14,6 @@ intrinsic Etale257(p::RngIntElt
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));
 		E0 := EtaleAlgebraFamily(F0, p : D := D);
 		for i := 1 to #E0 do
-			"0: this is where the error occurs?";
 			SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
 		end for;
 		Append(~E0s, E0);
@@ -25,14 +24,12 @@ intrinsic Etale257(p::RngIntElt
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
 	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, Filter := Integers(2)!0, D := D);
 	for i := 1 to #E2 do
-		"1: this is where the error occurs?";
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
 	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, Filter := Integers(7)!0, D := D);
 	for i := 1 to #E3 do
-		"2: this is where the error occurs?";
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
 
@@ -47,7 +44,6 @@ intrinsic Etale257(p::RngIntElt
 	for Ei in Eis do
 		if exists (i) {i : i in [1..#Es] | IsIsomorphic(Es[i], Ei)} then
 			if Neighbourhoods then
-				"3: this is where the error occurs?";
 				AddData(~Es[i], Data(Ei));
 			end if;
 		else

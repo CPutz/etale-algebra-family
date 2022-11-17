@@ -263,16 +263,24 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
-	vprintf EtaleAlg: "computing general separant\n";
 	if Degree(K) eq 1 then // K = Q
-		// Compute the separant over Q because it is faster
+		vprintf EtaleAlg: "computing general separant\n";
+		//compute the separant over Q because it is faster
 		KtoQ := Coercion(K, Q);
 		SQ,StoSQ := ChangeRing(S, Q, KtoQ);
 		RQ,RtoRQ := ChangeRing(R, SQ, StoSQ);
 		gen_sep := SwitchVariables(SeparantUPol(RtoRQ(F)) div t^Degree(F));
 	else
-		//gen_sep := SwitchVariables(SeparantUPol(F) div t^Degree(F));
+		vprintf EtaleAlg: "computing general mu-bound\n";
+		//compute mu_F and the difference between the roots of F instead of
+		//the separant because computing separants over a number field is too slow
 		gen_sep := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
+		gen_sep;
+		Re<e> := PolynomialRing(S);
+		Rx<x> := PolynomialRing(Re);
+		_<y> := PolynomialRing(Rx);
+		vprintf EtaleAlg: "computing general difference of roots\n";
+		dif := SwitchVariables(Resultant(Resultant(e - (x-y), Evaluate(F,y)), Evaluate(F,x)) div e^Degree(F));
 	end if;
 	
 
@@ -292,7 +300,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 			else
 				sN := Evaluate(gen_sep, N[1]);
-				sig := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]);
+				dN := Evaluate(dif, N[1]);
+				sig := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]) + Max([r[1] : r in ValuationsOfRoots(dN,Ideal(p))]);
 
 				if sig - min_val_s lt N[2] then
 					Append(~Nbhds_end, N);
