@@ -108,7 +108,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500,
 	  Filter := Integers(1)!0,
-	  MinVal := 0) -> SeqEnum
+	  MinVal := 0,
+	  Hint := []) -> SeqEnum
 {}
 	R := Parent(F);
 	S := BaseRing(R);
@@ -122,14 +123,15 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	pl := Decomposition(Qnf, p)[1,1];
 
 	return EtaleAlgebraFamily(RtoRnf(F), pl
-		: D := D, Precision := Precision, Filter := Filter, MinVal := MinVal);
+		: D := D, Precision := Precision, Filter := Filter, MinVal := MinVal, Hint := Hint);
 end intrinsic;
 
 intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Precision := 500,
 	  Filter := Integers(1)!0,
-	  MinVal := 0) -> SeqEnum
+	  MinVal := 0,
+	  Hint := []) -> SeqEnum
 {}
 	R := Parent(F);
 	S := BaseRing(R);
@@ -323,7 +325,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	//assert forall {N : N in Nbhds | Valuation(x) lt AbsolutePrecision(x) where x := Evaluate(StoSpP(disc), Representative(N))};
 
 	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);
-	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] : D := D, Data := Nbhds);
+	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
+		D := D, Data := Nbhds, Hint := Hint);
 
 	return E;
 end intrinsic;

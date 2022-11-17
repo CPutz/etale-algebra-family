@@ -301,8 +301,9 @@ function factorization_structure_list(L);
 end function;
 
 intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
-    :D := LocalFieldDatabase(),
-     Data := []) -> SeqEnum[EtAlg]
+    : D := LocalFieldDatabase(),
+      Hint := [],
+      Data := []) -> SeqEnum[EtAlg]
 {Creates a list of etale algebra given a sequence of polynomials over a local field}
     require Data eq [] or #L eq #Data: "L and Data must have the same length";
 
@@ -320,14 +321,26 @@ intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
         res := [];
         for FP in C do
             found := false;
-            Ec := 0;
-            for E in res do
+            //search for etale algebra in previously found algebras
+            if not found then
+                for E in res do
+                    if IsDefiningPolynomialEtale(E, FP[1]) then
+                        found := true;
+                        Ec := E;
+                        break;
+                    end if;
+                end for;
+            end if;
+
+            //search for etale algebra in Hint
+            for E in Hint do
                 if IsDefiningPolynomialEtale(E, FP[1]) then
                     found := true;
                     Ec := E;
                     break;
                 end if;
             end for;
+
             if found then //add meta data
                 if use_data then
                     AddData(~Ec, FP[3]); 
