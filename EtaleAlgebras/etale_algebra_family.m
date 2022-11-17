@@ -250,12 +250,13 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 		k := LCM([fi[2] : fi in fs]);
 		vprintf EtaleAlg: "k = %o\n", k;
 		v := k * Ceiling(bound / k);
-		v_power := 2*Valuation(K!k, p) + 1;
-		OKmOKk := quo<OKp | piKp^v_power>; // OK / (OK)^k
+		//v_power := 2*Valuation(K!k, p) + 1;
+		//OKmOKk := quo<OKp | piKp^v_power>; // OK / (OK)^k
 
-		// representatives for OK* / (OK*)^k would be sufficient here
+		//the group K*/(K*)^k
+		KmKk,phik := pSelmerGroup(k,Kp);
 		//TODO: something separate with 0 here...?
-		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r[1], (OKpq!a) * piOKpq^(v + w), k) : a in OKmOKk, w in [0..k-1] | a ne 0];
+		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r[1], (OKpq!(a@@phik)) * piOKpq^v, k) : a in KmKk | (a@@phik) ne 0];
 	end for;
 
 	vprintf EtaleAlg: "computing nbhds\n";
