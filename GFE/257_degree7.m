@@ -1,6 +1,6 @@
 Z := Integers();
 
-/*intrinsic Etale257Degree7(p::RngIntElt
+intrinsic Etale257Degree7(p::RngIntElt
      : D := LocalFieldDatabase(),
        Neighbourhoods := false) -> SeqEnum
 {}
@@ -51,7 +51,7 @@ Z := Integers();
      end if;
 
      return SetToSequence(Es);
-end intrinsic;*/
+end intrinsic;
 
 intrinsic FindDiscriminant(p::RngIntElt) -> .
 {}

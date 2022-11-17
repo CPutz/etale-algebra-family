@@ -193,8 +193,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 			"should be 1:",cs21 * f_hats[3] + cs22 * cs11 * f_hats[2] + cs22 * cs12 * f_hats[1]; 
 		end if;*/
-		cs;
-		c;
 
 		min_val_ci := Min([Valuation(ci) : ci in Coefficients(c), c in cs] cat [0]);
 		c := c * phi(pi)^(-min_val_ci);
@@ -207,7 +205,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 		c := ConstantCoefficient(c);
 
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in zip(cs, fs)];
-		rs;
 
 		//TODO: can use min_val here to reduce bound by a lot
 		bound := 0;
@@ -219,14 +216,12 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 			ri := rs[i];
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
-			fi, ri, ki;
 			stabi,ci := StabilityBound(ROKpq!fi, ROKpq!ri, ki);
 			bi := Valuation(ci) / (Degree(fi)*ki);
 			nu_i := MaxValuationInRootsOf(f_hats[i], fs[i,1]);
 			boundi := Max(stabi, ki * (Valuation(c) + bi + nu_i));
 			"boundi", boundi;
 			"stabi", stabi;
-			fi; ri;
 			"bi", bi;
 			"vc", Valuation(c);
 			bound := Max(bound, boundi);
@@ -284,8 +279,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	depth := 0;
 	repeat
 		Nbhds_new := [];
-		vprintf EtaleAlg: "depth %o with %o nbhds\n", depth, #Nbhds;
 		depth +:= 1;
+		vprintf EtaleAlg: "subdivision %o with %o neighbourhoods\n", depth, #Nbhds;
 		for N in Nbhds do
 			Np := phi(N[1]) + O(piKp^N[2]);
 			if exists { Nd : Nd in Nbhds_disc | Nd in Np } then
@@ -300,8 +295,6 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 					Append(~Nbhds_end, N);
 				else
 					Nbhds_new cat:= Subdivide(N[1], N[2], Floor(sig - min_val_s + 1), p);
-				//#Subdivide(N[1], N[2], Floor(sig + 1), p);
-				//N[1]; N[2]; Floor(sig + 1);
 				end if;
 			end if;
 		end for;
@@ -309,11 +302,7 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 		// Filter
 		//"#Nbhds before:", #Nbhds;
-
-		{* Valuation(c[1],p) : c in Nbhds *};
 		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1), Filter, MinVal)];
-		{* Valuation(c[1],p) : c in Nbhds *};
-
 		//"#Nbhds after:", #Nbhds;
 	until IsEmpty(Nbhds);
 

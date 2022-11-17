@@ -210,6 +210,7 @@ used for searching.}
 
     require ISA(Type(D), MyDB):
         "Optional database parameter D must be local field database";
+
     Exts := AllExtensions(D, BaseRing(P), d);
 
     require IsIrreducible(P): "P must be irreducible";
