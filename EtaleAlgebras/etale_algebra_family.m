@@ -109,7 +109,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	  Precision := 500,
 	  Filter := Integers(1)!0,
 	  MinVal := 0,
-	  Hint := []) -> SeqEnum
+	  Hint := [],
+	  BoundMethod := "Default") -> SeqEnum
 {}
 	R := Parent(F);
 	S := BaseRing(R);
@@ -123,7 +124,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	pl := Decomposition(Qnf, p)[1,1];
 
 	return EtaleAlgebraFamily(RtoRnf(F), pl
-		: D := D, Precision := Precision, Filter := Filter, MinVal := MinVal, Hint := Hint);
+		: D := D, Precision := Precision, Filter := Filter, MinVal := MinVal,
+			Hint := Hint, BoundMethod := BoundMethod);
 end intrinsic;
 
 intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
@@ -131,7 +133,8 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 	  Precision := 500,
 	  Filter := Integers(1)!0,
 	  MinVal := 0,
-	  Hint := []) -> SeqEnum
+	  Hint := [],
+	  BoundMethod := "Default") -> SeqEnum
 {}
 	R := Parent(F);
 	S := BaseRing(R);
@@ -263,26 +266,41 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
-	if Degree(K) eq 1 then // K = Q
-		vprintf EtaleAlg: "computing general separant\n";
-		//compute the separant over Q because it is faster
+	//if K = Q then separant computations will be performed over Q instead of
+	//RationalsAsNumberField because it is significantly faster
+	if Degree(K) eq 1 then
 		KtoQ := Coercion(K, Q);
 		SQ,StoSQ := ChangeRing(S, Q, KtoQ);
 		RQ,RtoRQ := ChangeRing(R, SQ, StoSQ);
-		gen_sep := SwitchVariables(SeparantUPol(RtoRQ(F)) div t^Degree(F));
+		Fcomp := RtoRQ(F);
+		if BoundMethod eq "Default" then
+			BoundMethod := "Separant";
+		end if;
 	else
-		vprintf EtaleAlg: "computing general mu-bound\n";
-		//compute mu_F and the difference between the roots of F instead of
-		//the separant because computing separants over a number field is too slow
-		gen_sep := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
-		gen_sep;
-		Re<e> := PolynomialRing(S);
-		Rx<x> := PolynomialRing(Re);
-		_<y> := PolynomialRing(Rx);
-		vprintf EtaleAlg: "computing general difference of roots\n";
-		dif := SwitchVariables(Resultant(Resultant(e - (x-y), Evaluate(F,y)), Evaluate(F,x)) div e^Degree(F));
+		Fcomp := F;
+		if BoundMethod eq "Default" then
+			BoundMethod := "Difference";
+		end if;
 	end if;
-	
+
+	case BoundMethod:
+		when "Separant":
+			vprintf EtaleAlg: "computing general separant\n";
+			gen_bound := SwitchVariables(SeparantUPol(Fcomp) div Parent(F).1^Degree(F));
+		when "Derivative":
+			vprintf EtaleAlg: "computing general derivative evaluated at roots\n";
+			gen_bound := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
+		when "Difference":
+			vprintf EtaleAlg: "computing general derivative evaluated at roots\n";
+			gen_bound := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
+			vprintf EtaleAlg: "computing general difference of roots\n";
+			Re<e> := PolynomialRing(S);
+			Rx<x> := PolynomialRing(Re);
+			_<y> := PolynomialRing(Rx);
+			gen_diff := SwitchVariables(Resultant(Resultant(e - (x-y), Evaluate(F,y)), Evaluate(F,x)) div e^Degree(F));
+		else:
+			error "Option for BoundMethod not supported:", BoundMethod;
+	end case;
 
 	// Subdivide in neighborhoods
 	Nbhds := [<K!0,0>];
@@ -299,14 +317,23 @@ intrinsic EtaleAlgebraFamily(F::RngUPolElt, p::PlcNumElt
 			elif exists { Nd : Nd in Nbhds_disc | Np in Nd } then
 				//Do nothing since N is contained in one of the neighborhoods around a root of the discriminant
 			else
-				sN := Evaluate(gen_sep, N[1]);
-				dN := Evaluate(dif, N[1]);
-				sig := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]) + Max([r[1] : r in ValuationsOfRoots(dN,Ideal(p))]);
+				sN := Evaluate(gen_bound, N[1]);
+				bN := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]);
+				case BoundMethod:
+					when "Separant":
+						boundN := bN;
+					when "Derivative":
+						boundN := 2*bN;
+					when "Difference":
+						dN := Evaluate(gen_diff, N[1]);
+						bdN := Max([r[1] : r in ValuationsOfRoots(dN,Ideal(p))]);
+						boundN := bN + bdN;
+				end case;
 
-				if sig - min_val_s lt N[2] then
+				if boundN - min_val_s lt N[2] then
 					Append(~Nbhds_end, N);
 				else
-					Nbhds_new cat:= Subdivide(N[1], N[2], Floor(sig - min_val_s + 1), p);
+					Nbhds_new cat:= Subdivide(N[1], N[2], Floor(boundN - min_val_s + 1), p);
 				end if;
 			end if;
 		end for;
