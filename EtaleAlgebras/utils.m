@@ -33,3 +33,8 @@ intrinsic SwitchVariables(f::RngUPolElt) -> RngUPolElt
 	phi3 := hom<T -> S | S.1, R.1>;
 	return phi3(phi2(f));
 end intrinsic;
+
+intrinsic ConstantCoefficient(P::RngMPolElt) -> RngElt
+{Returns the constant coefficient of a multivariate polynomial}
+	return Evaluate(P, [0 : i in [1..Rank(Parent(P))]]);
+end intrinsic;

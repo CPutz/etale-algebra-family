@@ -1,8 +1,14 @@
+/*
+ * 
+ */
 
-//Local etale algebras
 declare type EtAlg;
 declare attributes EtAlg: DefiningPolynomial, Components, BaseRing,
     FactorizationStructure, Data;
+
+/*
+ * Creation of etale algebras
+ */
 
 //collapse isomorphic factors
 function etale_reduce(Es);
@@ -35,13 +41,23 @@ used to store some meta data with the etale algebra.}
     require ISA(Type(K), FldPad) or ISA(Type(K), RngPad):
         "Parameter 1 should be defined over a p-adic field or ring";
 
-    Es := [ <FindLocalFieldExtension(f[1]: D := D), f[2]> : f in Factorization(P) ];
-    return EtaleAlgebra(Es : Data := Data);
+    //Es := [ <FindLocalFieldExtension(f[1]: D := D), f[2]> : f in Factorization(P) ];
+    E := New(EtAlg);
+    E`DefiningPolynomial := P;
+    E`BaseRing := K;
+    fac,_,exts := Factorization(P : Extensions := true);
+    E`Components := [<e`Extension,1> : e in exts];
+    //E`FactorizationStructure := Sort([<AbsoluteDegree(C[1]), C[2]> : C in Components(E)]);
+    if not ISA(Type(Data), MonStgElt) or Data ne "" then
+        E`Data := Data;
+    end if;
+
+    return E;
 end intrinsic;
 
 intrinsic EtaleAlgebra(L::SeqEnum[Tup]
     :Data := "") -> EtAlg
-{Creates an etale algebra given a sequence of field extensions with multiplicities}
+{Creates an etale algebra as a product of field extensions with multiplicities}
     require not IsEmpty(L):
         "Parameter 1 should be nonempty";
 
@@ -52,10 +68,9 @@ intrinsic EtaleAlgebra(L::SeqEnum[Tup]
     //    "All components in Parameter 1 must be defined over the same ring";
 
     E := New(EtAlg);
-    //E`DefiningPolynomial := &* [DefiningPolynomial(Li[1])^Li[2] : Li in L];
     E`BaseRing := K;
     E`Components := etale_reduce(L);
-    E`FactorizationStructure := Sort([<AbsoluteDegree(C[1]), C[2]> : C in Components(E)]);
+    //E`FactorizationStructure := Sort([<AbsoluteDegree(C[1]), C[2]> : C in Components(E)]);
     if not ISA(Type(Data), MonStgElt) or Data ne "" then
         E`Data := Data;
     end if;
@@ -63,26 +78,10 @@ intrinsic EtaleAlgebra(L::SeqEnum[Tup]
     return E;
 end intrinsic;
 
-intrinsic EtaleAlgebra(K::RngPad
-    :Data := "") -> EtAlg
-{Creates an etale algebra from a field extension of a local field}
-    E := EtaleAlgebra([<K,1>] : Data := Data);
-    E`DefiningPolynomial := DefiningPolynomial(K, BaseRing(E));
-    return E;
-end intrinsic;
-
-intrinsic EtaleAlgebra(K::FldPad
-    :Data := "") -> EtAlg
-{Creates an etale algebra from a field extension of a local field}
-    E := EtaleAlgebra([<K,1>] : Data := Data);
-    E`DefiningPolynomial := DefiningPolynomial(K, BaseRing(E));
-    return E;
-end intrinsic;
-
 intrinsic EtaleAlgebra(K::FldNum[FldRat], p::RngIntElt
     : D := LocalFieldDatabase(),
       Precision := 500) -> EtAlg
-{For a number field K over Q, returns an etale algebra isomorphic to K ⊗ Q_p.}
+{For a number field K over Q, returns an etale algebra K ⊗ Q_p.}
     require IsPrime(p): "p must be prime";
 
     Qp := pAdicField(p,Precision);
@@ -93,27 +92,42 @@ end intrinsic;
 intrinsic EtaleAlgebra(L::FldNum, p::PlcNumElt
     : D := LocalFieldDatabase(),
       Precision := 500) -> EtAlg
-{For a number field L over K, returns an etale algebra isomorphic to L ⊗ K_p.}
+{For a number field L over K, returns an etale algebra L ⊗ K_p.}
     K := BaseRing(L);
     require K eq NumberField(p): "p must be a place of the base field of K";
 
     Kp,KtoKp := Completion(K,p : Precision := Precision);
     //make Kp finite precision
-    Kpf := ChangePrecision(Kp,Precision);
+    /*Kpf := ChangePrecision(Kp,Precision);
     KptoKpf := Coercion(Kp,Kpf);
     R := PolynomialRing(K);
-    Rp,RtoRp := ChangeRing(R, Kpf, KtoKp * KptoKpf);
+    Rp,RtoRp := ChangeRing(R, Kpf, KtoKp * KptoKpf);*/
+    R := PolynomialRing(K);
+    Rp,RtoRp := ChangeRing(R, Kp, KtoKp);
     return EtaleAlgebra(RtoRp(DefiningPolynomial(L)) : D := D);
 end intrinsic;
 
+intrinsic Product(L::SeqEnum[EtAlg]) -> EtAlg
+{Constructs the product of a sequence of etale algebras}
+    return EtaleAlgebra(&cat [<Components(Li),1> : Li in L]);
+end intrinsic;
 
 intrinsic Print(E::EtAlg)
 {Print E}
-    printf "Etale algebra with components %o", Components(E);
+    if assigned E`DefiningPolynomial then
+        printf "Etale algebra defined by %o over %o", DefiningPolynomial(E), BaseRing(E);
+    else
+        printf "Etale algebra defined by product of %o", MultisetToSequence({* C[1]^^C[2] : C in Components(E) *});
+    end if;
     if assigned E`Data then
         printf " with meta data %o", E`Data;
     end if;
 end intrinsic;
+
+
+/*
+ * Accessing and modifying attributes
+ */
 
 intrinsic BaseRing(E::EtAlg) -> .
 {The base ring of E}
@@ -175,11 +189,6 @@ intrinsic Rank(E::EtAlg) -> RngIntElt
     return &+[C[2] * Degree(C[2]) : C in Components(E)];
 end intrinsic;
 
-intrinsic Product(L::SeqEnum[EtAlg]) -> EtAlg
-{Constructs the product of a sequence of etale algebras}
-    return EtaleAlgebra(&cat [Components(Li) : Li in L]);
-end intrinsic;
-
 intrinsic DiscriminantUpToSquares(E::EtAlg) -> .
 {The discriminant of E over its base ring correct up to squares}
     Ds := [Discriminant(Ei[1], BaseRing(E)) : Ei in Components(E) | Ei[2] mod 2 eq 1];
@@ -196,45 +205,9 @@ intrinsic Discriminant(E::EtAlg) -> .
 end intrinsic;
 
 
-intrinsic FindLocalFieldExtension(P::RngUPolElt
-    :D := LocalFieldDatabase()) -> FldPad
-{Given an irreducible polynomial P over a local field, finds the extension
-generated by this polynomial. An optional database of local fields D can be
-used for searching.}
-    d := Degree(P);
-    if d eq 1 then
-        return UnramifiedExtension(BaseRing(P),1);
-    end if;
-
-    require ISA(Type(D), MyDB):
-        "Optional database parameter D must be local field database";
-
-    Exts := AllExtensions(D, BaseRing(P), d);
-
-    require IsIrreducible(P): "P must be irreducible";
-
-    for Ext in Exts do
-        R := PolynomialRing(Ext);
-        if HasRoot(R ! P) then
-            B := BaseRing(Parent(P));
-            p := UniformizingElement(B);
-
-            if Degree(BaseRing(Ext)) eq Degree(B) then
-                f := DefiningPolynomial(Ext, BaseRing(Ext));
-            //if Ext is a double extension (totally ramified of unramified)
-            //then we need to take a BaseRing twice
-            else
-                f := DefiningPolynomial(Ext, BaseRing(BaseRing(Ext)));
-            end if;
-            f := ChangeRing(f, B);
-
-            _,_,Extsf := Factorization(f : Extensions := true);
-            assert #Extsf eq 1;
-            return Extsf[1]`Extension;
-        end if;
-    end for;
-    return BaseRing(P);
-end intrinsic;
+/*
+ * Isomorphism classes of etale algebras
+ */
 
 intrinsic IsIsomorphic(E1::EtAlg, E2::EtAlg) -> BoolElt
 {Determines whether two etale algebras are isomorphic}
@@ -242,10 +215,6 @@ intrinsic IsIsomorphic(E1::EtAlg, E2::EtAlg) -> BoolElt
         exists {Li : Li in Components(E2) |
             IsIsomorphic(Ki[1],Li[1]) and Ki[2] eq Li[2]}};
 end intrinsic;
-
-/*
- * Isomorphism classes of etale algebras
- */
  
 intrinsic FindIsomorphismClasses(L::SeqEnum[EtAlg]) -> SeqEnum[EtAlg]
 {Returns a sequence of representatives of isomorphism classes of a sequence
@@ -297,8 +266,8 @@ polynomials L is isomorphic to E}
     return IsEmpty(Es);
 end intrinsic;
 
-function factorization_structure_list(L);
-    return Sort([<Degree(Ki[1]), Ki[2]> : Ki in L]);
+function factorization_partition(L);
+    return {* Degree(Ki[1])^^Ki[2] : Ki in L *};
 end function;
 
 intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
@@ -313,12 +282,12 @@ intrinsic FindIsomorphismClasses(L::SeqEnum[RngUPolElt]
     if use_data then
         Fs := [<Factorization(L[i]), L[i], Data[i]> : i in [1..#L]];
     else
-        Fs := [<Factorization(P : Certificates := true), P> : P in L];
+        Fs := [<Factorization(P), P> : P in L];
     end if;
 
     //split polynomials up into groups with the same factorization partition
-    Fstructures := {@ factorization_structure_list(F[1]) : F in Fs @};
-    Fss := [[F : F in Fs | factorization_structure_list(F[1]) eq Fstruct] : Fstruct in Fstructures];
+    Fstructures := {@ factorization_partition(F[1]) : F in Fs @};
+    Fss := [[F : F in Fs | factorization_partition(F[1]) eq Fstruct] : Fstruct in Fstructures];
 
     for C in Fss do
         res := [];

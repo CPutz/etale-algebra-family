@@ -1,7 +1,5 @@
 import "utils.m" : sup;
 
-Q := Rationals();
-
 intrinsic Separant(f::RngUPolElt) -> RngIntElt
 {Returns the separant of f}
 	return Separant(f, f);
@@ -121,8 +119,50 @@ intrinsic SeparantMPol(f::RngMPolElt, g::RngMPolElt, v::MPolElt) -> .
 	return ConstantCoefficient(res);
 end intrinsic;
 
-//TODO: where to put?
-intrinsic ConstantCoefficient(P::RngMPolElt) -> RngElt
-{Returns the constant coefficient of a multivariate polynomial}
-	return Evaluate(P, [0 : i in [1..Rank(Parent(P))]]);
+intrinsic ValuationsInRootsOfUPol(f::RngUPolElt, g::RngUPolElt) -> .
+{Returns the general resultant giving the valuations of f at the roots of g}
+	R := BaseRing(Parent(f));
+	S<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(S);
+	res := Resultant(e - Evaluate(f, t), Evaluate(g, t));
+	return res;
+end intrinsic;
+
+intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt) -> .
+{Returns the valuations of f at the roots of g}
+	return ValuationsOfRoots(ValuationsInRootsOfUPol(f,g));
+end intrinsic;
+
+intrinsic ValuationsInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
+{Returns the valuations of f at the roots of g}
+	return ValuationsOfRoots(ValuationsInRootsOfUPol(f,g), p);
+end intrinsic;
+
+intrinsic ValuationsInRootsOfUPolQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPolElt) -> .
+{Returns the general resultant giving the valuations of f1/f2 at the roots of g}
+	R := BaseRing(Parent(f1));
+	S<e> := PolynomialRing(R);
+	T<t> := PolynomialRing(S);
+	res := Resultant(Evaluate(f2, t) * e - Evaluate(f1, t), Evaluate(g, t));
+	return res;
+end intrinsic;
+
+intrinsic ValuationsInRootsOfQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPolElt) -> .
+{Returns the valuations of f1/f2 at the roots of g}
+	return ValuationsOfRoots(ValuationsInRootsOfUPolQuotient(f1,f2,g));
+end intrinsic;
+
+intrinsic ValuationsInRootsOfQuotient(f1::RngUPolElt, f2::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> .
+{Returns the valuations of f1/f2 at the roots of g}
+	return ValuationsOfRoots(ValuationsInRootsOfUPolQuotient(f1,f2,g), p);
+end intrinsic;
+
+intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt) -> RngUPolElt, RngIntElt
+{Returns the maximal valuation of f at roots of g}
+	return Max([x[1] : x in ValuationsOfRoots(ValuationsInRootsOfUPol(f,g))]);
+end intrinsic;
+
+intrinsic MaxValuationInRootsOf(f::RngUPolElt, g::RngUPolElt, p::RngIntElt) -> RngUPolElt, RngIntElt
+{Returns the maximal valuation of f at roots of g}
+	return Max([x[1] : x in ValuationsOfRoots(ValuationsInRootsOfUPol(f,g), p)]);
 end intrinsic;
