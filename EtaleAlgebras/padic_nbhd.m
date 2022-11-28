@@ -19,7 +19,7 @@ intrinsic pAdicNbhds(K::RngPadResExt) -> PAdicNbhd
 end intrinsic;
 
 intrinsic AmbientSpace(X::PadNbhd) -> .
-{}
+{The ambient space that the neighbourhoods of X live in}
 	return X`AmbientSpace;
 end intrinsic;
 
