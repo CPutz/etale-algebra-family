@@ -92,15 +92,15 @@ intrinsic Etale3511(p::RngIntElt
 		Append(~E0s, E0);
 	end for;
 
-	E1 := EtaleAlgebraFamily(phi - s, p : MinVal := 5, Filter := Integers(5)!0, D := D);
+	E1 := EtaleAlgebraFamily(phi - s, p : MinVal := 5, CongrVal := Integers(5)!0, D := D);
 
-	E2 := EtaleAlgebraFamily(phi - (1 + s), p : MinVal := 3, Filter := Integers(3)!0, D := D);
+	E2 := EtaleAlgebraFamily(phi - (1 + s), p : MinVal := 3, CongrVal := Integers(3)!0, D := D);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(psi);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := minvalz, Filter := Integers(11)!0, D := D);
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := minvalz, CongrVal := Integers(11)!0, D := D);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;

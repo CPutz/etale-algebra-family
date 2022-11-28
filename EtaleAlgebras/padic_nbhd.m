@@ -1,8 +1,16 @@
-Z := Integers();
+/*
+ * p-adic neighbourhoods of the form c + r * (OK)^k over a local field K.
+ */
 
 declare type PadNbhd[PadNbhdElt];
 declare attributes PadNbhd: AmbientSpace;
 declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent, Inverted;
+
+Z := Integers();
+
+/*
+ * Creation and printing of the parent space
+ */
 
 intrinsic pAdicNbhds(K::RngPadRes) -> PAdicNbhd
 {The space of p-adic neighbourhoods of the form c + r * (OK)^k}
@@ -25,7 +33,7 @@ end intrinsic;
 
 intrinsic Print(X::PadNbhd)
 {Print X}
-	printf "The space of p-adic neighbourhoods of the form c + r * (OK*)^k with K = %o", AmbientSpace(X);
+	printf "The space of p-adic neighbourhoods of the form c + r * (OK)^k with K = %o", AmbientSpace(X);
 end intrinsic;
 
 intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt
@@ -33,18 +41,19 @@ intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt
 	return AmbientSpace(X1) eq AmbientSpace(X2);
 end intrinsic;
 
-intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIntElt) -> PadNbhdElt
-{}
+
+/*
+ * Creation, coercion and printing of p-adic neighbourhoods
+ */
+
+intrinsic pAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIntElt) -> PadNbhdElt
+{The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
 	requirege k, 1;
-	//require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
-	//require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
 	require Valuation(r) ge 0: "Argument 3 must be integral";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
-	//N`Middle := K!m;
-	//N`Radius := K!r;
 	N`Middle := m;
 	N`Radius := r;
 	N`Exponent := k;
@@ -53,17 +62,13 @@ intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIn
 end intrinsic;
 
 intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::RngPadResExtElt, k::RngIntElt) -> PadNbhdElt
-{}
+{The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
 	requirege k, 1;
-	//require IsCoercible(K, m): "Argument 2 must be coercible into the ambient space of Argument 1";
-	//require IsCoercible(K, r): "Argument 3 must be coercible into the ambient space of Argument 1";
 	require Valuation(r) ge 0: "Argument 3 must be integral";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
-	//N`Middle := K!m;
-	//N`Radius := K!r;
 	N`Middle := m;
 	N`Radius := r;
 	N`Exponent := k;
@@ -74,11 +79,7 @@ end intrinsic;
 intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
-	//if ISA(Type(x), PadNbhdElt) and IsCoercible(K, Middle(x)) and IsCoercible(K, Radius(x)) then
 	if ISA(Type(x), PadNbhdElt) then
-		//phim := Coercion(Parent(Middle(x)),K);
-		//phir := Coercion(Parent(Radius(x)),K);
-		//N := CreatePAdicNbhd(X, phim(Middle(x)), phir(Radius(x)), Exponent(x));
 		N := CreatePAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
 		if IsInverted(x) then
 			Invert(~N);
@@ -92,12 +93,25 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 		end if;
 	end if;
 
-	K;
-	AmbientSpace(Parent(x));
-	Coercion(K, AmbientSpace(Parent(x)));
-
 	return false, "Coercion into X failed";
 end intrinsic;
+
+intrinsic Print(N::PadNbhdElt)
+{Print N}
+	s := Sprintf("%o + (%o) * OK", Middle(N), Radius(N));
+	if Exponent(N) gt 1 then
+		s cat:= "^" cat IntegerToString(Exponent(N));
+	end if;
+	if IsInverted(N) then
+		s := "(" cat s cat ")^{-1}";
+	end if;
+	printf "%o", s;
+end intrinsic;
+
+
+/*
+ * Accessing attributes
+ */
 
 intrinsic Parent(N::PadNbhdElt) -> PadNbhd
 {The parent of N}
@@ -119,32 +133,9 @@ intrinsic Exponent(N::PadNbhdElt) -> RngIntElt
 	return N`Exponent;
 end intrinsic;
 
-intrinsic Invert(~N::PadNbhdElt)
-{Invert N}
-	N`Inverted := true;
-end intrinsic;
-
-intrinsic Invert(N::PadNbhdElt) -> PadNbhdElt
-{Invert N}
-	N`Inverted := true;
-	return N;
-end intrinsic;
-
 intrinsic IsInverted(N::PadNbhdElt) -> BoolElt
 {Returns if N is inverted}
 	return N`Inverted;
-end intrinsic;
-
-intrinsic Print(N::PadNbhdElt)
-{Print N}
-	s := Sprintf("%o + (%o) * OK", Middle(N), Radius(N));
-	if Exponent(N) gt 1 then
-		s cat:= "^" cat IntegerToString(Exponent(N));
-	end if;
-	if IsInverted(N) then
-		s := "(" cat s cat ")^{-1}";
-	end if;
-	printf "%o", s;
 end intrinsic;
 
 intrinsic 'eq'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
@@ -153,7 +144,7 @@ intrinsic 'eq'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 end intrinsic;
 
 intrinsic Representative(N::PadNbhdElt) -> .
-{Returns a nonzero element of N}
+{Returns an element of N, not equal to its middle element.}
 	K := AmbientSpace(Parent(N));
 	prec := Precision(K);
 	if prec eq Infinity() then
@@ -171,6 +162,11 @@ intrinsic Representative(N::PadNbhdElt) -> .
 	return c;
 end intrinsic;
 
+
+/*
+ * Operations on p-adic neighbourhoods
+ */
+
 intrinsic '+'(x::., N::PadNbhdElt) -> PadNbhdElt
 {x + N}
 	R := Parent(Middle(N));
@@ -185,6 +181,17 @@ intrinsic '*'(x::., N::PadNbhdElt) -> PadNbhdElt
 	b, xR := IsCoercible(R, x);
 	error if not b, "PadNbhdElt: Could not coerce Argument 1 into the ring over which Argument 2 is defined";
 	return CreatePAdicNbhd(Parent(N), xR * Middle(N), xR * Radius(N), Exponent(N));
+end intrinsic;
+
+intrinsic Invert(N::PadNbhdElt) -> PadNbhdElt
+{N^(-1)}
+	N`Inverted := true;
+	return N;
+end intrinsic;
+
+intrinsic Invert(~N::PadNbhdElt)
+{N^(-1)}
+	N`Inverted := true;
 end intrinsic;
 
 intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt, min::.) -> BoolElt
@@ -224,7 +231,7 @@ intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt, min::.) -> 
 			return false;
 		end if;
 		
-		//TODO: not completely correct I think
+		//TODO: is this completely correct?
 		b,_ := IsPower(-(K!c) div r, k);
 		return b;
 	end if;

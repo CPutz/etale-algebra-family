@@ -19,16 +19,19 @@ intrinsic Etale257(p::RngIntElt
 		Append(~E0s, E0);
 	end for;
 
-	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, Filter := Integers(5)!0, D := D);
+	E1 := EtaleAlgebraFamily(F, p :
+		MinVal := 5, CongrVal := Integers(5)!0, D := D, Precision := 400);
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, Filter := Integers(2)!0, D := D);
+	E2 := EtaleAlgebraFamily(F2, p :
+		MinVal := 2, CongrVal := Integers(2)!0, D := D, Precision := 400);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, Filter := Integers(7)!0, D := D);
+	E3 := EtaleAlgebraFamily(F3, p :
+		MinVal := 7, CongrVal := Integers(7)!0, D := D, Precision := 400);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
