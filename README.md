@@ -1,4 +1,4 @@
-# etale-algebra-faimily
+# etale-algebra-family
 
 Description
 --
