@@ -1,37 +1,42 @@
 
-intrinsic Etale257Relative(p::PlcNumElt
+intrinsic EtaleAlgebras257Relative(p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false,
 	  Hint := []) -> SeqEnum
-{}
+{Returns the isomorphism classes of etale algebras over Q(Sqrt(21))_p attached
+to the GFE with signature (2,5,7) and Belyi map of degree 7 over Q(Sqrt(21)).
+If Neighbourhoods is set to true then all etale algebras will contain meta data
+containing to the p-adic neighbourhoods such that evaluating at these parameter
+values will yield the corresponding etale algebra.}
 	K := NumberField(p);
 	require IsIsomorphic(K, QuadraticField(21)):
 		"p must be a place of Q(Sqrt(21))";
 	require IsFinite(p): "p must be a finite place";
 
 	if Valuation(2, p) gt 0 then
-		return Etale257Relative2(p : D := D,
+		return EtaleAlgebras257Relative2(p : D := D,
 			Neighbourhoods := Neighbourhoods, Hint := Hint);
 	elif Valuation(3, p) gt 0 then
-		return Etale257Relative3(p : D := D,
+		return EtaleAlgebras257Relative3(p : D := D,
 			Neighbourhoods := Neighbourhoods, Hint := Hint);
 	elif Valuation(5, p) gt 0 then
-		return Etale257Relative5(p : D := D,
+		return EtaleAlgebras257Relative5(p : D := D,
 			Neighbourhoods := Neighbourhoods, Hint := Hint);
 	elif Valuation(7, p) gt 0 then
-		return Etale257Relative7(p : D := D,
+		return EtaleAlgebras257Relative7(p : D := D,
 			Neighbourhoods := Neighbourhoods, Hint := Hint);
 	else
-		return Etale257RelativeUnram(p : D := D,
+		return EtaleAlgebras257RelativeUnramified(p : D := D,
 			Neighbourhoods := Neighbourhoods, Hint := Hint);
 	end if; 
 end intrinsic;
 
-intrinsic Etale257Relative2(p::PlcNumElt
+intrinsic EtaleAlgebras257Relative2(p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false,
 	  Hint := []) -> SeqEnum
-{}
+{Performs the calculations for EtaleAlgebras257Relative for the prime of
+Q(Sqrt(21)) above 2.}
 	K<a> := NumberField(p);
 	S<s> := PolynomialRing(K);
 	R<t> := PolynomialRing(S);
@@ -44,10 +49,9 @@ intrinsic Etale257Relative2(p::PlcNumElt
 	E2 := [];
 	E3 := [];
 
-	//TODO: take representatives of residue field here
 	for a in [19] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + 2^5*t));
-		E0 := EtaleAlgebraFamily(F0, p : D := D, Hint := Hint);
+		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint, Precision := 500);
 		for i := 1 to #E0 do
 			SetData(~E0[i], [a + 2^5 * B : B in Data(E0[i])]);
 		end for;
@@ -55,7 +59,8 @@ intrinsic Etale257Relative2(p::PlcNumElt
 	end for;
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, CongrVal := Integers(2)!0, D := D, Hint := Hint);
+	E2 := EtaleAlgebraFamily(F2, p :
+		MinVal := 2, CongrVal := Integers(2)!0, Hint := Hint, Precision := 500);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
@@ -78,15 +83,16 @@ intrinsic Etale257Relative2(p::PlcNumElt
 		end if;
 	end for;
 
-	return Es;
+	return [SimplifyToProduct(E : D := D) : E in Es];
 end intrinsic;
 
 
-intrinsic Etale257Relative3(p::PlcNumElt
+intrinsic EtaleAlgebras257Relative3(p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false,
 	  Hint := []) -> SeqEnum
-{}
+{Performs the calculations for EtaleAlgebras257Relative for the prime of
+Q(Sqrt(21)) above 3.}
 	K<a> := NumberField(p);
 	S<s> := PolynomialRing(K);
 	R<t> := PolynomialRing(S);
@@ -101,7 +107,8 @@ intrinsic Etale257Relative3(p::PlcNumElt
 	E3 := [];
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := e*7, CongrVal := Integers(e*7)!0, D := D, Hint := Hint);
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := e*7, CongrVal := Integers(e*7)!0,
+		Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -124,15 +131,16 @@ intrinsic Etale257Relative3(p::PlcNumElt
 		end if;
 	end for;
 
-	return Es;
+	return [SimplifyToProduct(E : D := D) : E in Es];
 end intrinsic;
 
 
-intrinsic Etale257Relative5(p::PlcNumElt
+intrinsic EtaleAlgebras257Relative5(p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false,
 	  Hint := []) -> SeqEnum
-{}
+{Performs the calculations for EtaleAlgebras257Relative for the primes of
+Q(Sqrt(21)) above 5.}
 	K<a> := NumberField(p);
 	S<s> := PolynomialRing(K);
 	R<t> := PolynomialRing(S);
@@ -145,7 +153,8 @@ intrinsic Etale257Relative5(p::PlcNumElt
 	E2 := [];
 	E3 := [];
 
-	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0, D := D, Hint := Hint);
+	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0,
+		Hint := Hint, Precision := 500);
 
 	Es := [];
 	Eis := (&cat E0s) cat E1 cat E2 cat E3;
@@ -165,15 +174,16 @@ intrinsic Etale257Relative5(p::PlcNumElt
 		end if;
 	end for;
 
-	return Es;
+	return [SimplifyToProduct(E : D := D) : E in Es];
 end intrinsic;
 
 
-intrinsic Etale257Relative7(p::PlcNumElt
+intrinsic EtaleAlgebras257Relative7(p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false,
 	  Hint := []) -> SeqEnum
-{}
+{Performs the calculations for EtaleAlgebras257Relative for the prime of
+Q(Sqrt(21)) above 7.}
 	K<a> := NumberField(p);
 	S<s> := PolynomialRing(K);
 	R<t> := PolynomialRing(S);
@@ -186,10 +196,10 @@ intrinsic Etale257Relative7(p::PlcNumElt
 	E1 := [];
 	E2 := [];
 	E3 := [];
-	//TODO: take representatives of residue field here
+
 	for a in [4] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + 7*t));
-		E0 := EtaleAlgebraFamily(F0, p : MinVal := 2, CongrVal := Integers(e)!0, D := D, Hint := Hint);
+		E0 := EtaleAlgebraFamily(F0, p : MinVal := 2, CongrVal := Integers(e)!0, Hint := Hint);
 		for i := 1 to #E0 do
 			SetData(~E0[i], [a + 7 * B : B in Data(E0[i])]);
 		end for;
@@ -197,7 +207,8 @@ intrinsic Etale257Relative7(p::PlcNumElt
 	end for;
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := e*7, CongrVal := Integers(e*7)!0, D := D, Hint := Hint);
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := e*7, CongrVal := Integers(e*7)!0,
+		Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -220,47 +231,51 @@ intrinsic Etale257Relative7(p::PlcNumElt
 		end if;
 	end for;
 
-	return Es;
+	return [SimplifyToProduct(E : D := D) : E in Es];
 end intrinsic;
 
 
-intrinsic Etale257RelativeUnram(p::PlcNumElt
+intrinsic EtaleAlgebras257RelativeUnramified(p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false,
 	  Hint := []) -> SeqEnum
-{}
+{Performs the calculations for EtaleAlgebras257Relative for the finite primes of
+Q(Sqrt(21)) not above 2, 3, 5 or 7.}
 	K<a> := NumberField(p);
 	S<s> := PolynomialRing(K);
 	R<t> := PolynomialRing(S);
 	F := t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9 * s;
 
 	pi := UniformizingElement(p);
-	//TODO: p cannot lie above 2,3,5,7
 
 	E0s := [];
 	E1 := [];
 	E2 := [];
 	E3 := [];
+
 	//TODO: take representatives of residue field here
 	for a in [2..(#ResidueClassField(p)-1)] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + pi*t));
-		E0 := EtaleAlgebraFamily(F0, p : D := D, Hint := Hint);
+		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint);
 		for i := 1 to #E0 do
 			SetData(~E0[i], [a + pi * B : B in Data(E0[i])]);
 		end for;
 		Append(~E0s, E0);
 	end for;
 
-	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0, D := D, Hint := Hint);
+	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0,
+		Hint := Hint, Precision := 200);
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, CongrVal := Integers(2)!0, D := D, Hint := Hint);
+	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, CongrVal := Integers(2)!0,
+		Hint := Hint, Precision := 200);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0, D := D, Hint := Hint);
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
+		Hint := Hint, Precision := 200);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -283,6 +298,6 @@ intrinsic Etale257RelativeUnram(p::PlcNumElt
 		end if;
 	end for;
 
-	return Es;
+	return [SimplifyToProduct(E : D := D) : E in Es];
 end intrinsic;
 

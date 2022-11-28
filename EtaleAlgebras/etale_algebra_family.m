@@ -311,7 +311,7 @@ Difference.}
 
 	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);
 	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
-		D := D, Data := Nbhds, Hint := Hint);
+		Data := Nbhds, Hint := Hint);
 
 	return E;
 end intrinsic;

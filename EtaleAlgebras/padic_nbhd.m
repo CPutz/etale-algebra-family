@@ -80,7 +80,7 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
 	if ISA(Type(x), PadNbhdElt) then
-		N := CreatePAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
+		N := pAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
 		if IsInverted(x) then
 			Invert(~N);
 		end if;
@@ -89,7 +89,7 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 		OKp := quo<Integers(K) | UniformizingElement(K)^Precision(K)>;
 		b, y := IsCoercible(OKp, x);
 		if b then
-			return true, CreatePAdicNbhd(X, y, UniformizingElement(K)^AbsolutePrecision(x), 1);
+			return true, pAdicNbhd(X, y, UniformizingElement(K)^AbsolutePrecision(x), 1);
 		end if;
 	end if;
 
@@ -172,7 +172,7 @@ intrinsic '+'(x::., N::PadNbhdElt) -> PadNbhdElt
 	R := Parent(Middle(N));
 	b, xR := IsCoercible(R, x);
 	error if not b, "PadNbhdElt: Could not coerce Argument 1 into the ring over which Argument 2 is defined";
-	return CreatePAdicNbhd(Parent(N), xR + Middle(N), Radius(N), Exponent(N));
+	return pAdicNbhd(Parent(N), xR + Middle(N), Radius(N), Exponent(N));
 end intrinsic;
 
 intrinsic '*'(x::., N::PadNbhdElt) -> PadNbhdElt
@@ -180,7 +180,7 @@ intrinsic '*'(x::., N::PadNbhdElt) -> PadNbhdElt
 	R := Parent(Middle(N));
 	b, xR := IsCoercible(R, x);
 	error if not b, "PadNbhdElt: Could not coerce Argument 1 into the ring over which Argument 2 is defined";
-	return CreatePAdicNbhd(Parent(N), xR * Middle(N), xR * Radius(N), Exponent(N));
+	return pAdicNbhd(Parent(N), xR * Middle(N), xR * Radius(N), Exponent(N));
 end intrinsic;
 
 intrinsic Invert(N::PadNbhdElt) -> PadNbhdElt
