@@ -210,7 +210,7 @@ Difference.}
 		//the group K*/(K*)^k
 		KmKk,phik := pSelmerGroup(k,Kp);
 
-		Nbhds_oo cat:= [CreatePAdicNbhd(X, OKpq!r[1], (OKpq!(a@@phik)) * piOKpq^v, k) : a in KmKk];
+		Nbhds_oo cat:= [pAdicNbhd(X, OKpq!r[1], (OKpq!(a@@phik)) * piOKpq^v, k) : a in KmKk];
 	end for;
 
 	vprintf EtaleAlg: "computing nbhds\n";
@@ -293,11 +293,11 @@ Difference.}
 		Nbhds := Nbhds_new;
 
 		// Filter neighbourhoods
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(CreatePAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1), CongrVal, MinVal)];
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(pAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1), CongrVal, MinVal)];
 	until IsEmpty(Nbhds);
 
 	// Add neighborhoods around the roots of the discriminant
-	Nbhds := Nbhds_oo cat [CreatePAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1) : N in Nbhds_end];
+	Nbhds := Nbhds_oo cat [pAdicNbhd(X, OKpq!phi(N[1]), piOKpq^N[2], 1) : N in Nbhds_end];
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, CongrVal, MinVal)];

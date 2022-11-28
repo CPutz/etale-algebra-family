@@ -61,7 +61,7 @@ intrinsic pAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIntElt) 
 	return N;
 end intrinsic;
 
-intrinsic CreatePAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::RngPadResExtElt, k::RngIntElt) -> PadNbhdElt
+intrinsic pAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::RngPadResExtElt, k::RngIntElt) -> PadNbhdElt
 {The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
 	requirege k, 1;
