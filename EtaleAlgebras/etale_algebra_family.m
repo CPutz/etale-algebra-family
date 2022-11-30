@@ -310,9 +310,9 @@ Difference.}
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
-	//E := EtaleAlgebraListIsomorphism2(RtoRpP(F), Nbhds : D := D);
 	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
 		Data := Nbhds, Hint := Hint);
+	vprintf EtaleAlg: "%o isomorphism classes found among %o etale algebras\n", #E, #Nbhds;
 
 	return E;
 end intrinsic;
