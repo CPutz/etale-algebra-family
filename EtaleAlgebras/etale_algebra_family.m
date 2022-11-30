@@ -147,6 +147,7 @@ Difference.}
 		f := StoSp(Evaluate(SwitchVariables(F), r[1]));
 		// The coefficient of s in F
 		g := StoSp(Coefficient(SwitchVariables(F), 1));
+		require g ne 0: "F must have a linear term in s";
 
 		fac := Factorization(f);
 		fs := [<fi[1],fi[2]> : fi in fac];
