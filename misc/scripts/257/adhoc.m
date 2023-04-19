@@ -14,7 +14,7 @@ end function;
 
 // Proposition B.1
 
-printf "==================================================================\n";
+printf "\n==================================================================\n";
 printf "We perform the computations from Proposition B.1.\n";
 printf "==================================================================\n\n";
 
@@ -166,3 +166,80 @@ assert valid_upper_bound(L5_oo, U5_oo);
 assert valid_upper_bound(U5_oo, L5_oo_sample);
 assert valid_upper_bound(L5_oo_sample, U5_oo);
 printf "valid upper bound for S_{5,oo}\n\n";
+
+
+printf "\n==================================================================\n";
+printf "We perform the computations from Proposition B.3.\n";
+printf "==================================================================\n\n";
+
+Q7 := pAdicField(7,500);
+_<t> := PolynomialRing(Q7);
+
+phi0 := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14);
+phi1 := 10*t^4 + 4*t^3 + 2*t^2 + 2*t - 1;
+phioo := 4*t - 1;
+
+// Upper bounds
+U7_rest :=
+	 [ EtaleAlgebra((t^6 + a*7) * t * (t+1)) : a in [1,2,4] ]
+ cat [ EtaleAlgebra((t^7 + 7*a*t + 7) * t) : a in [1,2,4] ];
+U7_0 := [
+	EtaleAlgebra((t^5 - 7) * (t^2 - 7) * t) ];
+U7_1 := [
+	EtaleAlgebra(t^8 - 7) ];
+U7_oo := [
+	EtaleAlgebra((t^6 + 7) * t * (t+1)),
+	EtaleAlgebra((t^7 + 7*t + 7) * t) ];
+
+
+// Compute parameter values for U7_rest
+G,mG := UnitGroup(Integers(7^3));
+Brest := [Z!mG(g) : g in G | Z!mG(g) mod 7 ne 1];
+L7_rest := [EtaleAlgebra(phi0 - s * phioo) : s in Brest];
+
+// Check that U7_rest is a valid upper bound for L7_rest
+assert valid_upper_bound(U7_rest, L7_rest); //sufficient
+assert valid_upper_bound(L7_rest, U7_rest); //necessary
+printf "valid upper bound for S_{7,rest}\n";
+
+
+// Compute etale algebras for U7_0
+L5s := [FieldOfFractions(L) : L in AllExtensions(Q7,5 : E := 5)];
+L2s := [FieldOfFractions(L) : L in AllExtensions(Q7,2 : E := 2)];
+L7_0 := [ E : L5 in L5s, L2 in L2s |
+	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L5,L2,Q7])];
+L7_0_sample := [EtaleAlgebra(phi0 - 7^5*s * phioo) : s in [1]];
+
+// Check that U7_0 is a valid upper bound for L7_0
+assert valid_upper_bound(U7_0, L7_0);
+assert valid_upper_bound(L7_0, U7_0);
+assert valid_upper_bound(U7_0, L7_0_sample);
+assert valid_upper_bound(L7_0_sample, U7_0);
+printf "valid upper bound for S_{7,0}\n";
+
+
+// Compute etale algebras for U7_1
+L8s := [FieldOfFractions(L) : L in AllExtensions(Q7,8 : E := 8)];
+L7_1 := [ E : L8 in L8s |
+	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L8])];
+L7_1_sample := [EtaleAlgebra(phi0 - (1 + 7^2*s) * phioo) : s in [1]];
+
+// Check that U7_1 is a valid upper bound for L7_1
+assert valid_upper_bound(U7_1, L7_1);
+assert valid_upper_bound(L7_1, U7_1);
+assert valid_upper_bound(U7_1, L7_1_sample);
+assert valid_upper_bound(L7_1_sample, U7_1);
+printf "valid upper bound for S_{7,1}\n";
+
+
+// Compute parameter values for U7_oo
+G,mG := UnitGroup(Integers(7^3));
+Boo := [7^(-7*r) * Z!mG(g) : r in [1,2,3], g in G];
+L7_oo := [EtaleAlgebra(phi0 - s * phioo) : s in Boo];
+
+// Check that U7_oo is a valid upper bound for L7_oo
+assert valid_upper_bound(U7_oo, L7_oo); //sufficient
+assert valid_upper_bound(L7_oo, U7_oo); //necessary
+printf "valid upper bound for S_{7,oo}\n";
+
+printf "\ndone\n";
