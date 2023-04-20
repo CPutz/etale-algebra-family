@@ -3,12 +3,14 @@ Z := Integers();
 
 intrinsic EtaleAlgebras257(p::RngIntElt
 	: D := LocalFieldDatabase(),
-	  Neighbourhoods := false) -> SeqEnum
+	  Neighbourhoods := false,
+	  Simplify := true) -> SeqEnum
 {Returns the isomorphism classes of etale algebras over Q_p attached to the GFE
 with signature (2,5,7) and Belyi map of degree 8. If Neighbourhoods is set to
 true then all etale algebras will contain meta data containing to the p-adic
 neighbourhoods such that evaluating at these parameter values will yield the
-corresponding etale algebra.}
+corresponding etale algebra. If Simplify is set to true then SimplifyToProduct
+will be applied to all etale algebras in the result.}
 	S<s> := PolynomialRing(Rationals());
 	R<t> := PolynomialRing(S);
 	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
@@ -58,7 +60,11 @@ corresponding etale algebra.}
 		end if;
 	end for;
 
-	return [SimplifyToProduct(E : D := D) : E in Es];
+	if Simplify then
+		return [SimplifyToProduct(E : D := D) : E in Es];
+	else
+		return Es;
+	end if;
 end intrinsic;
 
 intrinsic EtaleAlgebras257Unramified(p::RngIntElt) -> SeqEnum
