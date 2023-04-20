@@ -7,48 +7,40 @@ declare verbose EtaleAlg, 1;
 import "utils.m" : zip, prod;
 Q := Rationals();
 
-intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt, RngElt
-{Bound on the valuation of s for which f^k - sg is structurally stable
-together with a constant c used in further computations.}
+intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt, RngElt
+{The standard conditions for f^k - sg (Definition ?)}
+	require Valuation(LeadingCoefficient(f)) eq 0: "f must be monic";
+	require Degree(g) le k * Degree(f): "Must have deg(g) le deg(f^k)";
+
 	R := Parent(f);
 	K := BaseRing(R);
-	_<s> := PolynomialRing(R);
-	F := SwitchVariables(f^k - s*g);
-	disc := Discriminant(F);
-	F0 := LeadingCoefficient(F);
-	c := Coefficient(F0 * disc, Degree(F) - Degree(f));
+	n := k * Degree(f);
+
 	df := Derivative(f);
+	mu_f := MaxValuationInRootsOf(df,f);
+	tau_F := Valuation(K!k) + mu_f + Valuation(Resultant(f,g)) * (k - 1) / n;
 
-	sigf := Separant(f);
 	sigfg := Separant(f,g);
-	//this bound is slightly worse than the real bound but easier to compute
-	b := k * Valuation(K!k) + k * MaxValuationInRootsOf(df * g, f);
-	vc := Valuation(c);
-	b_mu := k * MaxValuationInRootsOf(df,f) + vc / Degree(f);
 
-	return Max([k*sigf, k*sigfg, b, vc, b_mu]), c;
+	return Max([2 * k * tau_F, k * sigfg]), tau_F;
 end intrinsic;
 
-intrinsic StabilityBound(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt, RngElt
-{Bound on the valuation of s for which f^k - sg is structurally stable
-together with a constant c used in further computations.}
+intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt, RngElt
+{The standard conditions for f^k - sg (Definition ?), at the prime p.}
+	require Valuation(LeadingCoefficient(f),p) eq 0: "f must be monic";
+	require Degree(g) le k * Degree(f): "Must have deg(g) le deg(f^k)";
+
 	R := Parent(f);
 	K := BaseRing(R);
-	_<s> := PolynomialRing(R);
-	F := SwitchVariables(f^k - s*g);
-	disc := Discriminant(F);
-	F0 := LeadingCoefficient(F);
-	c := Coefficient(F0 * disc, Degree(F) - Degree(f));
+	n := k * Degree(f);
+
 	df := Derivative(f);
+	mu_f := MaxValuationInRootsOf(df,f,p);
+	tau_F := Valuation(K!k,p) + mu_f + Valuation(Resultant(f,g),p) * (k - 1) / n;
 
-	sigf := Separant(f,p);
 	sigfg := Separant(f,g,p);
-	//this bound is slightly worse than the real bound but easier to compute
-	b := k * Valuation(K!k,p) + k * MaxValuationInRootsOf(df * g, f, p);
-	vc := Valuation(c,p);
-	b_mu := k * MaxValuationInRootsOf(df,f,p) + vc / Degree(f);
 
-	return Max([k*sigf, k*sigfg, b, vc, b_mu]), c;
+	return Max([2 * k * tau_F, k * sigfg]), tau_F;
 end intrinsic;
 
 intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
@@ -106,6 +98,7 @@ s with v(s) = c (mod m) will be considered. The parameter BoundMethod decides wh
 bound for Hensels lemma is used during the computations (this can greatly improve
 computation times). Options for BoundMethod are Default, Separant, Derivative and
 Difference.}
+	F /:= Evaluate(LeadingCoefficient(F),0);
 
 	R := Parent(F);
 	S := BaseRing(R);
@@ -145,7 +138,7 @@ Difference.}
 	disc0 := disc div prod([(s - r[1])^r[2] : r in rootsK]);
 	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge MinVal];
 	require IsEmpty(roots0Kp): "The integral roots of the discriminant over K_p should be defined over K";
-	
+
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
@@ -157,7 +150,8 @@ Difference.}
 		require g ne 0: "F must have a linear term in s";
 		require Degree(f) eq Degree(F): "degree of F may not drop when specializing to roots of discriminant";
 
-		fac := Factorization(f);
+		fac,cons := Factorization(f);
+		//assert cons eq 1;
 		fs := [<fi[1],fi[2]> : fi in fac];
 		//f_hats := [f div fi[1]^fi[2] : fi in fs];
 		if #fs eq 1 then
@@ -188,11 +182,12 @@ Difference.}
 			ri := rs[i];
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
-			stabi,ci := StabilityBound(ROKpq!fi, ROKpq!ri, ki);
-			bi := Valuation(ci) / (Degree(fi)*ki);
-			nu_i := MaxValuationInRootsOf(f_hats[i], fs[i,1]);
-			boundi := Max(stabi, ki * (Valuation(c) + bi + nu_i));
-			bound := Max(bound, boundi);
+			stabi,tau_Fi := StandardConditions(ROKpq!fi, ROKpq!ri, ki);
+			bound := Max(bound, Valuation(c) + stabi);
+
+			fi_hat := f_hats[i];
+			res_i := Resultant(fi, fi_hat);
+			bound := Max(bound, Valuation(c) + ki * tau_Fi + Valuation(res_i));
 		end for;
 
 		for i := 1 to #fs do
@@ -200,9 +195,10 @@ Difference.}
 				if i ne j then
 					fi := fs[i][1];
 					fj := fs[j][1];
-					mu_ij := MaxValuationInRootsOf(fj, fi);
+					res_ij := Resultant(fi, fj);
+					ki := fs[i][2];
 					kj := fs[j][2];
-					bound := Max(bound, 2 * Valuation(c) + kj * mu_ij);
+					bound := Max(bound, Valuation(c) + ki / kj * Valuation(res_ij));
 				end if;
 			end for;
 		end for;
@@ -324,7 +320,7 @@ Difference.}
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
-	time E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
+	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
 		Data := Nbhds, Hint := Hint);
 	vprintf EtaleAlg: "%o isomorphism classes found among %o etale algebras\n", #E, #Nbhds;
 
