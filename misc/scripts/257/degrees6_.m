@@ -1,7 +1,7 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-/*function contains_components_isomorphic_to(E1,E2);
+function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);
 	C2 := Components(E2);
 
@@ -17,7 +17,28 @@ AttachSpec("spec");
 	end for;
 
 	return true;
-end function;*/
+end function;
+
+// Computes all quadratic extensions of a number field K,
+// only ramified above the primes in P
+function quadratic_extensions(K,P);
+	U,mU := UnitGroup(K);
+	//units modulo squares
+	U2,mU2 := quo<U | 2*U>;
+
+	L := [[mU(u@@mU2) : u in U2]];
+
+	for p in P do
+		phi := LocalTwoSelmerMap(p);
+		Append(~L, [g@@phi : g in Codomain(phi)]);
+	end for;
+
+	C := CartesianProduct(L);
+	values := [&*[x : x in c] : c in C];
+
+	R<x> := PolynomialRing(K);
+	return [ext<K | x^2 - v> : v in values | IsIrreducible(x^2 - v)];
+end function;
 
 function splitting_partition(E);
 	return {* Degree(C[1],BaseRing(E)) ^^ C[2] : C in ComponentsIsoStructure(E) *};
@@ -43,28 +64,55 @@ E2 := [ E : E in U2 |
 printf "Valuation of possible local discriminants at 2: %o\n",
 	{ Valuation(Discriminant(E)) : E in E2 };
 
+E5 := [ E : E in U5 |
+	splitting_partition(E) in subpartitions([6,1,1]) or
+	splitting_partition(E) in subpartitions([6,2]) ];
 
-// Filter Ls for number fields that agree with the local data at 2 and 5
-/*L3_filter := [ L : L in L3 |
-	exists {E : E in U2 | contains_components_isomorphic_to(E, EtaleAlgebra(L,2)) } and
-	exists {E : E in U5 | contains_components_isomorphic_to(E, EtaleAlgebra(L,5)) } and
-	exists {E : E in U7 | contains_components_isomorphic_to(E, EtaleAlgebra(L,7)) } ];
+printf "Valuation of possible local discriminants at 5: %o\n",
+	{ Valuation(Discriminant(E)) : E in E5 };
 
-printf "The following cubic number fields remain after checking local conditions at 2, 5 and 7: %o\n\n", L3_filter;
+E7 := [ E : E in U7 |
+	splitting_partition(E) in subpartitions([6,1,1]) or
+	splitting_partition(E) in subpartitions([6,2]) ];
 
-L5_filter := [ L : L in L5 |
-	exists {E : E in U2 | contains_components_isomorphic_to(E, EtaleAlgebra(L,2)) } and
-	exists {E : E in U5 | contains_components_isomorphic_to(E, EtaleAlgebra(L,5)) } and
-	exists {E : E in U7 | contains_components_isomorphic_to(E, EtaleAlgebra(L,7)) } ];
+printf "Valuation of possible local discriminants at 7: %o\n",
+	{ Valuation(Discriminant(E)) : E in E7 };
 
-printf "The following quintic number fields remain after checking local conditions at 2, 5 and 7: %o\n\n", L5_filter;
 
-L := [ <K5, K3> : K5 in L5_filter, K3 in L3_filter ];
-L_filter := [K : K in L |
-	exists {E : E in U2 | IsIsomorphic(E, DirectProduct([EtaleAlgebra(K[1],2), EtaleAlgebra(K[2],2)])) } and 
-	exists {E : E in U5 | IsIsomorphic(E, DirectProduct([EtaleAlgebra(K[1],5), EtaleAlgebra(K[2],5)])) } and 
-	exists {E : E in U7 | IsIsomorphic(E, DirectProduct([EtaleAlgebra(K[1],7), EtaleAlgebra(K[2],7)])) } ];
+printf "\nRuling out cubic subfields.\n";
+load "misc/scripts/257/fields_cubic_unramified57.m";
+L3 := make_data();
+printf "Possible candidates for cubic subfield: %o\n", L3;
 
-printf "The following etale algebras remain after checking local conditions at 2, 5 and 7: %o\n\n", L_filter;
+// Rule out both candidates by computing their quadratic extensions
+// and comparing with the local etale algebras for the primes 5 and 7 
+for K in L3 do
+	printf "Computing quadratic extensions and checking local conditions.\n";
+	// The primes above 5 and 7
+	Ps := [Ideal(P[1]) : P in Decomposition(K,p), p in [5,7]];
+	// The quadratic extensions of K unramified outside 5 and 7
+	Ms := [AbsoluteField(M) : M in quadratic_extensions(K, Ps)];
+	// Find the M's which satsify the local conditions at 5 and 7
+	Ms_filter := [ M : M in Ms |
+		exists {E : E in U5 | contains_components_isomorphic_to(E, EtaleAlgebra(M,5)) } and
+		exists {E : E in U7 | contains_components_isomorphic_to(E, EtaleAlgebra(M,7)) } ];
+	// No extension satsifies all local conditions
+	assert #Ms_filter eq 0;
+end for;
 
-printf "\ndone\n";*/
+printf "Cubic subfields have been ruled out.\n";
+
+printf "\nRuling out quadratic subfields.\n";
+L2 := [NumberField(f) : e in [1,-1], a in [0,1], b in [0,1] |
+	IsIrreducible(f) and
+	PrimeDivisors(Discriminant(Integers(NumberField(f)))) subset [5,7]
+	where f := x^2 - e * 5^a * 7^b];
+printf "Possible candidates for cubic subfield: %o\n", L2;
+
+// Either 5 is inert in K, or 7 is inert in K, or 3 splits in K
+assert forall { K : K in L2 |
+	IsInert(Ideal(Decomposition(K,5)[1,1])) or
+	IsInert(Ideal(Decomposition(K,7)[1,1])) or
+	IsSplit(Ideal(Decomposition(K,3)[1,1]))	};
+
+printf "Quadratic subfields have been ruled out.\n";
