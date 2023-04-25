@@ -77,6 +77,11 @@ The precision for the base fields can be given (deafault 50).}
     return EtaleAlgebra(RtoRp(DefiningPolynomial(L)));
 end intrinsic;
 
+intrinsic DirectProduct(E1::AlgEtpAdic, E2::AlgEtpAdic) -> AlgEtpAdic
+{Constructs the product of two etale algebras}
+    return DirectProduct([E1,E2]);
+end intrinsic;
+
 intrinsic DirectProduct(L::SeqEnum[AlgEtpAdic]) -> AlgEtpAdic
 {Constructs the product of a sequence of p-adic etale algebras.}
     require not IsEmpty(L):
@@ -181,7 +186,8 @@ end intrinsic;
 
 intrinsic Discriminant(E::AlgEtpAdic) -> .
 {The product of the discriminants of the components of E.}
-    return prod([Discriminant(C, BaseRing(E)) : C in Components(E)]);
+    B := BaseRing(E);
+    return prod([B!Discriminant(C, B) : C in Components(E)]);
 end intrinsic;
 
 /*
