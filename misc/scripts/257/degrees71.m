@@ -1,23 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-/*function contains_components_isomorphic_to(E1,E2);
-	C1 := Components(E1);
-	C2 := Components(E2);
-
-	I := [];
-	// For every component of E2, find an isomorphic component of E1,
-	// and make sure that no components are ``used twice''
-	for C in C2 do
-		b := exists (i) { i : i in [1..#C1] | i notin I and IsIsomorphic(C,C1[i]) };
-		if not b then
-			return false;
-		end if;
-		Append(~I, i);
-	end for;
-
-	return true;
-end function;*/
 
 function splitting_partition(E);
 	return {* Degree(C[1],BaseRing(E)) ^^ C[2] : C in ComponentsIsoStructure(E) *};
@@ -55,3 +38,32 @@ E7 := [ E : E in U7 |
 printf "Valuation of possible local discriminants at 7: %o\n",
 	{ Valuation(Discriminant(E)) : E in E7 };
 
+
+// A hunter search shows that the only septic number fields satisfying all
+// local conditions, is Q(5^(1/7))
+
+printf "\n==================================================================\n";
+printf "We perform the computations from Proposition ?.\n";
+printf "==================================================================\n\n";
+
+QQ := Rationals();
+_<x> := PolynomialRing(QQ);
+L<a> := NumberField(x^7 - 5);
+phi0 := 4*x^5*(25*x^3 + 20*x^2 + 14*x + 14);
+
+_<s,t,u,v> := PolynomialRing(QQ,4);
+P2<x1,x2,x3> := ProjectiveSpace(QQ,2);
+
+fC := ((4*s-1)*Evaluate(phi0,t) - (4*t-1)*Evaluate(phi0, s)) div (s - t);
+C := Curve(P2, Homogenization(Evaluate(fC, [x1,x2,0,0]), x3));
+
+printf "The curve C has genus %o\n", Genus(C);
+
+S3 := Sym(3);
+sigma := Automorphism(C, S3!(1,2));
+Gsigma := AutomorphismGroup(C,[sigma]);
+Csigma,CtoCsigma := CurveQuotient(Gsigma);
+
+printf "The quotient curve C/σ has genus %o\n", Genus(Csigma);
+
+E0,E0toCsigma := EllipticCurve()
