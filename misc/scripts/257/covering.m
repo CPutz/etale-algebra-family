@@ -51,16 +51,13 @@ PhiCsigma := map< Csigma -> P1 |
 	[CoordinateRing(Csigma)!Phi1_uv,
 	 CoordinateRing(Csigma)!Phi2_uv] >;
 
-// We have CtoCsigma * PhiCsigma = Phi
-eqs1 := DefiningEquations(Phi);
-eqs2 := DefiningEquations(CtoCsigma * PhiCsigma);
-assert CoordinateRing(C)!(eqs1[1] * eqs2[2] - eqs1[2] * eqs2[1]) eq 0;
+// PhiCsigma is the descended map of Phi to Csigma
+assert Phi eq CtoCsigma * PhiCsigma;
 
 printf "Phi descends to C/σ\n";
 
 //PhiE1 := Extend(Normalization(Expand(
 //	Maps(E1, P1)!(E1toE0 * E0toCsigma * PhiCsigma))));
-
 PhiE1 := map< E1 -> P1 |
 	[-1/210739200000*x1^2*x2^8 - 1151/752640000*x1^2*x2^7*x3 - 619/15052800000*x1*x2^8*x3 - 
     1/1505280000*x2^9*x3 - 6901/1228800*x1^2*x2^6*x3^2 - 109997/268800000*x1*x2^7*x3^2 -
@@ -84,7 +81,5 @@ x1^2*x2^5*x3^3 + 1/42*x1*x2^6*x3^3 + 1/4116*x2^7*x3^3 + 5887/3*x1^2*x2^4*x3^4 +
     - 15171859180457/12*x2^2*x3^8 + 4802336756156625/2*x1*x3^9 + 
     9159088134765625/12*x2*x3^9 - 1144886016845703125/12*x3^10] >;
 
-// We have E1toE0 * E0toCsigma * PhiCsigma = PhiE1
-eqs1 := DefiningEquations(E1toE0 * E0toCsigma * PhiCsigma);
-eqs2 := DefiningEquations(PhiE1);
-assert CoordinateRing(E1)!(eqs1[1] * eqs2[2] - eqs1[2] * eqs2[1]) eq 0;
+// The equations above give a correct model for PhiE1
+assert PhiE1 eq E1toE0 * E0toCsigma * PhiCsigma;
