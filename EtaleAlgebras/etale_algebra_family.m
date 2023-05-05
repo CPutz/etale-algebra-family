@@ -2,7 +2,7 @@
  * Isomorphism classes of families of etale algebras parametrized by one variable.
  */
 
-declare verbose EtaleAlg, 1;
+declare verbose AlgEtFam, 2;
 
 import "utils.m" : zip, prod;
 Q := Rationals();
@@ -98,6 +98,7 @@ s with v(s) = c (mod m) will be considered. The parameter BoundMethod decides wh
 bound for Hensels lemma is used during the computations (this can greatly improve
 computation times). Options for BoundMethod are Default, Separant, Derivative and
 Difference.}
+	error if Degree(LeadingCoefficient(F)) ne 0, "Not implemented for polynomials with non-constant leading term"; 
 	F /:= Evaluate(LeadingCoefficient(F),0);
 
 	R := Parent(F);
@@ -130,7 +131,7 @@ Difference.}
 		F := pi^Degree(F) * Evaluate(F, t/pi);
 	end while;
 
-	vprintf EtaleAlg: "computing discriminant\n";
+	vprintf AlgEtFam,1: "computing discriminant";
 	disc := Discriminant(F);
 
 	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge MinVal];
@@ -139,16 +140,23 @@ Difference.}
 	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge MinVal];
 	require IsEmpty(roots0Kp): "The integral roots of the discriminant over K_p should be defined over K";
 
+	vprintf AlgEtFam,1: ", roots = {";
+	if not IsEmpty(rootsK) then vprintf AlgEtFam,1: "%o", rootsK[1,1]; end if;
+	for r in rootsK[2..#rootsK] do
+		vprintf AlgEtFam,1: ", %o", r[1];
+	end for;
+	vprintf AlgEtFam,1: "}\n";
+
 	Nbhds_disc := []; // The neighborhoods around the roots of the discriminant
 	Nbhds_oo := [];
 
 	for r in rootsK do
-		// Evaluate F at s = r
+		// Evalua10 with 1te F at s = r
 		f := StoSp(Evaluate(SwitchVariables(F), r[1]));
 		// The coefficient of s in F
 		g := StoSp(Coefficient(SwitchVariables(F), 1));
 		require g ne 0: "F must have a linear term in s";
-		require Degree(f) eq Degree(F): "degree of F may not drop when specializing to roots of discriminant";
+		assert Degree(f) eq Degree(F);
 
 		fac,cons := Factorization(f);
 		//assert cons eq 1;
@@ -173,6 +181,8 @@ Difference.}
 
 		rs := [(cf[1] * g) mod (cf[2][1]^cf[2][2]) : cf in zip(cs, fs)];
 
+		vprintf AlgEtFam,1: "Computed standard form with c = %o\n", c;
+
 		bound := 0;
 		ROKpq := PolynomialRing(OKpq);
 
@@ -181,15 +191,20 @@ Difference.}
 			ki := fs[i][2];
 			ri := rs[i];
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
+
+			vprintf AlgEtFam,2: "\nFactor %o = %o\n", i, Fi;
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
-			stabi,tau_Fi := StandardConditions(ROKpq!fi, ROKpq!ri, ki);
-			bound := Max(bound, Valuation(c) + stabi);
+			stab_i,tau_Fi := StandardConditions(ROKpq!fi, ROKpq!ri, ki);
+			bound := Max(bound, Valuation(c) + stab_i);
+			vprintf AlgEtFam,2: "Stability bound = %o\n", stab_i;
 
 			fi_hat := f_hats[i];
 			res_i := Resultant(fi, fi_hat);
+			vprintf AlgEtFam,2: "Resultant bound = %o\n", ki * tau_Fi + Valuation(res_i);
 			bound := Max(bound, Valuation(c) + ki * tau_Fi + Valuation(res_i));
 		end for;
 
+		vprintf AlgEtFam,2: "\n";
 		for i := 1 to #fs do
 			for j := 1 to #fs do
 				if i ne j then
@@ -198,18 +213,22 @@ Difference.}
 					res_ij := Resultant(fi, fj);
 					ki := fs[i][2];
 					kj := fs[j][2];
-					bound := Max(bound, Valuation(c) + ki / kj * Valuation(res_ij));
+					res_boundij := ki / kj * Valuation(res_ij);
+					bound := Max(bound, Valuation(c) + res_boundij);
+
+					vprintf AlgEtFam,2: "Resultant bound for (%o,%o) = %o\n", i, j, res_boundij;
 				end if;
 			end for;
 		end for;
+		vprintf AlgEtFam,2: "\n";
 
-		vprintf EtaleAlg: "bound = %o\n", bound;
+		vprintf AlgEtFam,1: "around %o: bound = %o\n", r[1], bound;
 		bound := Floor(bound + 1);
 
 		Append(~Nbhds_disc, phi(r[1]) + O(piKp^bound));
 
 		k := LCM([fi[2] : fi in fs]);
-		vprintf EtaleAlg: "k = %o\n", k;
+		vprintf AlgEtFam,1: "around %o: multiplicative period = %o\n", r[1], k;
 		v := k * Ceiling(bound / k);
 
 		//the group K*/(K*)^k
@@ -222,7 +241,7 @@ Difference.}
 		Nbhds_oo cat:= [pAdicNbhd(X, OKpq!r[1], (OKpq!(a@@phik)) * piOKpq^v, k) : a in KmKk];
 	end for;
 
-	vprintf EtaleAlg: "computing nbhds\n";
+	vprintf AlgEtFam,1: "subdividing nbhds\n";
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
 
 	//if K = Q then separant computations will be performed over Q instead of
@@ -244,15 +263,15 @@ Difference.}
 
 	case BoundMethod:
 		when "Separant":
-			vprintf EtaleAlg: "computing general separant\n";
+			vprintf AlgEtFam,1: "computing general separant\n";
 			gen_bound := SwitchVariables(SeparantUPol(Fcomp) div Parent(F).1^Degree(F));
 		when "Derivative":
-			vprintf EtaleAlg: "computing general derivative evaluated at roots\n";
+			vprintf AlgEtFam,1: "computing general derivative evaluated at roots\n";
 			gen_bound := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
 		when "Difference":
-			vprintf EtaleAlg: "computing general derivative evaluated at roots\n";
+			vprintf AlgEtFam,1: "computing general derivative evaluated at roots\n";
 			gen_bound := SwitchVariables(ValuationsInRootsOfUPol(Derivative(F), F));
-			vprintf EtaleAlg: "computing general difference of roots\n";
+			vprintf AlgEtFam,1: "computing general difference of roots\n";
 			Re<e> := PolynomialRing(S);
 			Rx<x> := PolynomialRing(Re);
 			_<y> := PolynomialRing(Rx);
@@ -270,7 +289,7 @@ Difference.}
 	repeat
 		Nbhds_new := [];
 		depth +:= 1;
-		vprintf EtaleAlg: "subdivision %o with %o neighbourhoods\n", depth, #Nbhds;
+		vprintf AlgEtFam,2: "subdivision %o with %o neighbourhoods\n", depth, #Nbhds;
 		for N in Nbhds do
 			Np := N[1] + O(piKp^N[2]);
 			error if N[2] ge Precision, "Precision too low:", Precision;
@@ -313,7 +332,7 @@ Difference.}
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, CongrVal, MinVal)];
 
-	vprintf EtaleAlg: "computing isomorphism classes of %o etale algebras\n", #Nbhds;
+	vprintf AlgEtFam,1: "computing isomorphism classes of %o etale algebras\n", #Nbhds;
 	//use finite precision for last step
 	KpP := ChangePrecision(Kp, Precision);
 	psi := Coercion(Kp, KpP);
@@ -322,7 +341,7 @@ Difference.}
 
 	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
 		Data := Nbhds, Hint := Hint);
-	vprintf EtaleAlg: "%o isomorphism classes found among %o etale algebras\n", #E, #Nbhds;
+	vprintf AlgEtFam,1: "%o isomorphism classes found among %o etale algebras\n", #E, #Nbhds;
 
 	return E;
 end intrinsic;

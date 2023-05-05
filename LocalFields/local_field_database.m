@@ -6,9 +6,9 @@ function flatten(L);
 	return [Li : Li in L];
 end function;
 
-intrinsic LocalFieldDatabase(L::[]) -> MyDB
+intrinsic LocalFieldDatabase(L::SeqEnum) -> MyDB
 {A database of local fields which caches all degree d extensions
-of Qp described in L, in the format <p,d>}
+of Qp described in L, in the format <prime,degree>}
 	D := New(MyDB);
 	data := [];
 	for l in L do
@@ -30,6 +30,11 @@ end intrinsic;
 intrinsic LocalFieldDatabase() -> MyDB
 {A database of local fields}
 	return LocalFieldDatabase([]);
+end intrinsic;
+
+intrinsic Precomputed(DB::MyDB) -> SeqEnum
+{A summary of precomputed data in DB, given in the format <prime,degree>}
+	return DB`Precomputed;
 end intrinsic;
 
 intrinsic LocalFieldDatabaseOctic2Adics() -> MyDB
