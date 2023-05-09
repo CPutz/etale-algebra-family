@@ -253,29 +253,35 @@ Q(Sqrt(21)) not above 2, 3, 5 or 7.}
 	E2 := [];
 	E3 := [];
 
-	//TODO: take representatives of residue field here
-	for a in [2..(#ResidueClassField(p)-1)] do
+	R,m := ResidueClassField(Ideal(p));
+	for a in [K!(x@@m) : x in R | x ne 0 and x ne 1] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + pi*t));
 		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint);
-		for i := 1 to #E0 do
-			SetData(~E0[i], [a + pi * B : B in Data(E0[i])]);
-		end for;
+
+		//Precision := 50;
+		//Kp,phi := Completion(K,p : Precision := Precision);
+		//OKp := Integers(Kp);
+		//piKp := UniformizingElement(Kp);
+		//OKpq := quo<OKp | piKp^Precision>;
+		//for i := 1 to #E0 do
+			//SetData(~E0[i], [OKpq!phi(a) + OKpq!phi(pi) * B where X := Parent(B) : B in Data(E0[i])]);
+		//end for;
 		Append(~E0s, E0);
 	end for;
 
 	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0,
-		Hint := Hint, Precision := 200);
+		Hint := Hint, Precision := 500);
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
 	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, CongrVal := Integers(2)!0,
-		Hint := Hint, Precision := 200);
+		Hint := Hint, Precision := 500);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
 	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
-		Hint := Hint, Precision := 200);
+		Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
