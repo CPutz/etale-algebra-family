@@ -1,4 +1,5 @@
-//AttachSpec("spec");
+// Load this file from the main folder
+AttachSpec("spec");
 
 Z := Integers();
 Q := Rationals();

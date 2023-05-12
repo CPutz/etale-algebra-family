@@ -15,7 +15,7 @@ printf "The curve C has genus %o\n", Genus(C);
 I := ideal< R | [fC, s + t - u, s*t - v] >;
 fCsigma := Homogenization(Evaluate(Basis(EliminationIdeal(I,{u,v}))[1], [0,0,x1,x2]), x3);
 Csigma := Curve(P2, fCsigma);
-CtoCsigma := map < C -> Csigma | [(x1 + x2)*x3, x1*x2, x3^2] >;
+CtoCsigma := Extend(map < C -> Csigma | [(x1 + x2)*x3, x1*x2, x3^2] >);
 
 printf "The quotient curve C/σ has genus %o\n", Genus(Csigma);
 
@@ -27,16 +27,20 @@ printf "It contains a non-singular point\n";
 E0,CsigmatoE0 := EllipticCurve(Csigma, pt);
 _,E0toCsigma := IsInvertible(CsigmatoE0);
 
-E1 := EllipticCurve(x^3 - 154*x^2 + 6125*x);
-_,E1toE0 := IsIsomorphic(E1,E0);
-_,E0toE1 := IsIsomorphic(E0,E1);
+E := EllipticCurve(x^3 - 154*x^2 + 6125*x);
+_,EtoE0 := IsIsomorphic(E,E0);
+_,E0toE := IsIsomorphic(E0,E);
 
-printf "It is birational to the %o\n", E1;
+printf "It is birational to the %o\n", E;
 
-E := EllipticCurve(x^3 - 7*x^2 - 49*x);
-_,EtoE1 := IsIsogenous(E,E1);
+E1 := EllipticCurve(x^3 - 7*x^2 - 49*x);
+_,E1toE := IsIsogenous(E1,E);
 
+printf "Computing alternative equations for the map C/σ -> E\n";
+CsigmatoE := Extend(Expand(CsigmatoE0 * E0toE));
+_,EtoCsigma := IsInvertible(CsigmatoE);
 
+//Descend Phi to E
 Phi := map<C -> P1 |
 	[CoordinateRing(C)!Homogenization(Evaluate(phi0, x1), x3),
 	 CoordinateRing(C)!Homogenization(Evaluate(phioo,x1), x3, 8)]>;
@@ -56,9 +60,9 @@ assert Phi eq CtoCsigma * PhiCsigma;
 
 printf "Phi descends to C/σ\n";
 
-//PhiE1 := Extend(Normalization(Expand(
-//	Maps(E1, P1)!(E1toE0 * E0toCsigma * PhiCsigma))));
-PhiE1 := map< E1 -> P1 |
+//PhiE := Extend(Normalization(Expand(
+//	Maps(E, P1)!(EtoCsigma * PhiCsigma))));
+PhiE := map< E -> P1 |
 	[-1/210739200000*x1^2*x2^8 - 1151/752640000*x1^2*x2^7*x3 - 619/15052800000*x1*x2^8*x3 - 
     1/1505280000*x2^9*x3 - 6901/1228800*x1^2*x2^6*x3^2 - 109997/268800000*x1*x2^7*x3^2 -
     68407/2007040000*x2^8*x3^2 + 150607841/153600000*x1^2*x2^5*x3^3 + 
@@ -82,4 +86,4 @@ x1^2*x2^5*x3^3 + 1/42*x1*x2^6*x3^3 + 1/4116*x2^7*x3^3 + 5887/3*x1^2*x2^4*x3^4 +
     9159088134765625/12*x2*x3^9 - 1144886016845703125/12*x3^10] >;
 
 // The equations above give a correct model for PhiE1
-assert PhiE1 eq E1toE0 * E0toCsigma * PhiCsigma;
+assert PhiE eq EtoCsigma * PhiCsigma;
