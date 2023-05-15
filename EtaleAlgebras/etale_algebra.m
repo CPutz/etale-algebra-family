@@ -35,16 +35,14 @@ Data can be used to store some meta data with the etale algebra.}
     return E;
 end intrinsic;
 
-intrinsic EtaleAlgebra(L::SeqEnum[FldPad] : Data := "") -> AlgEtpAdic
-{Given a sequence of p-adic fields, creates the direct product.
+intrinsic EtaleAlgebra(L::SeqEnum[FldPad], B::FldPad : Data := "") -> AlgEtpAdic
+{Given a sequence of p-adic fields over a base field B, creates the direct product.
 Additional meta data can be attached using the parameter Data.}
     require not IsEmpty(L):
         "L should be nonempty";
 
-    K := BaseRing(L[1]);
-
     E := New(AlgEtpAdic);
-    E`BaseRing := K;
+    E`BaseRing := B;
     E`Components := L;
     if not ISA(Type(Data), MonStgElt) or Data ne "" then
         E`Data := Data;
@@ -91,7 +89,7 @@ intrinsic DirectProduct(L::SeqEnum[AlgEtpAdic]) -> AlgEtpAdic
     require forall {E : E in L | BaseRing(E) eq K}:
         "All etale algebras in L must be defined over the same field";
 
-    return EtaleAlgebra(&cat [Components(Li) : Li in L]);
+    return EtaleAlgebra(&cat [Components(Li) : Li in L], K);
 end intrinsic;
 
 intrinsic SimplifyToProduct(E::AlgEtpAdic : D := LocalFieldDatabase()) -> AlgEtpAdic
@@ -105,7 +103,7 @@ intrinsic SimplifyToProduct(E::AlgEtpAdic : D := LocalFieldDatabase()) -> AlgEtp
         data := E`Data;
     end if;
 
-    return EtaleAlgebra(Cs : Data := data);
+    return EtaleAlgebra(Cs, BaseRing(E) : Data := data);
 end intrinsic;
 
 intrinsic Print(E::AlgEtpAdic)
