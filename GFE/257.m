@@ -102,7 +102,7 @@ more efficient way.}
 		Include(~Es, {* Degree(f[1])^^f[2] : f in Factorization(t * (t^7 - a)) *});
 	end for;
 
-	return [EtaleAlgebra([UnramifiedExtension(Qp,C) : C in E]) : E in Es];
+	return [EtaleAlgebra([UnramifiedExtension(Qp,C) : C in E], Qp) : E in Es];
 end intrinsic;
 
 
