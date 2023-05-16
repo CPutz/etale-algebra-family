@@ -14,8 +14,13 @@ U2 := [ EtaleAlgebra((t^5 - 2) * (t^3 - 2)),
 	DirectProduct(EtaleAlgebra(t^4 + 2*t^3 + 2*t^2 + 2),EtaleAlgebra(t^4 + 2*t^3 + 2*t^2 + 2)),
 	EtaleAlgebra(t^8 + 2*t^7 + 2),
 	EtaleAlgebra(t^8 + 2*t^7 + 6),
-	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [6,2]]),
-	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [3,3,1,1]]) ];
+	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [6,2]], Q2),
+	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [3,3,1,1]], Q2) ];
+
+Q3 := pAdicField(3,500);
+
+U3 := [ EtaleAlgebra([UnramifiedExtension(Q3,d) : d in P], Q3) :
+	P in [[8],[6,1,1],[5,2,1],[4,3,1]] ];
 
 Q5 := pAdicField(5,500);
 _<t> := PolynomialRing(Q5);

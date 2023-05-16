@@ -22,23 +22,12 @@ end function;
 // Computes all quadratic extensions of a number field K,
 // only ramified above the primes in P
 function quadratic_extensions(K,P);
-	U,mU := UnitGroup(K);
-	//units modulo squares
-	U2,mU2 := quo<U | 2*U>;
-
-	L := [[mU(u@@mU2) : u in U2]];
-
-	for p in P do
-		phi := LocalTwoSelmerMap(p);
-		Append(~L, [g@@phi : g in Codomain(phi)]);
-	end for;
-
-	C := CartesianProduct(L);
-	values := [&*[x : x in c] : c in C];
-
+	G,phi := pSelmerGroup(2,P);
+	values := [g@@phi : g in G];
 	R<x> := PolynomialRing(K);
-	return [ext<K | x^2 - v> : v in values | IsIrreducible(x^2 - v)];
+	return [AbsoluteField(ext<K | x^2 - v>) : v in values | IsIrreducible(x^2 - v)];
 end function;
+
 
 function splitting_partition(E);
 	return {* Degree(C[1],BaseRing(E)) ^^ C[2] : C in ComponentsIsoStructure(E) *};
@@ -88,10 +77,11 @@ printf "Possible candidates for cubic subfield: %o\n", L3;
 // and comparing with the local etale algebras for the primes 5 and 7 
 for K in L3 do
 	printf "Computing quadratic extensions and checking local conditions.\n";
+	OK := Integers(K);
 	// The primes above 5 and 7
-	Ps := [Ideal(P[1]) : P in Decomposition(K,p), p in [5,7]];
+	Ps := Support(35*OK);
 	// The quadratic extensions of K unramified outside 5 and 7
-	Ms := [AbsoluteField(M) : M in quadratic_extensions(K, Ps)];
+	Ms := [M : M in quadratic_extensions(K, Ps)];
 	// Find the M's which satsify the local conditions at 5 and 7
 	Ms_filter := [ M : M in Ms |
 		exists {E : E in U5 | contains_components_isomorphic_to(E, EtaleAlgebra(M,5)) } and
