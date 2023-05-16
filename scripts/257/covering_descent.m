@@ -1,6 +1,6 @@
 // Load this file from the main folder
 
-load "misc/scripts/257/covering.m";
+load "scripts/257/covering.m";
 _<X> := PolynomialRing(Rationals());
 
 printf "\n==================================================================\n";

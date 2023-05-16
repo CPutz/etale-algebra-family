@@ -50,10 +50,10 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/upperbounds.m";
+load "scripts/257/upperbounds.m";
 
 // LMFDB data
-load "misc/scripts/257/fields_quartic_unramified257.m";
+load "scripts/257/fields_quartic_unramified257.m";
 L4 := make_data();
 printf "\nThere exist %o quartic number fields unramfied outside 2, 5 and 7\n\n", #L4;
 
@@ -86,7 +86,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/covering.m";
+load "scripts/257/covering.m";
 
 printf "Computing a full-rank subgroup of the Mordell-Weil group of E over %o\n", L;
 

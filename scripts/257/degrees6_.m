@@ -44,7 +44,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/upperbounds.m";
+load "scripts/257/upperbounds.m";
 
 E2 := [ E : E in U2 |
 	splitting_partition(E) in subpartitions([6,1,1]) or
@@ -69,7 +69,7 @@ printf "Valuation of possible local discriminants at 7: %o\n",
 
 
 printf "\nRuling out cubic subfields.\n";
-load "misc/scripts/257/fields_cubic_unramified57.m";
+load "scripts/257/fields_cubic_unramified57.m";
 L3 := make_data();
 printf "Possible candidates for cubic subfield: %o\n", L3;
 

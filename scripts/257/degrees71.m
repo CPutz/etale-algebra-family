@@ -17,7 +17,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/upperbounds.m";
+load "scripts/257/upperbounds.m";
 
 E2 := [ E : E in U2 |
 	splitting_partition(E) in subpartitions([7,1]) ];
@@ -46,7 +46,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/covering.m";
+load "scripts/257/covering.m";
 
 QQ := Rationals();
 _<x> := PolynomialRing(QQ);
@@ -95,6 +95,7 @@ p3 := E1L![
 */
 
 //time rank := RankBound(E1L); //crashes
+// -> minimal model?
 rank := 3;
 
 gens := [p1,p2,p3];

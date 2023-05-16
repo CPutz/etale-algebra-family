@@ -26,15 +26,15 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/upperbounds.m";
+load "scripts/257/upperbounds.m";
 
 // LMFDB data
-load "misc/scripts/257/fields_cubic_unramified257.m";
+load "scripts/257/fields_cubic_unramified257.m";
 L3 := make_data();
 printf "\nThere exist %o cubic number fields with signature (1,1) and unramfied outside 2, 5 and 7\n\n", #L3;
 
 // LMFDB data
-load "misc/scripts/257/fields_quintic_unramified257.m";
+load "scripts/257/fields_quintic_unramified257.m";
 L5 := make_data();
 printf "\nThere exist %o quintic number fields with signature (1,2) and unramfied outside 2, 5 and 7\n\n", #L5;
 
@@ -70,7 +70,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "misc/scripts/257/covering.m";
+load "scripts/257/covering.m";
 
 _<x> := PolynomialRing(Rationals());
 M := NumberField(25*x^3 + 20*x^2 + 14*x + 14);
