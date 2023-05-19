@@ -20,12 +20,51 @@ function contains_components_isomorphic_to(E1,E2);
 end function;
 
 // Computes all quadratic extensions of a number field K,
-// only ramified above the primes in P
-function quadratic_extensions(K,P);
-	G,phi := pSelmerGroup(2,P);
+// only ramified above the primes in S
+function quadratic_extensions(K,S);
+	//A/A^2 where A is the ring of S-units of K
+	G,phi := pSelmerGroup(2,S);
 	values := [g@@phi : g in G];
 	R<x> := PolynomialRing(K);
 	return [AbsoluteField(ext<K | x^2 - v>) : v in values | IsIrreducible(x^2 - v)];
+end function;
+
+// Computes all degree n field extensions of L where
+// L is a p-adic field with base ring B
+function local_field_extensions(L,n,B);
+	exts := [];
+	for K in AllExtensions(L,n) do
+		E := EtaleAlgebra([FieldOfFractions(AbsoluteTotallyRamifiedExtension(K))], B);
+		E`BaseRing := B;
+		Append(~exts, E);
+	end for;
+	return exts;
+end function;
+
+// Computes all degree n etale algebra extensions of L where
+// L is a p-adic field with base ring B
+function local_etale_extensions_of_field(L,n,B);
+	exts_degree := [];
+	for d := 1 to n do
+		Append(~exts_degree, local_field_extensions(L,d,B));
+	end for;
+
+	exts := [];
+	for P in Partitions(n) do
+		C := [DirectProduct([e : e in c]) : c in CartesianProduct([exts_degree[p] : p in P])];
+		exts cat:= C;
+	end for;
+
+	return exts;
+end function;
+
+// Computes all degree n etale algebra extensions of E where
+// E is a p-adic etale algebra
+function local_etale_extensions(E,n);
+	B := BaseRing(E);
+	Cs := [local_etale_extensions_of_field(K,n,B) : K in Components(E)];
+	C := CartesianProduct(Cs);
+	return [DirectProduct([c : c in cs]) : cs in C];
 end function;
 
 
@@ -93,10 +132,11 @@ end for;
 printf "Cubic subfields have been ruled out.\n";
 
 printf "\nRuling out quadratic subfields.\n";
-L2 := [NumberField(f) : e in [1,-1], a in [0,1], b in [0,1] |
+//L2 contains all quadratic number fields only ramified at 5 and 7
+L2 := [NumberField(f) : e,a,b in [0,1] |
 	IsIrreducible(f) and
 	PrimeDivisors(Discriminant(Integers(NumberField(f)))) subset [5,7]
-	where f := x^2 - e * 5^a * 7^b];
+	where f := x^2 - (-1)^e * 5^a * 7^b];
 printf "Possible candidates for cubic subfield: %o\n", L2;
 
 // Either 5 is inert in K, or 7 is inert in K, or 3 splits in K
@@ -105,4 +145,14 @@ assert forall { K : K in L2 |
 	IsInert(Ideal(Decomposition(K,7)[1,1])) or
 	IsSplit(Ideal(Decomposition(K,3)[1,1]))	};
 
+// Alternatively, one can compute all local cubic extensions of the
+// quadratic fields in L2 and see that non satisfy both the local conditions at 5 and 7
+assert forall { L : L in L2 |
+	not exists {E : E in U5 | exists { E2 : E2 in local_etale_extensions(EtaleAlgebra(L,5),3) |
+			contains_components_isomorphic_to(E,E2) } } or
+	not exists {E : E in U7 | exists { E2 : E2 in local_etale_extensions(EtaleAlgebra(L,7),3) |
+			contains_components_isomorphic_to(E,E2) } } };
+
 printf "Quadratic subfields have been ruled out.\n";
+
+print "\ndone\n";
