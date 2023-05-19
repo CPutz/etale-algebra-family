@@ -1,5 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
+load "scripts/257/upperbounds.m";
 
 function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);
@@ -17,6 +18,48 @@ function contains_components_isomorphic_to(E1,E2);
 	end for;
 
 	return true;
+end function;
+
+// Computes all degree n field extensions of L where
+// L is a p-adic field with base ring B
+function local_field_extensions(L,n,B);
+	exts := [];
+	//hack
+	if Degree(L) eq 1 then
+		L := BaseRing(L);
+	end if;
+	for K in AllExtensions(L,n) do
+		E := EtaleAlgebra([FieldOfFractions(AbsoluteTotallyRamifiedExtension(K))], B);
+		E`BaseRing := B;
+		Append(~exts, E);
+	end for;
+	return exts;
+end function;
+
+// Computes all degree n etale algebra extensions of L where
+// L is a p-adic field with base ring B
+function local_etale_extensions_of_field(L,n,B);
+	exts_degree := [];
+	for d := 1 to n do
+		Append(~exts_degree, local_field_extensions(L,d,B));
+	end for;
+
+	exts := [];
+	for P in Partitions(n) do
+		C := [DirectProduct([e : e in c]) : c in CartesianProduct([exts_degree[p] : p in P])];
+		exts cat:= C;
+	end for;
+
+	return exts;
+end function;
+
+// Computes all degree n etale algebra extensions of E where
+// E is a p-adic etale algebra
+function local_etale_extensions(E,n);
+	B := BaseRing(E);
+	Cs := [local_etale_extensions_of_field(K,n,B) : K in Components(E)];
+	C := CartesianProduct(Cs);
+	return [DirectProduct([c : c in cs]) : cs in C];
 end function;
 
 function quadratic_extensions_etale_algebras_field(L,B);
@@ -45,12 +88,31 @@ function quadratic_extensions(K,P);
 	return [AbsoluteField(ext<K | x^2 - v>) : v in values | IsIrreducible(x^2 - v)];
 end function;
 
-
 printf "\n==================================================================\n";
 printf "We perform the computations from Proposition ?.\n";
 printf "==================================================================\n\n";
 
-load "scripts/257/upperbounds.m";
+Q5 := pAdicField(5,500);
+E5_2 := local_etale_extensions_of_field(Q5, 2, Q5);
+E5_2_filter := [ E : E in E5_2 |
+	exists {<E8,E2> : E8 in local_etale_extensions(E,4),
+					  E2 in U5 |
+					  	IsIsomorphic(E8,E2)} ];
+
+Q7 := pAdicField(7,500);
+E7_2 := local_etale_extensions_of_field(Q7, 2, Q7);
+E7_2_filter := [ E : E in E7_2 |
+	exists {<E8,E2> : E8 in local_etale_extensions(E,4),
+					  E2 in U7 |
+					  	IsIsomorphic(E8,E2)} ];
+
+//TODO: finish by comparing at 3
+assert false;
+
+
+printf "\n==================================================================\n";
+printf "We perform the computations from Proposition ?.\n";
+printf "==================================================================\n\n";
 
 // LMFDB data
 load "scripts/257/fields_quartic_unramified257.m";
