@@ -6,6 +6,8 @@ declare type PadNbhd[PadNbhdElt];
 declare attributes PadNbhd: AmbientSpace;
 declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent, Inverted;
 
+import "utils.m" : prod;
+
 Z := Integers();
 
 /*
@@ -86,8 +88,7 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 		end if;
 		return true, N;
 	elif ISA(Type(x), FldPadElt) or ISA(Type(x), RngPadElt) then
-		OKp := quo<Integers(K) | UniformizingElement(K)^Precision(K)>;
-		b, y := IsCoercible(OKp, x);
+		b, y := IsCoercible(K, x);
 		if b then
 			return true, pAdicNbhd(X, y, UniformizingElement(K)^AbsolutePrecision(x), 1);
 		end if;
@@ -100,7 +101,7 @@ intrinsic Print(N::PadNbhdElt)
 {Print N}
 	s := Sprintf("%o + (%o) * OK", Middle(N), Radius(N));
 	if Exponent(N) gt 1 then
-		s cat:= "^" cat IntegerToString(Exponent(N));
+		s cat:= "^" cat IntegerToString(Exponent(N)) cat "- {0}";
 	end if;
 	if IsInverted(N) then
 		s := "(" cat s cat ")^{-1}";
@@ -235,4 +236,78 @@ intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt, min::.) -> 
 		b,_ := IsPower(-(K!c) div r, k);
 		return b;
 	end if;
+end intrinsic;
+
+intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
+{N1 subset N2}
+	require Parent(N1) eq Parent(N2): "N1 and N2 must have the same Parent";
+
+	if (IsInverted(N1) and not IsInverted(N2)) or
+		not IsInverted(N1) and IsInverted(N2) then
+		return false;
+	end if;
+
+	X := Parent(N1);
+	K := AmbientSpace(X);
+	p := Prime(K);
+
+	c1 := Middle(N1);
+	r1 := Radius(N1);
+	k1 := Exponent(N1);
+	vc1 := Valuation(c1);
+	vr1 := Valuation(r1);
+
+	c2 := Middle(N2);
+	r2 := Radius(N2);
+	k2 := Exponent(N2);
+	vc2 := Valuation(c2);
+	vr2 := Valuation(r2);
+
+	if Valuation(c1 - c2) lt Valuation(r2) then
+		return false;
+	elif Valuation(r1) lt Valuation(r2) then
+		return false;
+	end if;
+
+	c := (c1 - c2) div r2;
+	r := r1 div r2;
+	vc := Valuation(c);
+	vr := Valuation(r);
+
+	if p eq 2 then
+		l1 := 2^Valuation(k1,2);
+		l2 := 2^Valuation(k2,2);
+	else
+		l1 := prod([q[1]^q[2] : q in Factorization(k1) | (p-1) mod q[1] eq 0]);
+		l2 := prod([q[1]^q[2] : q in Factorization(k2) | (p-1) mod q[1] eq 0]);
+	end if;
+
+	if c eq 0 then
+		if vr lt 0 then
+			return false;
+		end if;
+
+		if not IsPower(r,l2) then
+			return false;
+		end if;
+
+		if l2 mod l1 ne 0 then
+			return false;
+		end if;
+		return true;
+	end if;
+
+	if vc lt 0 then
+		return false;
+	end if;
+
+	if vr lt 0 then
+		return false;
+	end if;
+
+	if not IsPower(c,l2) then
+		return false;
+	end if;
+
+	error "not implemented";
 end intrinsic;
