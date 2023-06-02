@@ -82,11 +82,18 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
 	if ISA(Type(x), PadNbhdElt) then
-		N := pAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
+		return true,x;
+		/*N := pAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
+		//bm,m := IsCoercible(K, Middle(x));
+		//br,r := IsCoercible(K, Radius(x));
+		//if not bm or not bm then
+		//	return false, "Coercion into X failed";
+		//end if;
+		//N := pAdicNbhd(X, m, r, Exponent(x));
 		if IsInverted(x) then
 			Invert(~N);
 		end if;
-		return true, N;
+		return true, N;*/
 	elif ISA(Type(x), FldPadElt) or ISA(Type(x), RngPadElt) then
 		b, y := IsCoercible(K, x);
 		if b then
@@ -241,7 +248,7 @@ end intrinsic;
 intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 {N1 subset N2}
 	require Parent(N1) eq Parent(N2): "N1 and N2 must have the same Parent";
-
+	require AmbientSpace(Parent(N1)) eq AmbientSpace(Parent(N2)): "..";
 	if (IsInverted(N1) and not IsInverted(N2)) or
 		not IsInverted(N1) and IsInverted(N2) then
 		return false;
@@ -291,7 +298,7 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 			return false;
 		end if;
 
-		if l2 mod l1 ne 0 then
+		if l1 mod l2 ne 0 then
 			return false;
 		end if;
 		return true;
@@ -308,6 +315,14 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 	if not IsPower(c,l2) then
 		return false;
 	end if;
+
+	if l2 eq 1 then
+		return true;
+	end if;
+
+	c,r,l1,l2;
+	r1,r2;
+	c1,c2;
 
 	error "not implemented";
 end intrinsic;
