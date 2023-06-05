@@ -4,7 +4,7 @@ AttachSpec("spec");
 load "scripts/257/upperbounds.m";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Theorem ?.\n";
+printf "We perform the computations from Theorem 5.29.\n";
 printf "==================================================================\n\n";
 
 R<t> := PolynomialRing(Rationals());

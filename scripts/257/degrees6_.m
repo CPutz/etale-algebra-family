@@ -80,7 +80,7 @@ end function;
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.11.\n";
 printf "==================================================================\n\n";
 
 load "scripts/257/upperbounds.m";

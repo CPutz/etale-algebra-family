@@ -9,7 +9,7 @@ function valid_upper_bound(U,L);
 end function;
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Theorem ?.\n";
+printf "We perform the computations from Theorem 5.7.\n";
 printf "==================================================================\n\n";
 
 SetVerbose("AlgEtFam",1);

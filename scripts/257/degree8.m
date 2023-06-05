@@ -89,7 +89,7 @@ function quadratic_extensions(K,P);
 end function;
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.23.\n";
 printf "==================================================================\n\n";
 
 Q5 := pAdicField(5,500);
@@ -111,7 +111,7 @@ assert false;
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.24.\n";
 printf "==================================================================\n\n";
 
 // LMFDB data
@@ -133,6 +133,10 @@ assert #L4_filter eq 1;
 L := L4_filter[1];
 printf "There exists 1 quartic number field satisfying all local conditions at 2, 3, 5 and 7: %o\n", L;
 
+printf "\n==================================================================\n";
+printf "We perform the computations from Remark 5.25.\n";
+printf "==================================================================\n\n";
+
 OL := Integers(L);
 L8 := [K : K in quadratic_extensions(L,Support(2*5*7*OL)) |
 	exists { E : E in U3 | IsIsomorphic(E, EtaleAlgebra(K,3)) } and
@@ -145,7 +149,7 @@ printf "and having L as a quartic subfield: %o\n", L8;
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.26.\n";
 printf "==================================================================\n\n";
 
 load "scripts/257/covering.m";

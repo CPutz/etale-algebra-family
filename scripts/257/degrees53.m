@@ -23,7 +23,7 @@ end function;
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.18.\n";
 printf "==================================================================\n\n";
 
 load "scripts/257/upperbounds.m";
@@ -67,7 +67,7 @@ printf "\ndone\n";
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.19.\n";
 printf "==================================================================\n\n";
 
 load "scripts/257/covering.m";

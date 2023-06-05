@@ -4,7 +4,7 @@ load "scripts/257/covering.m";
 _<X> := PolynomialRing(Rationals());
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition ?.\n";
+printf "We perform the computations from Proposition 5.14.\n";
 printf "==================================================================\n\n";
 
 psi := CsigmatoE;
