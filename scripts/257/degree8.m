@@ -92,6 +92,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition 5.23.\n";
 printf "==================================================================\n\n";
 
+// Shows that 5 must split in M
 Q5 := pAdicField(5,500);
 E5_2 := local_etale_extensions_of_field(Q5, 2, Q5);
 E5_2_filter := [ E : E in E5_2 |
@@ -99,6 +100,7 @@ E5_2_filter := [ E : E in E5_2 |
 					  E2 in U5 |
 					  	IsIsomorphic(E8,E2)} ];
 
+// Shows that M \otimes Q_7 = Q_7(sqrt(7))
 Q7 := pAdicField(7,500);
 E7_2 := local_etale_extensions_of_field(Q7, 2, Q7);
 E7_2_filter := [ E : E in E7_2 |
@@ -106,9 +108,22 @@ E7_2_filter := [ E : E in E7_2 |
 					  E2 in U7 |
 					  	IsIsomorphic(E8,E2)} ];
 
-//TODO: finish by comparing at 3
-assert false;
+//	quadratic extensions unramified outside 2, 5 and 7
+quad := [QuadraticField((-1)^a * 2^b * 5^c * 7^d) : a,b,c,d in [0,1] | <a,b,c,d> ne <0,0,0,0>];
+quad_filter := [ K : K in quad |
+	exists { E5 : E5 in E5_2_filter | IsIsomorphic(E5, EtaleAlgebra(K,5)) } and
+	exists { E7 : E7 in E7_2_filter | IsIsomorphic(E7, EtaleAlgebra(K,7)) }	];
 
+assert #M eq 1;
+
+M := quad_filter[1];
+printf "There exists 1 quadratic number field satisfying all local conditions at 5 and 7: %o\n", M;
+
+_<t> := PolynomialRing(Rationals());
+assert forall { E2 : E2 in U2 |
+	forall { C : C in Components(E2) | not HasRoot(t^2 - 14, C) } };
+
+printf "None of the local algebras at 2 is an extension of Q(sqrt(14)).\n";
 
 printf "\n==================================================================\n";
 printf "We perform the computations from Proposition 5.24.\n";
