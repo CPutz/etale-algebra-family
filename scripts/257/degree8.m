@@ -114,7 +114,7 @@ quad_filter := [ K : K in quad |
 	exists { E5 : E5 in E5_2_filter | IsIsomorphic(E5, EtaleAlgebra(K,5)) } and
 	exists { E7 : E7 in E7_2_filter | IsIsomorphic(E7, EtaleAlgebra(K,7)) }	];
 
-assert #M eq 1;
+assert #quad_filter eq 1;
 
 M := quad_filter[1];
 printf "There exists 1 quadratic number field satisfying all local conditions at 5 and 7: %o\n", M;
