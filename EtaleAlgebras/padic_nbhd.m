@@ -320,9 +320,10 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 		return true;
 	end if;
 
-	c,r,l1,l2;
-	r1,r2;
-	c1,c2;
+	// Hensel's lemma applied to X^l2 - (c + ra^l1) (note that c is an l2-th power)
+	if Valuation(r) gt 2 * Valuation(l2,p) + 2 * (l2-1) / l2 * Valuation(c) then
+		return true;
+	end if;
 
 	error "not implemented";
 end intrinsic;
