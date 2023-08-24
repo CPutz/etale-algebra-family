@@ -60,7 +60,7 @@ will be applied to all etale algebras in the result.}
 		end if;
 	end for;
 
-	if Simplify and <2,8> notin Precomputed(Database) then
+	if Simplify and p eq 2 and <2,8> notin Precomputed(Database) then
 		printf "Warning: database of local fields provided does not contain a precomputed list of degree 8 extensions of Q_2. ";
 		printf "This may lead to a very long running time.\n";
 		printf "Solution: either set Simplify = false or Database = LocalFieldDatabaseOctic2Adics().\n";
