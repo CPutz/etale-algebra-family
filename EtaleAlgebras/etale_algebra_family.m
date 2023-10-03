@@ -18,11 +18,11 @@ intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngI
 
 	df := Derivative(f);
 	mu_f := MaxValuationInRootsOf(df,f);
-	tau_F := Valuation(K!k) + mu_f + Valuation(Resultant(f,g)) * (k - 1) / n;
+	tau_F := Valuation(K!k) + Valuation(Resultant(f,g)) * (k - 1) / n;
 
 	sigfg := Separant(f,g);
 
-	return Max([2 * k * tau_F, k * sigfg]), tau_F;
+	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
 end intrinsic;
 
 intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt, RngElt
@@ -36,11 +36,11 @@ intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcN
 
 	df := Derivative(f);
 	mu_f := MaxValuationInRootsOf(df,f,p);
-	tau_F := Valuation(K!k,p) + mu_f + Valuation(Resultant(f,g),p) * (k - 1) / n;
+	tau_F := Valuation(K!k,p) + Valuation(Resultant(f,g),p) * (k - 1) / n;
 
 	sigfg := Separant(f,g,p);
 
-	return Max([2 * k * tau_F, k * sigfg]), tau_F;
+	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
 end intrinsic;
 
 intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
@@ -194,18 +194,15 @@ Difference.}
 
 			vprintf AlgEtFam,2: "\nFactor %o = %o\n", i, Fi;
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
-			stab_i,tau_Fi := StandardConditions(ROKpq!fi, ROKpq!ri, ki);
+			stab_i,mu_tau_i := StandardConditions(ROKpq!fi, ROKpq!ri, ki);
 			bound := Max(bound, Valuation(c) + stab_i);
 			vprintf AlgEtFam,2: "Stability bound = %o\n", stab_i;
 
 			fi_hat := f_hats[i];
 			res_i := Resultant(fi, fi_hat);
-			vprintf AlgEtFam,2: "Resultant bound = %o\n", ki * tau_Fi + Valuation(res_i);
-			bound := Max(bound, Valuation(c) + ki * tau_Fi + Valuation(res_i));
-		end for;
+			vprintf AlgEtFam,2: "Resultant bound = %o\n", ki * mu_tau_i + Valuation(res_i) * ki / Degree(fi);
+			bound := Max(bound, Valuation(c) + ki * mu_tau_i + Valuation(res_i) * ki / Degree(fi));
 
-		vprintf AlgEtFam,2: "\n";
-		for i := 1 to #fs do
 			for j := 1 to #fs do
 				if i ne j then
 					fi := fs[i][1];
@@ -213,10 +210,12 @@ Difference.}
 					res_ij := Resultant(fi, fj);
 					ki := fs[i][2];
 					kj := fs[j][2];
-					res_boundij := ki / kj * Valuation(res_ij);
-					bound := Max(bound, Valuation(c) + res_boundij);
+					if (ki ne 1) then
+						res_boundij := (ki * kj * Valuation(res_ij) - mu_tau_i) / (1 - 1 / ki);
+						bound := Max(bound, Valuation(c) + res_boundij);
 
-					vprintf AlgEtFam,2: "Resultant bound for (%o,%o) = %o\n", i, j, res_boundij;
+						vprintf AlgEtFam,2: "Resultant bound for (%o,%o) = %o\n", i, j, res_boundij;
+					end if;
 				end if;
 			end for;
 		end for;

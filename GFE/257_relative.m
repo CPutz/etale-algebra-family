@@ -49,20 +49,17 @@ Q(Sqrt(21)) above 2.}
 	E2 := [];
 	E3 := [];
 
-	for a in [19] do
-		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + 2^5*t));
-		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint, Precision := 500);
-		for i := 1 to #E0 do
-			SetData(~E0[i], [a + 2^5 * B : B in Data(E0[i])]);
-		end for;
-		Append(~E0s, E0);
-	end for;
-
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
 	E2 := EtaleAlgebraFamily(F2, p :
 		MinVal := 2, CongrVal := Integers(2)!0, Hint := Hint, Precision := 500);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
+	end for;
+
+	F3 := ReciprocalPolynomial(2^7 * (1 + 2*s) * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
+	E3 := EtaleAlgebraFamily(F3, p : Hint := Hint, Precision := 500);
+	for i := 1 to #E3 do
+		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
 
 	Es := [];
