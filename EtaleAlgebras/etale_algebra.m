@@ -114,7 +114,7 @@ intrinsic Print(E::AlgEtpAdic)
         printf "Etale algebra defined by product of %o", Components(E);
     end if;
     if assigned E`Data then
-        printf " with meta data %o", E`Data;
+        printf " with stable neighbourhoods %o", E`Data;
     end if;
 end intrinsic;
 

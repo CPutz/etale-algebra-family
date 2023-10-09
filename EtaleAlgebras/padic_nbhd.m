@@ -106,9 +106,11 @@ end intrinsic;
 
 intrinsic Print(N::PadNbhdElt)
 {Print N}
-	s := Sprintf("%o + (%o) * OK", Middle(N), Radius(N));
+	s := Sprintf("%o + %o * ", Middle(N), Radius(N));
 	if Exponent(N) gt 1 then
-		s cat:= "^" cat IntegerToString(Exponent(N)) cat "- {0}";
+		s cat:= "(OK^" cat IntegerToString(Exponent(N)) cat " - {0})";
+	else
+		s cat:= "OK";
 	end if;
 	if IsInverted(N) then
 		s := "(" cat s cat ")^{-1}";
