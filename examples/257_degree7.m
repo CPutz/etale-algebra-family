@@ -1,6 +1,6 @@
 AttachSpec("spec");
 K := QuadraticField(21);
-SetVerbose("EtaleAlg",true);
+SetVerbose("AlgEtFam",true);
 
 for p in [2,3,5,7,11] do
 	for P in Decomposition(K,p) do

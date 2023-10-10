@@ -1,5 +1,5 @@
 AttachSpec("spec");
-SetVerbose("EtaleAlg",true);
+SetVerbose("AlgEtFam",true);
 
 time E2 := EtaleAlgebras257(2 : D := LocalFieldDatabaseOctic2Adics());
 E2;
