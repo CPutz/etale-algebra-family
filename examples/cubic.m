@@ -1,3 +1,4 @@
+// Load this file from the main folder
 AttachSpec("spec");
 
 S<s> := PolynomialRing(Rationals());
