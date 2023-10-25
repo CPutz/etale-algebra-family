@@ -7,6 +7,7 @@
         separant.m
         padic_nbhd.m
         utils.m
+        test.m
     }
 
     LocalFields
