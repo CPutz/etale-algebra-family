@@ -45,7 +45,7 @@ discs := {@ Discriminant(Integers(K)) : K in Ks_iso @};
 primes := [2,3,5,7];
 algebras := [U2,U3,U5,U7];
 for d in discs do
-	printf "---------- Number fields with discriminant %o ----------\n", disc_to_string(d);
+	printf "\n---------- Number fields with discriminant %o ----------\n", disc_to_string(d);
 	Ksd := [K : K in Ks_iso | Discriminant(Integers(K)) eq d];
 	for K in Ksd do
 		Ko := OptimizedRepresentation(K);
@@ -54,5 +54,4 @@ for d in discs do
 				not exists { Ep : Ep in algebras[i] | IsIsomorphic(EtaleAlgebra(Ko,primes[i]),Ep) }];
 		printf "%o, Primitive: %o, Obstruction: %o\n", Ko, is_primitive, obstruction;
 	end for;
-	printf "\n";
 end for;

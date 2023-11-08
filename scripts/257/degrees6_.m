@@ -67,11 +67,6 @@ function local_etale_extensions(E,n);
 	return [DirectProduct([c : c in cs]) : cs in C];
 end function;
 
-
-function splitting_partition(E);
-	return {* Degree(C[1],BaseRing(E)) ^^ C[2] : C in ComponentsIsoStructure(E) *};
-end function;
-
 // generates all subpartitions of p
 function subpartitions(p);
 	C := CartesianProduct([Partitions(r) : r in p]);
@@ -86,22 +81,22 @@ printf "==================================================================\n\n";
 load "scripts/257/upperbounds.m";
 
 E2 := [ E : E in U2 |
-	splitting_partition(E) in subpartitions([6,1,1]) or
-	splitting_partition(E) in subpartitions([6,2]) ];
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,1,1]) or
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,2]) ];
 
 printf "Valuation of possible local discriminants at 2: %o\n",
 	{ Valuation(Discriminant(E)) : E in E2 };
 
 E5 := [ E : E in U5 |
-	splitting_partition(E) in subpartitions([6,1,1]) or
-	splitting_partition(E) in subpartitions([6,2]) ];
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,1,1]) or
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,2]) ];
 
 printf "Valuation of possible local discriminants at 5: %o\n",
 	{ Valuation(Discriminant(E)) : E in E5 };
 
 E7 := [ E : E in U7 |
-	splitting_partition(E) in subpartitions([6,1,1]) or
-	splitting_partition(E) in subpartitions([6,2]) ];
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,1,1]) or
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,2]) ];
 
 printf "Valuation of possible local discriminants at 7: %o\n",
 	{ Valuation(Discriminant(E)) : E in E7 };
@@ -137,7 +132,7 @@ L2 := [NumberField(f) : e,a,b in [0,1] |
 	IsIrreducible(f) and
 	PrimeDivisors(Discriminant(Integers(NumberField(f)))) subset [5,7]
 	where f := x^2 - (-1)^e * 5^a * 7^b];
-printf "Possible candidates for cubic subfield: %o\n", L2;
+printf "Possible candidates for quadratic subfield: %o\n", L2;
 
 // Either 5 is inert in K, or 7 is inert in K, or 3 splits in K
 assert forall { K : K in L2 |
@@ -154,5 +149,34 @@ assert forall { L : L in L2 |
 			contains_components_isomorphic_to(E,E2) } } };
 
 printf "Quadratic subfields have been ruled out.\n";
+
+printf "\nComputations for the primitive case.\n";
+
+E5_611 := [ SimplifyToProduct(E) : E in U5 |
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,1,1]) ];
+
+E7_611 := [ SimplifyToProduct(E) : E in U7 |
+	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,1,1]) ];
+
+printf "\nCase where K is isomorphic to M x Q x Q:\n";
+printf "K tensor Q_5 is isomorphic to: %o\n", E5_611;
+printf "K tensor Q_7 is isomorphic to: %o\n", E7_611;
+
+printf "\nCase where K is isomorphic to M x L with L a quadratic number field:\n";
+printf "Possible candidates for L: %o\n", L2;
+
+for L in L2 do
+	printf "\nSuppose L is isomorphic to %o.\n", L;
+	E5_L := [ SimplifyToProduct(E) : E in U5 | contains_components_isomorphic_to(E, EtaleAlgebra(L,5)) ];
+	E7_L := [ SimplifyToProduct(E) : E in U7 | contains_components_isomorphic_to(E, EtaleAlgebra(L,7)) ];
+	if #E5_L eq 0 then
+		printf "Then we get an obstruction at the prime 5.\n";
+	elif #E7_L eq 0 then
+		printf "Then we get an obstruction at the prime 7.\n";
+	else
+		printf "Then K tensor Q_5 must be isomorphic to one of %o etale algebras: %o,\n", #E5_L, E5_L;
+		printf "and K tensor Q_7 must be isomorphic to one of %o etale algebras: %o.\n", #E7_L, E7_L;
+	end if;
+end for;
 
 print "\ndone\n";

@@ -43,6 +43,4 @@ U7 :=
   [ EtaleAlgebra((t^6 + a*7) * t * (t+1)) : a in [1,2,4] ] cat
   [ EtaleAlgebra((t^7 + 7*a*t + 7) * t) : a in [1,2,4] ] cat
   [ EtaleAlgebra((t^5 - 7) * (t^2 - 7) * t),
-	EtaleAlgebra(t^8 - 7),
-	EtaleAlgebra((t^6 + 7) * t * (t+1)),
-	EtaleAlgebra((t^7 + 7*t + 7) * t) ];
+		EtaleAlgebra(t^8 - 7) ];

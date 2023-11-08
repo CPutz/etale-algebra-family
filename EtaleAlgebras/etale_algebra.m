@@ -178,14 +178,20 @@ intrinsic ClearData(~E::AlgEtpAdic)
 end intrinsic;
 
 intrinsic Dimension(E::AlgEtpAdic) -> RngIntElt
-{The dimension of E over its base ring.}
+{The dimension of E over its base ring}
     return &+[Degree(C, BaseRing(E)) : C in Components(E)];
 end intrinsic;
 
 intrinsic Discriminant(E::AlgEtpAdic) -> .
-{The product of the discriminants of the components of E.}
+{The product of the discriminants of the components of E}
     B := BaseRing(E);
     return prod([B!Discriminant(C, B) : C in Components(E)]);
+end intrinsic;
+
+intrinsic FactorizationPattern(E::AlgEtpAdic) -> .
+{The factorization pattern of E}
+    B := BaseRing(E);
+    return Reverse(Sort([Degree(C, B) : C in Components(E)]));
 end intrinsic;
 
 /*
