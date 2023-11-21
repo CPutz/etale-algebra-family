@@ -117,7 +117,8 @@ modulo p^k for all E in a list L}
 
     C := {@ @};
     for E in L do
-        C join:= ComputeCongruences(E,k);
+        E;
+        time C join:= ComputeCongruences(E,k);
     end for;
     return C;
 end intrinsic;

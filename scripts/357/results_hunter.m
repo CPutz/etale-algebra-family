@@ -34,8 +34,8 @@ function disc_to_string(d);
 	return s;
 end function;
 
-load "scripts/257/results_hunter_raw.m";
-load "scripts/257/upperbounds.m";
+load "scripts/357/results_hunter_raw.m";
+load "scripts/357/upperbounds.m";
 
 printf "computing number fields\n";
 Ks := [NumberField(f) : f in pols];
@@ -49,9 +49,8 @@ for d in discs do
 	Ksd := [K : K in Ks_iso | Discriminant(Integers(K)) eq d];
 	for K in Ksd do
 		Ko := K;
-		is_primitive := #Subfields(Ko) eq 1;
 		obstruction := [primes[i] : i in [1..#primes] | 
 				not exists { Ep : Ep in algebras[i] | IsIsomorphic(EtaleAlgebra(Ko,primes[i]),Ep) }];
-		printf "%o, Primitive: %o, Obstruction: %o\n", Ko, is_primitive, obstruction;
+		printf "%o, Obstruction: %o\n", Ko, obstruction;
 	end for;
 end for;

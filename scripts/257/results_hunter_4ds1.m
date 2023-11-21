@@ -34,7 +34,7 @@ function disc_to_string(d);
 	return s;
 end function;
 
-load "scripts/257/results_hunter_raw.m";
+load "scripts/257/results_hunter_raw_4ds1.m";
 load "scripts/257/upperbounds.m";
 
 printf "computing number fields\n";
@@ -48,7 +48,7 @@ for d in discs do
 	printf "\n---------- Number fields with discriminant %o ----------\n", disc_to_string(d);
 	Ksd := [K : K in Ks_iso | Discriminant(Integers(K)) eq d];
 	for K in Ksd do
-		Ko := K;
+		Ko := OptimizedRepresentation(K);
 		is_primitive := #Subfields(Ko) eq 1;
 		obstruction := [primes[i] : i in [1..#primes] | 
 				not exists { Ep : Ep in algebras[i] | IsIsomorphic(EtaleAlgebra(Ko,primes[i]),Ep) }];
