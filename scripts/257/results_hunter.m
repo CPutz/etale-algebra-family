@@ -3,14 +3,25 @@ AttachSpec("spec");
 
 Z := Integers();
 
+//the string length of the minimal polynomial of K
+function length(K);
+	return #Sprint(DefiningPolynomial(K));
+end function;
+
 function uptoiso(L);
-	Ls := {@ @};
+	Ls := [];
+	//make a list L2 of isomorphism classes
 	for K in L do
-		if not exists { K2 : K2 in Ls | IsIsomorphic(K,K2) } then
-			Include(~Ls, K);
+		if not exists (i) { i : i in [1..#Ls] | IsIsomorphic(K,Ls[i][1]) } then
+			Append(~Ls, [K]);
+		else
+			Append(~Ls[i], K);
 		end if;
 	end for;
-	return Ls;
+
+	//for every isomorphism class, add the polynomial with the smallest minimal polynomial
+	//to the output list
+	return {@ [K : K in Kiso | length(K) eq Min([length(N) : N in Kiso])][1] : Kiso in Ls @};
 end function;
 
 function disc_to_string(d);
@@ -37,7 +48,7 @@ end function;
 load "scripts/257/results_hunter_raw.m";
 load "scripts/257/upperbounds.m";
 
-printf "computing number fields\n";
+printf "computing isomorphism classes of number fields\n";
 Ks := [NumberField(f) : f in pols];
 Ks_iso := uptoiso(Ks);
 
