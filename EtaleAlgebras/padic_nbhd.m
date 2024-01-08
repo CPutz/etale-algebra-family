@@ -3,7 +3,7 @@
  */
 
 declare type PadNbhd[PadNbhdElt];
-declare attributes PadNbhd: AmbientSpace, Prime, MinVal, CongrVal;
+declare attributes PadNbhd: AmbientSpace, Prime, MinVal, CongrVal, Uniformizer;
 declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent, Inverted;
 
 import "utils.m" : prod;
@@ -24,6 +24,7 @@ v(x) = a (mod b)}
 	X`Prime := p;
 	X`MinVal := MinVal;
 	X`CongrVal := CongrVal;
+	X`Uniformizer := p;
 	return X;
 end intrinsic;
 
@@ -37,6 +38,7 @@ v(x) = a (mod b)}
 	X`Prime := p;
 	X`MinVal := MinVal;
 	X`CongrVal := CongrVal;
+	X`Uniformizer := UniformizingElement(p);
 	return X;
 end intrinsic;
 
@@ -63,6 +65,11 @@ v(x) = a (mod b) for all x in N}
 	return X`CongrVal;
 end intrinsic;
 
+intrinsic UniformizingElement(X::PadNbhd) -> .
+{A uniformizer of the completion of the ambient space of X at p}
+	return X`Uniformizer;
+end intrinsic;
+
 intrinsic Print(X::PadNbhd)
 {Print X}
 	printf "The space of p-adic neighbourhoods of the form c + r * (O_K)^k intersected with {x in O_K | v(x) >= %o and v(x) = %o (mod %o)}, and K = %o",
@@ -71,7 +78,8 @@ end intrinsic;
 
 intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt
 {X1 eq X2}
-	return AmbientSpace(X1) eq AmbientSpace(X2);
+	return AmbientSpace(X1) eq AmbientSpace(X2) and Prime(X1) eq Prime(X2) and
+		MinValuation(X1) eq MinValuation(X2) and CongrValuation(X1) eq CongrValuation(X2);
 end intrinsic;
 
 
@@ -79,11 +87,14 @@ end intrinsic;
  * Creation, coercion and printing of p-adic neighbourhoods
  */
 
-intrinsic pAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIntElt) -> PadNbhdElt
+intrinsic pAdicNbhd(X::PadNbhd, m::., r::., k::RngIntElt) -> PadNbhdElt
 {The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
+	require Type(K) eq FldRat: "Base field of X must be the rationals";
+	require IsCoercible(K,m): "Argument 2 must be coercible to the rationals";
+	require IsCoercible(K,r): "Argument 3 must be coercible to the rationals";
 	requirege k, 1;
-	require Valuation(r) ge 0: "Argument 3 must be integral";
+	require Valuation(r, Prime(X)) ge 0: "Argument 3 must be integral";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
@@ -94,11 +105,13 @@ intrinsic pAdicNbhd(X::PadNbhd, m::RngPadResElt, r::RngPadResElt, k::RngIntElt) 
 	return N;
 end intrinsic;
 
-intrinsic pAdicNbhd(X::PadNbhd, m::RngPadResExtElt, r::RngPadResExtElt, k::RngIntElt) -> PadNbhdElt
+intrinsic pAdicNbhd(X::PadNbhd, m::FldNumElt, r::FldNumElt, k::RngIntElt) -> PadNbhdElt
 {The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
+	require K eq Parent(m): "Argument 2 must be an element of the ambient space of X";
+	require K eq Parent(r): "Argument 3 must be an element of the ambient space of X";
 	requirege k, 1;
-	require Valuation(r) ge 0: "Argument 3 must be integral";
+	require Valuation(r, Prime(X)) ge 0: "Argument 3 must be integral";
 
 	N := New(PadNbhdElt);
 	N`Parent := X;
@@ -113,23 +126,20 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
 	if ISA(Type(x), PadNbhdElt) then
-		return true,x;
-		/*N := pAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
-		//bm,m := IsCoercible(K, Middle(x));
-		//br,r := IsCoercible(K, Radius(x));
-		//if not bm or not bm then
-		//	return false, "Coercion into X failed";
-		//end if;
-		//N := pAdicNbhd(X, m, r, Exponent(x));
-		if IsInverted(x) then
-			Invert(~N);
+		if X eq Parent(x) then
+			N := pAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
+			if IsInverted(x) then
+				Invert(~N);
+			end if;
+			return true, N;
 		end if;
-		return true, N;*/
-	elif ISA(Type(x), FldPadElt) or ISA(Type(x), RngPadElt) then
+	/*elif ISA(Type(x), FldPadElt) or ISA(Type(x), RngPadElt) then
 		b, y := IsCoercible(K, x);
 		if b then
+			p := 
 			return true, pAdicNbhd(X, y, UniformizingElement(K)^AbsolutePrecision(x), 1);
 		end if;
+	end if;*/
 	end if;
 
 	return false, "Coercion into X failed";
@@ -181,22 +191,13 @@ end intrinsic;
 
 intrinsic 'eq'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 {N1 eq N2}
-	return Middle(N1) eq Middle(N2) and Radius(N1) eq Radius(N2) and Exponent(N1) eq Exponent(N2);
+	return Parent(N1) eq Parent(N2) and Middle(N1) eq Middle(N2) and
+		Radius(N1) eq Radius(N2) and Exponent(N1) eq Exponent(N2);
 end intrinsic;
 
 intrinsic Representative(N::PadNbhdElt) -> .
-{Returns an element of N, not equal to its middle element.}
-	K := AmbientSpace(Parent(N));
-	prec := Precision(K);
-	if prec eq Infinity() then
-		prec := K`DefaultPrecision;
-	end if;
+{Returns an element of N, not equal to its middle element}
 	c := Middle(N) + Radius(N);
-	/*if Valuation(c) ge AbsolutePrecision(c) then //c is zero
-		p := Prime(K);
-		c := ChangePrecision(c,1);
-		c +:= p^AbsolutePrecision(Radius(N)) + ChangePrecision(Radius(N), prec);
-	end if;*/
 	if IsInverted(N) then
 		c := c^(-1);
 	end if;
@@ -235,53 +236,81 @@ intrinsic Invert(~N::PadNbhdElt)
 	N`Inverted := true;
 end intrinsic;
 
-intrinsic ContainsElementOfValuation(N::PadNbhdElt, v::RngIntResElt, min::.) -> BoolElt
-{Returns whether N contains an element of valuation at least min and v mod m
-(where v is defined modulo m)}
-	K := AmbientSpace(Parent(N));
+intrinsic IsEmpty(N::PadNbhdElt) -> BoolElt
+{Return whether N is empty, considering the conditions on the minimal
+valuation and congruence on the valuation imposed by the parent of N}
+	X := Parent(N);
+	p := Prime(X);
+	K,phi := Completion(AmbientSpace(X),p);
+	min := MinValuation(X);
+	v := CongrValuation(X);
 	R := Parent(v);
 	m := Modulus(R);
 
 	c := Middle(N);
 	r := Radius(N);
 	k := Exponent(N);
-	vc := Valuation(c);
-	vr := Valuation(r);
+	vc := Valuation(c,p);
+	vr := Valuation(r,p);
+
+	d := GCD(k, m);
 
 	if c eq 0 then
-		d := GCD(k, m);
-		return (Z!v - vr) mod d eq 0;
+		return (Z!v - vr) mod d ne 0;
 	else
-		//check whether N contains an element of valuation >= min
-		//TODO: check whether use of IsPower is correct
-		if vc lt min and (vc ne vr or not IsPower(-(K!c) div r, k)) then
-			return false;
+		//compute largest n such that v(r) + nk < v(c)
+		nl := Ceiling((vc - vr) / k - 1);
+
+		//compute smallest n such that v(r) + nk >= min
+		ns := Ceiling((min - vr) / k);
+
+		//check whether there exists ns <= n <= nl with v(r) + nk = v (mod m)
+		if (Z!v - vr) mod d eq 0 then
+			//formulate reduced problem n * k2 = v2 mod m2
+			k2 := k div d;
+			v2 := (v - vr) div d;
+			m2 := m div d;
+			//solution
+			s := Z!(Inverse(Integers(m2)!k2) * v2);
+
+			//check whether there exists a global solution ns <= n <= nl:
+			s_min := ns + ((s - ns) mod m);
+			if s_min le nl then
+				return false;
+			end if;
 		end if;
 
-		if R!vc eq v then
+		//check whether a solution exists of valuation v(c)
+		if vc ge min then
+			if vc - v eq 0 then
+				return false;
+			end if;
+		end if;
+
+		//case where all elements of N have valuation equal to v(c)
+		if vc lt vr then
 			return true;
 		end if;
 
-		for va := 0 to Ceiling((vc - vr) / k) - 1 do
-			if R!(vr + k * va) eq v then
-				return true;
-			end if;
-		end for;
-
-		if vc lt vr then
-			return false;
+		//check whether any solutions c + r*x^k may exist for which v(c) = v(r * x^k)
+		if (vc - vr) mod k ne 0 then
+			return true;
 		end if;
-		
-		//TODO: is this completely correct?
-		b,_ := IsPower(-(K!c) div r, k);
-		return b;
+
+		error "not implemented";
+
+		//a solution only exists if c + r x^k = 0 mod p^min has a solution
+		/*if not IsPower(-c div r, k) then
+			return true;
+		end if;*/
+
+		error "not implemented";
 	end if;
 end intrinsic;
 
 intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 {N1 subset N2}
 	require Parent(N1) eq Parent(N2): "N1 and N2 must have the same Parent";
-	require AmbientSpace(Parent(N1)) eq AmbientSpace(Parent(N2)): "..";
 	if (IsInverted(N1) and not IsInverted(N2)) or
 		not IsInverted(N1) and IsInverted(N2) then
 		return false;
@@ -289,31 +318,32 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 
 	X := Parent(N1);
 	K := AmbientSpace(X);
-	p := Prime(K);
+	p := Prime(X);
 
 	c1 := Middle(N1);
 	r1 := Radius(N1);
 	k1 := Exponent(N1);
-	vc1 := Valuation(c1);
-	vr1 := Valuation(r1);
+	vc1 := Valuation(c1,p);
+	vr1 := Valuation(r1,p);
 
 	c2 := Middle(N2);
 	r2 := Radius(N2);
 	k2 := Exponent(N2);
-	vc2 := Valuation(c2);
-	vr2 := Valuation(r2);
+	vc2 := Valuation(c2,p);
+	vr2 := Valuation(r2,p);
 
-	if Valuation(c1 - c2) lt Valuation(r2) then
+	if Valuation(c1 - c2,p) lt Valuation(r2,p) then
 		return false;
-	elif Valuation(r1) lt Valuation(r2) then
+	elif Valuation(r1) lt Valuation(r2,p) then
 		return false;
 	end if;
 
 	c := (c1 - c2) div r2;
 	r := r1 div r2;
-	vc := Valuation(c);
-	vr := Valuation(r);
+	vc := Valuation(c,p);
+	vr := Valuation(r,p);
 
+	//TODO: this works for primes in number fields?
 	if p eq 2 then
 		l1 := 2^Valuation(k1,2);
 		l2 := 2^Valuation(k2,2);
@@ -354,9 +384,34 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 	end if;
 
 	// Hensel's lemma applied to X^l2 - (c + ra^l1) (note that c is an l2-th power)
-	if Valuation(r) gt 2 * Valuation(l2,p) + 2 * (l2-1) / l2 * Valuation(c) then
+	if Valuation(r,p) gt 2 * Valuation(l2,p) + 2 * (l2-1) / l2 * Valuation(c,p) then
 		return true;
 	end if;
 
 	error "not implemented";
+end intrinsic;
+
+
+intrinsic Subdivide(N::PadNbhdElt, n::RngIntElt) -> SeqEnum
+{Subdivides a p-adic nbhd N into nbhds of radius radius <= p^n}
+	require Exponent(N) eq 1: "Argument 1 must be of the form c + r * OK";
+
+	X := Parent(N);
+	p := Prime(X);
+	vr := Valuation(Radius(N),p);
+	if n le vr then
+		return [N];
+	else
+		OK := Integers(AmbientSpace(X));
+		R := quo<OK | p^(n-vr)>;
+		phi := Coercion(OK,R);
+
+		//enumerating R can result in some duplicate elements,
+		//so we will remove them first (this is fixed as per MAGMA V2.27-7)
+		R_set := {y : y in R};
+
+		c := Middle(N);
+		pi := UniformizingElement(X);
+		return [ pAdicNbhd(X, c + r * y@@phi, r * pi^(n-vr)) : y in R_set];
+	end if;
 end intrinsic;
