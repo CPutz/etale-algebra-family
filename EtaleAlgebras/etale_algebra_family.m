@@ -7,42 +7,6 @@ declare verbose AlgEtFam, 2;
 import "utils.m" : zip, prod;
 Q := Rationals();
 
-intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt, RngElt
-{The standard conditions for f^k - sg (Definition ?)}
-	require Valuation(LeadingCoefficient(f)) eq 0: "f must be monic";
-	require Degree(g) le k * Degree(f): "Must have deg(g) le deg(f^k)";
-
-	R := Parent(f);
-	K := BaseRing(R);
-	n := k * Degree(f);
-
-	df := Derivative(f);
-	mu_f := MaxValuationInRootsOf(df,f);
-	tau_F := Valuation(K!k) + Valuation(Resultant(f,g)) * (k - 1) / n;
-
-	sigfg := Separant(f,g);
-
-	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
-end intrinsic;
-
-intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt, RngElt
-{The standard conditions for f^k - sg (Definition ?), at the prime p.}
-	require Valuation(LeadingCoefficient(f),p) eq 0: "f must be monic";
-	require Degree(g) le k * Degree(f): "Must have deg(g) le deg(f^k)";
-
-	R := Parent(f);
-	K := BaseRing(R);
-	n := k * Degree(f);
-
-	df := Derivative(f);
-	mu_f := MaxValuationInRootsOf(df,f,p);
-	tau_F := Valuation(K!k,p) + Valuation(Resultant(f,g),p) * (k - 1) / n;
-
-	sigfg := Separant(f,g,p);
-
-	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
-end intrinsic;
-
 intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldRat]], p::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Hint := [],
@@ -79,6 +43,7 @@ Difference.}
 			Hint := Hint, BoundMethod := BoundMethod, ParameterSpace := ParameterSpace);
 end intrinsic;
 
+
 intrinsic EtaleAlgebraFamily(F::RngUPolElt[RngUPol[FldNum]], p::PlcNumElt
 	: D := LocalFieldDatabase(),
 	  Precision := 50,
@@ -110,18 +75,26 @@ Difference.}
 	OK := Integers(K);
 	pi := UniformizingElement(p);
 
+
 	Kp,phi := Completion(K,p : Precision := Precision);
 	OKp := Integers(Kp);
 	piKp := UniformizingElement(Kp);
 	Sp,StoSp := ChangeRing(S, Kp, phi);
 	Rp,RtoRp := ChangeRing(R, Sp, StoSp);
-	OKpq := quo<OKp | piKp^Precision>;
-	piOKpq := OKpq!piKp;
-	X := pAdicNbhds(OKpq);
+	OKp_ex := quo<OKp | piKp^Precision>; //exact version of O_Kp
+	ROKpq := PolynomialRing(OKpq);
 
 	if ParameterSpace cmpeq false then
-		ParameterSpace := Kp;
+		ParameterSpace := hom<K -> K | >; //the identity map from K to K
 	end if;
+
+	//ParameterSpace := BaseField(BaseField(Kp));
+	//ParameterSpace;
+	piPar := UniformizingElement(ParameterSpace);
+	vpi := Valuation(Kp!piPar);
+	ParameterSpaceEx := quo<Integers(ParameterSpace) | piPar^Precision>;
+	piParEx := UniformizingElement(ParameterSpaceEx);
+	X := pAdicNbhds(ParameterSpaceEx);
 
 	// Make F monic and integral
 	lc := LeadingCoefficient(LeadingCoefficient(F));
@@ -134,10 +107,10 @@ Difference.}
 	vprintf AlgEtFam,1: "computing discriminant";
 	disc := Discriminant(F);
 
-	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge MinVal];
+	rootsK  := [r : r in Roots(disc, K) | Valuation(r[1],p) ge MinVal * vpi];
 	//We assume that all integral roots of the discriminant over K_p are defined over K
 	disc0 := disc div prod([(s - r[1])^r[2] : r in rootsK]);
-	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge MinVal];
+	roots0Kp := [r[1] : r in Roots(StoSp(disc0),Kp) | Valuation(r[1]) ge MinVal * vpi];
 	require IsEmpty(roots0Kp): "The integral roots of the discriminant over K_p should be defined over K";
 
 	vprintf AlgEtFam,1: ", roots = {";
@@ -151,7 +124,7 @@ Difference.}
 	Nbhds_oo := [];
 
 	for r in rootsK do
-		// Evalua10 with 1te F at s = r
+		// Evaluate F(s,t) at s = r
 		f := StoSp(Evaluate(SwitchVariables(F), r[1]));
 		// The coefficient of s in F
 		g := StoSp(Coefficient(SwitchVariables(F), 1));
@@ -183,8 +156,8 @@ Difference.}
 
 		vprintf AlgEtFam,1: "Computed standard form with c = %o\n", c;
 
+		//initialize bound
 		bound := 0;
-		ROKpq := PolynomialRing(OKpq);
 
 		for i := 1 to #fs do
 			fi := fs[i][1];
@@ -194,6 +167,7 @@ Difference.}
 
 			vprintf AlgEtFam,2: "\nFactor %o = %o\n", i, Fi;
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
+			//TODO: if the Precision is too low, the stability bound may become infinite
 			stab_i,mu_tau_i := StandardConditions(ROKpq!fi, ROKpq!ri, ki);
 			bound := Max(bound, Valuation(c) + stab_i);
 			vprintf AlgEtFam,2: "Stability bound = %o\n", stab_i;
@@ -210,12 +184,10 @@ Difference.}
 					res_ij := Resultant(fi, fj);
 					ki := fs[i][2];
 					kj := fs[j][2];
-					if (ki ne 1) then
-						res_boundij := (ki * kj * Valuation(res_ij) - mu_tau_i) / (1 - 1 / ki);
-						bound := Max(bound, Valuation(c) + res_boundij);
+					res_boundij := ki * kj * Valuation(res_ij);
+					bound := Max(bound, Valuation(c) + res_boundij);
 
-						vprintf AlgEtFam,2: "Resultant bound for (%o,%o) = %o\n", i, j, res_boundij;
-					end if;
+					vprintf AlgEtFam,2: "Resultant bound for (%o,%o) = %o\n", i, j, res_boundij;
 				end if;
 			end for;
 		end for;
@@ -224,11 +196,11 @@ Difference.}
 		vprintf AlgEtFam,1: "around %o: bound = %o\n", r[1], bound;
 		bound := Floor(bound + 1);
 
-		Append(~Nbhds_disc, phi(r[1]) + O(piKp^bound));
+		Append(~Nbhds_disc, ParameterSpace!phi(r[1]) + O(piPar^Floor(bound / vpi)));
 
 		k := LCM([fi[2] : fi in fs]);
-		vprintf AlgEtFam,1: "around %o: multiplicative period = %o\n", r[1], k;
-		v := k * Ceiling(bound / k);
+		vprintf AlgEtFam,1: "around %o: common ramification index = %o\n", r[1], k;
+		v := Ceiling(k * Ceiling(bound / k) / vpi);
 
 		//the group K*/(K*)^k
 		//KmKk,phik := pSelmerGroup(k,Kp);
@@ -237,11 +209,11 @@ Difference.}
 
 		//psi := Coercion(ParameterSpace, Kp);
 		//Nbhds_oo cat:= [pAdicNbhd(X, OKpq!r[1], (OKpq!(psi(a@@phik))) * piOKpq^v, k) : a in KmKk];
-		Nbhds_oo cat:= [pAdicNbhd(X, OKpq!r[1], (OKpq!(a@@phik)) * piOKpq^v, k) : a in KmKk];
+		Nbhds_oo cat:= [pAdicNbhd(X, ParameterSpaceEx!r[1], (ParameterSpaceEx!(a@@phik)) * piParEx^v, k) : a in KmKk];
 	end for;
 
 	vprintf AlgEtFam,1: "subdividing nbhds\n";
-	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]);
+	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]) / vpi;
 
 	//if K = Q then separant computations will be performed over Q instead of
 	//RationalsAsNumberField because it is significantly faster
@@ -290,7 +262,7 @@ Difference.}
 		depth +:= 1;
 		vprintf AlgEtFam,2: "subdivision %o with %o neighbourhoods\n", depth, #Nbhds;
 		for N in Nbhds do
-			Np := N[1] + O(piKp^N[2]);
+			Np := N[1] + O(piPar^N[2]);
 			error if N[2] ge Precision, "Precision too low:", Precision;
 
 			if exists { Nd : Nd in Nbhds_disc | ContainedIn(Nd, Np) } then
@@ -300,7 +272,7 @@ Difference.}
 			else
 				rep := N[1]@@phi;
 				sN := Evaluate(gen_bound, rep);
-				bN := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]);
+				bN := Max([r[1] : r in ValuationsOfRoots(sN,Ideal(p))]) / vpi;
 				case BoundMethod:
 					when "Separant":
 						boundN := bN;
@@ -308,7 +280,7 @@ Difference.}
 						boundN := 2*bN;
 					when "Difference":
 						dN := Evaluate(gen_diff, rep);
-						bdN := Max([r[1] : r in ValuationsOfRoots(dN,Ideal(p))]);
+						bdN := Max([r[1] : r in ValuationsOfRoots(dN,Ideal(p))]) / vpi;
 						boundN := bN + bdN;
 				end case;
 
@@ -322,11 +294,11 @@ Difference.}
 		Nbhds := Nbhds_new;
 
 		// Filter neighbourhoods
-		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(pAdicNbhd(X, OKpq!N[1], piOKpq^N[2], 1), CongrVal, MinVal)];
+		Nbhds := [N : N in Nbhds | ContainsElementOfValuation(pAdicNbhd(X, ParameterSpaceEx!N[1], piParEx^N[2], 1), CongrVal, MinVal)];
 	until IsEmpty(Nbhds);
 
 	// Add neighborhoods around the roots of the discriminant
-	Nbhds := Nbhds_oo cat [pAdicNbhd(X, OKpq!N[1], piOKpq^N[2], 1) : N in Nbhds_end];
+	Nbhds := Nbhds_oo cat [pAdicNbhd(X, ParameterSpaceEx!N[1], piParEx^N[2], 1) : N in Nbhds_end];
 
 	// Filter neighborhoods
 	Nbhds := [N : N in Nbhds | ContainsElementOfValuation(N, CongrVal, MinVal)];
@@ -338,12 +310,51 @@ Difference.}
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
 
-	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),Representative(N)) : N in Nbhds] :
+	E := FindIsomorphismClasses([Evaluate(SwitchVariables(RtoRpP(F)),OKpq!Kp!ParameterSpace!Representative(N)) : N in Nbhds] :
 		Data := Nbhds, Hint := Hint);
 	vprintf AlgEtFam,1: "%o isomorphism classes found among %o etale algebras\n", #E, #Nbhds;
 
 	return E;
 end intrinsic;
+
+
+intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngIntElt, RngElt
+{The standard conditions for f^k - sg (Definition ?)}
+	require Valuation(LeadingCoefficient(f)) eq 0: "f must be monic";
+	require Degree(g) le k * Degree(f): "Must have deg(g) le deg(f^k)";
+
+	R := Parent(f);
+	K := BaseRing(R);
+	n := k * Degree(f);
+
+	df := Derivative(f);
+	mu_f := MaxValuationInRootsOf(df,f);
+	tau_F := Valuation(K!k) + Valuation(Resultant(f,g)) * (k - 1) / n;
+
+	sigfg := Separant(f,g);
+
+	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
+end intrinsic;
+
+
+intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcNumElt) -> RngIntElt, RngElt
+{The standard conditions for f^k - sg (Definition ?), at the prime p.}
+	require Valuation(LeadingCoefficient(f),p) eq 0: "f must be monic";
+	require Degree(g) le k * Degree(f): "Must have deg(g) le deg(f^k)";
+
+	R := Parent(f);
+	K := BaseRing(R);
+	n := k * Degree(f);
+
+	df := Derivative(f);
+	mu_f := MaxValuationInRootsOf(df,f,p);
+	tau_F := Valuation(K!k,p) + Valuation(Resultant(f,g),p) * (k - 1) / n;
+
+	sigfg := Separant(f,g,p);
+
+	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
+end intrinsic;
+
 
 /*intrinsic Subdivide(x::FldNumElt, r::RngIntElt, n::RngIntElt, p::PlcNumElt) -> SeqEnum
 {Subdivides a p-adic ball of the form x + O(p^r) into balls with radius p^n}
@@ -389,7 +400,7 @@ intrinsic Subdivide(x::RngPadElt, r::RngIntElt, n::RngIntElt) -> SeqEnum
 		S := quo<OK | p^n>;
 
 		//enumerating R can result in some duplicate elements,
-		//so we will remove them first
+		//so we will remove them first (this is fixed as per MAGMA V2.27-7)
 		R_set := {y : y in R};
 
 		return [ <OK!S!x + p^r * y@@phi, n> : y in R_set ];

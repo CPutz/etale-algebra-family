@@ -3,7 +3,7 @@
  */
 
 declare type PadNbhd[PadNbhdElt];
-declare attributes PadNbhd: AmbientSpace;
+declare attributes PadNbhd: AmbientSpace, Prime, MinVal, CongrVal;
 declare attributes PadNbhdElt: Parent, Middle, Radius, Exponent, Inverted;
 
 import "utils.m" : prod;
@@ -14,17 +14,29 @@ Z := Integers();
  * Creation and printing of the parent space
  */
 
-intrinsic pAdicNbhds(K::RngPadRes) -> PAdicNbhd
-{The space of p-adic neighbourhoods of the form c + r * (OK)^k}
+intrinsic pAdicNbhdSpace(K::FldRat, p::RngIntElt :
+	MinVal := 0, CongrVal := Integers(1)!0) -> PAdicNbhd
+{The space of p-adic neighbourhoods of the form c + r * (ZZ_p)^k
+with possible additional constraints of the form v(x) >= m and
+v(x) = a (mod b)}
 	X := New(PadNbhd);
 	X`AmbientSpace := K;
+	X`Prime := p;
+	X`MinVal := MinVal;
+	X`CongrVal := CongrVal;
 	return X;
 end intrinsic;
 
-intrinsic pAdicNbhds(K::RngPadResExt) -> PAdicNbhd
-{The space of p-adic neighbourhoods of the form c + r * (OK)^k}
+intrinsic pAdicNbhdSpace(K::FldNum, p::PlcNumElt :
+	MinVal := 0, CongrVal := Integers(1)!0) -> PAdicNbhd
+{The space of p-adic neighbourhoods of the form c + r * (OK_p)^k
+with possible additional constraints of the form v(x) >= m and
+v(x) = a (mod b)}
 	X := New(PadNbhd);
 	X`AmbientSpace := K;
+	X`Prime := p;
+	X`MinVal := MinVal;
+	X`CongrVal := CongrVal;
 	return X;
 end intrinsic;
 
@@ -33,9 +45,28 @@ intrinsic AmbientSpace(X::PadNbhd) -> .
 	return X`AmbientSpace;
 end intrinsic;
 
+intrinsic Prime(X::PadNbhd) -> .
+{The prime element of the ambient space of X at which we take
+the completion}
+	return X`Prime;
+end intrinsic;
+
+intrinsic MinValuation(X::PadNbhd) -> RngIntElt
+{The minimal valuation of the elements belonging to the
+nbhds of X}
+	return X`MinVal;
+end intrinsic;
+
+intrinsic CongrValuation(X::PadNbhd) -> RngIntResElt
+{This returns a class a of ZZ/bZZ such that if N in X, then
+v(x) = a (mod b) for all x in N}
+	return X`CongrVal;
+end intrinsic;
+
 intrinsic Print(X::PadNbhd)
 {Print X}
-	printf "The space of p-adic neighbourhoods of the form c + r * (OK)^k with K = %o", AmbientSpace(X);
+	printf "The space of p-adic neighbourhoods of the form c + r * (O_K)^k intersected with {x in O_K | v(x) >= %o and v(x) = %o (mod %o)}, and K = %o",
+		MinValuation(X), Z!CongrValuation(X), Modulus(Parent(CongrValuation(X))), Completion(AmbientSpace(X),Prime(X));
 end intrinsic;
 
 intrinsic 'eq'(X1::PadNbhd, X2::PadNbhd) -> BoolElt

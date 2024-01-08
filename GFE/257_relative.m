@@ -96,7 +96,6 @@ Q(Sqrt(21)) above 3.}
 	F := t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9 * s;
 
 	pi := UniformizingElement(p);
-	e := Valuation(3, p);
 
 	E0s := [];
 	E1 := [];
@@ -104,7 +103,7 @@ Q(Sqrt(21)) above 3.}
 	E3 := [];
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := e*7, CongrVal := Integers(e*7)!0,
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
 		Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
@@ -187,7 +186,6 @@ Q(Sqrt(21)) above 7.}
 	F := t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9 * s;
 
 	pi := UniformizingElement(p);
-	e := Valuation(7, p);
 
 	E0s := [];
 	E1 := [];
@@ -196,7 +194,7 @@ Q(Sqrt(21)) above 7.}
 
 	for a in [4] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + 7*t));
-		E0 := EtaleAlgebraFamily(F0, p : MinVal := 2, CongrVal := Integers(e)!0, Hint := Hint);
+		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint);
 		for i := 1 to #E0 do
 			SetData(~E0[i], [a + 7 * B : B in Data(E0[i])]);
 		end for;
@@ -204,8 +202,8 @@ Q(Sqrt(21)) above 7.}
 	end for;
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := e*7, CongrVal := Integers(e*7)!0,
-		Hint := Hint, Precision := 500);
+	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
+		Hint := Hint, Precision := 500, ParameterSpace := pAdicField(7,500));
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
