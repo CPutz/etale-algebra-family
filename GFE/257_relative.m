@@ -50,14 +50,15 @@ Q(Sqrt(21)) above 2.}
 	E3 := [];
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p :
-		MinVal := 2, CongrVal := Integers(2)!0, Hint := Hint, Precision := 500);
+	Par2 := pAdicNbhdSpace(Rationals(), 2 : MinVal := 2, CongrVal := Integers(2)!0);
+	E2 := EtaleAlgebraFamily(F2, p : ParameterSpace := Par2, Hint := Hint, Precision := 500);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(2^7 * (1 + 2*s) * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : Hint := Hint, Precision := 500);
+	Par3 := pAdicNbhdSpace(Rationals(), 2);
+	E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par3, Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -103,8 +104,8 @@ Q(Sqrt(21)) above 3.}
 	E3 := [];
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
-		Hint := Hint, Precision := 500);
+	Par3 := pAdicNbhdSpace(Rationals(), 3 : MinVal := 7, CongrVal := Integers(7)!0);
+	E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par3, Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -149,8 +150,8 @@ Q(Sqrt(21)) above 5.}
 	E2 := [];
 	E3 := [];
 
-	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0,
-		Hint := Hint, Precision := 500);
+	Par1 := pAdicNbhdSpace(Rationals(), 5 : MinVal := 5, CongrVal := Integers(5)!0);
+	E1 := EtaleAlgebraFamily(F, p : ParameterSpace := Par1, Hint := Hint, Precision := 500);
 
 	Es := [];
 	Eis := (&cat E0s) cat E1 cat E2 cat E3;
@@ -194,7 +195,8 @@ Q(Sqrt(21)) above 7.}
 
 	for a in [4] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + 7*t));
-		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint);
+		Par0 := pAdicNbhdSpace(Rationals(), 7);
+		E0 := EtaleAlgebraFamily(F0, p : ParameterSpace := Par0, Hint := Hint);
 		for i := 1 to #E0 do
 			SetData(~E0[i], [a + 7 * B : B in Data(E0[i])]);
 		end for;
@@ -202,8 +204,8 @@ Q(Sqrt(21)) above 7.}
 	end for;
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
-		Hint := Hint, Precision := 500, ParameterSpace := pAdicField(7,500));
+	Par3 := pAdicNbhdSpace(Rationals(), 7 : MinVal := 7, CongrVal := Integers(7)!0);
+	E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par3, Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -242,6 +244,7 @@ Q(Sqrt(21)) not above 2, 3, 5 or 7.}
 	F := t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9 * s;
 
 	pi := UniformizingElement(p);
+	P := PrimeDivisors(Norm(Ideal(p)))[1];
 
 	E0s := [];
 	E1 := [];
@@ -249,9 +252,10 @@ Q(Sqrt(21)) not above 2, 3, 5 or 7.}
 	E3 := [];
 
 	R,m := ResidueClassField(Ideal(p));
+	Par0 := pAdicNbhdSpace(Rationals(), P);
 	for a in [K!(x@@m) : x in R | x ne 0 and x ne 1] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + pi*t));
-		E0 := EtaleAlgebraFamily(F0, p : Hint := Hint);
+		E0 := EtaleAlgebraFamily(F0, p : ParameterSpace := Par0, Hint := Hint);
 
 		//Precision := 50;
 		//Kp,phi := Completion(K,p : Precision := Precision);
@@ -264,19 +268,19 @@ Q(Sqrt(21)) not above 2, 3, 5 or 7.}
 		Append(~E0s, E0);
 	end for;
 
-	E1 := EtaleAlgebraFamily(F, p : MinVal := 5, CongrVal := Integers(5)!0,
-		Hint := Hint, Precision := 500);
+	Par1 := pAdicNbhdSpace(Rationals(), P : MinVal := 5, CongrVal := Integers(5)!0);
+	E1 := EtaleAlgebraFamily(F, p : ParameterSpace := Par1, Hint := Hint, Precision := 500);
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p : MinVal := 2, CongrVal := Integers(2)!0,
-		Hint := Hint, Precision := 500);
+	Par2 := pAdicNbhdSpace(Rationals(), P : MinVal := 2, CongrVal := Integers(2)!0);
+	E2 := EtaleAlgebraFamily(F2, p : ParameterSpace := Par2, Hint := Hint, Precision := 500);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * t^5 * ((960 + 210*a)*t^2 + (-315 - 70*a)*t + (378 + 84*a)) - 9);
-	E3 := EtaleAlgebraFamily(F3, p : MinVal := 7, CongrVal := Integers(7)!0,
-		Hint := Hint, Precision := 500);
+	Par3 := pAdicNbhdSpace(Rationals(), P : MinVal := 7, CongrVal := Integers(7)!0);
+	E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par3, Hint := Hint, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
