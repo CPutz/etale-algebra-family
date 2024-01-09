@@ -19,6 +19,8 @@ intrinsic pAdicNbhdSpace(K::FldRat, p::RngIntElt :
 {The space of p-adic neighbourhoods of the form c + r * (ZZ_p)^k
 with possible additional constraints of the form v(x) >= m and
 v(x) = a (mod b)}
+	require IsPrime(p): "Argument 2 must be prime";
+
 	X := New(PadNbhd);
 	X`AmbientSpace := K;
 	X`Prime := p;
@@ -87,12 +89,11 @@ end intrinsic;
  * Creation, coercion and printing of p-adic neighbourhoods
  */
 
-intrinsic pAdicNbhd(X::PadNbhd, m::., r::., k::RngIntElt) -> PadNbhdElt
+intrinsic pAdicNbhd(X::PadNbhd, m::FldNumElt, r::FldNumElt, k::RngIntElt) -> PadNbhdElt
 {The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
-	require Type(K) eq FldRat: "Base field of X must be the rationals";
-	require IsCoercible(K,m): "Argument 2 must be coercible to the rationals";
-	require IsCoercible(K,r): "Argument 3 must be coercible to the rationals";
+	require K eq Parent(m): "Argument 2 must be an element of the ambient space of X";
+	require K eq Parent(r): "Argument 3 must be an element of the ambient space of X";
 	requirege k, 1;
 	require Valuation(r, Prime(X)) ge 0: "Argument 3 must be integral";
 
@@ -105,11 +106,12 @@ intrinsic pAdicNbhd(X::PadNbhd, m::., r::., k::RngIntElt) -> PadNbhdElt
 	return N;
 end intrinsic;
 
-intrinsic pAdicNbhd(X::PadNbhd, m::FldNumElt, r::FldNumElt, k::RngIntElt) -> PadNbhdElt
+intrinsic pAdicNbhd(X::PadNbhd, m::., r::., k::RngIntElt) -> PadNbhdElt
 {The element m + r * (OK)^k with parent X.}
 	K := AmbientSpace(X);
-	require K eq Parent(m): "Argument 2 must be an element of the ambient space of X";
-	require K eq Parent(r): "Argument 3 must be an element of the ambient space of X";
+	require Type(K) eq FldRat: "Base field of X must be the rationals";
+	require IsCoercible(K,m): "Argument 2 must be coercible to the rationals";
+	require IsCoercible(K,r): "Argument 3 must be coercible to the rationals";
 	requirege k, 1;
 	require Valuation(r, Prime(X)) ge 0: "Argument 3 must be integral";
 
@@ -268,10 +270,10 @@ valuation and congruence on the valuation imposed by the parent of N}
 		if (Z!v - vr) mod d eq 0 then
 			//formulate reduced problem n * k2 = v2 mod m2
 			k2 := k div d;
-			v2 := (v - vr) div d;
+			v2 := (Z!v - vr) div d;
 			m2 := m div d;
 			//solution
-			s := Z!(Inverse(Integers(m2)!k2) * v2);
+			s := Z!(1 / (Integers(m2)!k2) * v2);
 
 			//check whether there exists a global solution ns <= n <= nl:
 			s_min := ns + ((s - ns) mod m);
@@ -334,11 +336,11 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 
 	if Valuation(c1 - c2,p) lt Valuation(r2,p) then
 		return false;
-	elif Valuation(r1) lt Valuation(r2,p) then
+	elif Valuation(r1,p) lt Valuation(r2,p) then
 		return false;
 	end if;
 
-	c := (c1 - c2) div r2;
+	c := (c1 - c2) / r2;
 	r := r1 div r2;
 	vc := Valuation(c,p);
 	vr := Valuation(r,p);
@@ -397,6 +399,7 @@ intrinsic Subdivide(N::PadNbhdElt, n::RngIntElt) -> SeqEnum
 	require Exponent(N) eq 1: "Argument 1 must be of the form c + r * OK";
 
 	X := Parent(N);
+	B := AmbientSpace(X);
 	p := Prime(X);
 	vr := Valuation(Radius(N),p);
 	if n le vr then
@@ -411,7 +414,8 @@ intrinsic Subdivide(N::PadNbhdElt, n::RngIntElt) -> SeqEnum
 		R_set := {y : y in R};
 
 		c := Middle(N);
+		r := Radius(N);
 		pi := UniformizingElement(X);
-		return [ pAdicNbhd(X, c + r * y@@phi, r * pi^(n-vr)) : y in R_set];
+		return [ pAdicNbhd(X, c + r * y@@phi, r * pi^(n-vr), 1) : y in R_set];
 	end if;
 end intrinsic;
