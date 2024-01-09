@@ -263,8 +263,8 @@ valuation and congruence on the valuation imposed by the parent of N}
 		//compute largest n such that v(r) + nk < v(c)
 		nl := Ceiling((vc - vr) / k - 1);
 
-		//compute smallest n such that v(r) + nk >= min
-		ns := Ceiling((min - vr) / k);
+		//compute smallest non-negative n such that v(r) + nk >= min
+		ns := Max(0, Ceiling((min - vr) / k));
 
 		//check whether there exists ns <= n <= nl with v(r) + nk = v (mod m)
 		if (Z!v - vr) mod d eq 0 then

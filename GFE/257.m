@@ -15,6 +15,12 @@ will be applied to all etale algebras in the result.}
 	R<t> := PolynomialRing(S);
 	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
 
+	if Simplify and p eq 2 and <2,8> notin Precomputed(Database) then
+		printf "Warning: database of local fields provided does not contain a precomputed list of degree 8 extensions of Q_2. ";
+		printf "This may lead to a very long running time.\n";
+		printf "Solution: either set Simplify := false or Database := LocalFieldDatabaseOctic2Adics().\n";
+	end if;
+
 	E0s := [];
 	for a in [2..(p-1)] do
 		F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));
@@ -25,19 +31,22 @@ will be applied to all etale algebras in the result.}
 		Append(~E0s, E0);
 	end for;
 
-	E1 := EtaleAlgebraFamily(F, p :
-		MinVal := 5, CongrVal := Integers(5)!0, D := Database, Precision := 400);
+	Par1 := pAdicNbhdSpace(Rationals(), p : MinVal := 5, CongrVal := Integers(5)!0);
+	E1 := EtaleAlgebraFamily(F, p : D := Database, Precision := 400,
+		ParameterSpace := Par1);
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p :
-		MinVal := 2, CongrVal := Integers(2)!0, D := Database, Precision := 400);
+	Par2 := pAdicNbhdSpace(Rationals(), p : MinVal := 2, CongrVal := Integers(2)!0);
+	E2 := EtaleAlgebraFamily(F2, p : D := Database, Precision := 400,
+		ParameterSpace := Par2);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
-	E3 := EtaleAlgebraFamily(F3, p :
-		MinVal := 7, CongrVal := Integers(7)!0, D := Database, Precision := 400);
+	Par3 := pAdicNbhdSpace(Rationals(), p : MinVal := 7, CongrVal := Integers(7)!0);
+	E3 := EtaleAlgebraFamily(F3, p : D := Database, Precision := 400,
+		ParameterSpace := Par3);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;
@@ -59,12 +68,6 @@ will be applied to all etale algebras in the result.}
 			Append(~Es, Ei);
 		end if;
 	end for;
-
-	if Simplify and p eq 2 and <2,8> notin Precomputed(Database) then
-		printf "Warning: database of local fields provided does not contain a precomputed list of degree 8 extensions of Q_2. ";
-		printf "This may lead to a very long running time.\n";
-		printf "Solution: either set Simplify = false or Database = LocalFieldDatabaseOctic2Adics().\n";
-	end if;
 
 	if Simplify then
 		return [SimplifyToProduct(E : D := Database) : E in Es];
