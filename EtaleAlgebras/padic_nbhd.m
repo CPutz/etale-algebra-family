@@ -128,7 +128,7 @@ intrinsic IsCoercible(X::PadNbhd, x::.) -> BoolElt, .
 {Return whether x is coercible into X and the result if so}
 	K := AmbientSpace(X);
 	if ISA(Type(x), PadNbhdElt) then
-		if X eq Parent(x) then
+		if K eq AmbientSpace(Parent(x)) then
 			N := pAdicNbhd(X, Middle(x), Radius(x), Exponent(x));
 			if IsInverted(x) then
 				Invert(~N);

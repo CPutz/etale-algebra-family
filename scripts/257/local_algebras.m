@@ -8,13 +8,15 @@ function valid_upper_bound(U,L);
 		exists {K : K in U | IsIsomorphic(E,K)}};
 end function;
 
+load "scripts/257/upperbounds.m";
+
 printf "\n==================================================================\n";
 printf "We perform the computations from Theorem 5.7.\n";
 printf "==================================================================\n\n";
 
 SetVerbose("AlgEtFam",1);
 
-Q2 := pAdicField(2,500);
+/*Q2 := pAdicField(2,500);
 Q22 := UnramifiedExtension(Q2,2);
 _<t> := PolynomialRing(Q2);
 _<t2> := PolynomialRing(Q22);
@@ -31,7 +33,7 @@ U2_oo := [
 	EtaleAlgebra(t^8 + 2*t^7 + 6),
 	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [6,2]]),
 	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [3,3,1,1]]) ];
-U2 := U2_0 cat U2_1 cat U2_oo;
+U2 := U2_0 cat U2_1 cat U2_oo;*/
 
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 2\n";
@@ -46,8 +48,8 @@ printf "valid upper bound the prime 2\n\n";
 Q3 := pAdicField(3,500);
 
 // Upper bound
-U3 := [ EtaleAlgebra([UnramifiedExtension(Q3,d) : d in P]) :
-	P in [[8],[6,1,1],[5,2,1],[4,3,1]] ];
+//U3 := [ EtaleAlgebra([UnramifiedExtension(Q3,d) : d in P]) :
+//	P in [[8],[6,1,1],[5,2,1],[4,3,1]] ];
 
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 3\n";
@@ -59,7 +61,7 @@ assert valid_upper_bound(E3, U3); //necessary
 printf "valid upper bound the prime 3\n\n";
 
 
-Q5 := pAdicField(5,500);
+/*Q5 := pAdicField(5,500);
 _<t> := PolynomialRing(Q5);
 
 // Upper bounds
@@ -76,7 +78,7 @@ U5_1 := [
 	EtaleAlgebra((t^6 - 10) * (t^2 - 5)) ];
 U5_oo := [
 	EtaleAlgebra((t^7 - 5) * t) ];
-U5 := U5_rest cat U5_0 cat U5_1 cat U5_oo;
+U5 := U5_rest cat U5_0 cat U5_1 cat U5_oo;*/
 
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 5\n";
@@ -88,7 +90,7 @@ assert valid_upper_bound(E5, U5); //necessary
 printf "valid upper bound the prime 5\n\n";
 
 
-Q7 := pAdicField(7,500);
+/*Q7 := pAdicField(7,500);
 _<t> := PolynomialRing(Q7);
 
 // Upper bounds
@@ -102,7 +104,7 @@ U7_1 := [
 U7_oo := [
 	EtaleAlgebra((t^6 + 7) * t * (t+1)),
 	EtaleAlgebra((t^7 + 7*t + 7) * t) ];
-U7 := U7_rest cat U7_0 cat U7_1 cat U7_oo;
+U7 := U7_rest cat U7_0 cat U7_1 cat U7_oo;*/
 
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 7\n";
