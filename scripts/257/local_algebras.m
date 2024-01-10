@@ -1,8 +1,7 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-// Returns whether U is a valid covering set of isomorphism
-// classes of etale algebras for L
+// Returns whether L is contained in U up to isomorphsim
 function valid_covering_set(U,L);
 	return forall (E) {E : E in L |
 		exists {K : K in U | IsIsomorphic(E,K)}};
