@@ -67,6 +67,7 @@ intrinsic EtaleAlgebras3511(p::RngIntElt
 	return Es;
 end intrinsic;
 
+
 intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::RngIntElt
 	: D := LocalFieldDatabase(),
 	  Neighbourhoods := false) -> SeqEnum
@@ -103,14 +104,14 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 
 	if vabc eq 0 or va gt 0 then
 		minvalx := va eq 0 select 5 else va;
-		E1 := EtaleAlgebraFamily(phi - s, p : MinVal := minvalx, CongrVal := Integers(5)!va,
-			D := D, Precision := 5000);
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
+		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := 5000);
 	end if;
 
 	if vabc eq 0 or vb gt 0 then
 		minvaly := vb eq 0 select 3 else vb;
-		E2 := EtaleAlgebraFamily(phi - (1 + s), p : MinVal := minvaly, CongrVal := Integers(3)!vb,
-			D := D, Precision := 500);
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(3)!vb);
+		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := 500);
 		for i := 1 to #E2 do
 			SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 		end for;
@@ -123,8 +124,8 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 			minvalz := 0;
 		end if;
 		F3 := ReciprocalPolynomial(psi);
-		E3 := EtaleAlgebraFamily(F3, p : MinVal := minvalz, CongrVal := Integers(11)!vc,
-			D := D, Precision := 500);
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!vc);
+		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := 500);
 		for i := 1 to #E3 do
 			SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 		end for;
