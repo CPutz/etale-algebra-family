@@ -78,7 +78,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition 5.11.\n";
 printf "==================================================================\n\n";
 
-load "scripts/257/upperbounds.m";
+load "scripts/257/covering_sets.m";
 
 E2 := [ E : E in U2 |
 	SequenceToMultiset(FactorizationPattern(E)) in subpartitions([6,1,1]) or

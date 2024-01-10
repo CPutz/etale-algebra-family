@@ -1,7 +1,7 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-load "scripts/257/upperbounds.m";
+load "scripts/257/covering_set.m";
 
 printf "\n==================================================================\n";
 printf "We perform the computations from Theorem 5.29.\n";

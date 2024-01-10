@@ -17,7 +17,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition 5.12.\n";
 printf "==================================================================\n\n";
 
-load "scripts/257/upperbounds.m";
+load "scripts/257/covering_sets.m";
 
 E2 := [ E : E in U2 |
 	splitting_partition(E) in subpartitions([7,1]) ];

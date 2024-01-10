@@ -5,9 +5,9 @@ Z := Integers();
 Q := Rationals();
 _<x> := PolynomialRing(Q);
 
-// Returns whether U is a valid upper bound of isomorphism
+// Returns whether U is a valid covering set of isomorphism
 // classes of etale algebras for L
-function valid_upper_bound(U,L);
+function valid_covering_set(U,L);
 	return forall (E) {E : E in L |
 		exists {K : K in U | IsIsomorphic(E,K)}};
 end function;
@@ -67,10 +67,10 @@ end for;
 
 L2_1 := [EtaleAlgebra(phi0 - s * phioo) : s in B1];
 
-// Check that U2_1 is a valid upper bound for L2_1
-assert valid_upper_bound(U2_1, L2_1); //sufficient
-assert valid_upper_bound(L2_1, U2_1); //necessary
-printf "valid upper bound for S_{2,1}\n";
+// Check that U2_1 is a valid covering set for L2_1
+assert valid_covering_set(U2_1, L2_1); //sufficient
+assert valid_covering_set(L2_1, U2_1); //necessary
+printf "valid covering set for S_{2,1}\n";
 
 
 // Compute parameter values for U2_oo
@@ -84,10 +84,10 @@ end for;
 
 L2_oo := [EtaleAlgebra(phi0 - s * phioo) : s in Boo];
 
-// Check that U2_oo is a valid upper bound for L2_oo
-assert valid_upper_bound(U2_oo, L2_oo); //sufficient
-//assert valid_upper_bound(L2_oo, U2_oo); //necessary
-printf "valid upper bound for S_{2,oo}\n\n";
+// Check that U2_oo is a valid covering set for L2_oo
+assert valid_covering_set(U2_oo, L2_oo); //sufficient
+//assert valid_covering_set(L2_oo, U2_oo); //necessary
+printf "valid covering set for S_{2,oo}\n\n";
 
 
 // Proposition B.2
@@ -124,10 +124,10 @@ G,mG := UnitGroup(Integers(5^3));
 Brest := [Z!mG(g) : g in G | Z!mG(g) mod 5 ne 1];
 L5_rest := [EtaleAlgebra(phi0 - s * phioo) : s in Brest];
 
-// Check that U5_rest is a valid upper bound for L5_rest
-assert valid_upper_bound(U5_rest, L5_rest); //sufficient
-assert valid_upper_bound(L5_rest, U5_rest); //necessary
-printf "valid upper bound for S_{5,rest}\n";
+// Check that U5_rest is a valid covering set for L5_rest
+assert valid_covering_set(U5_rest, L5_rest); //sufficient
+assert valid_covering_set(L5_rest, U5_rest); //necessary
+printf "valid covering set for S_{5,rest}\n";
 
 
 // Compute parameter values for U5_0
@@ -135,10 +135,10 @@ G,mG := UnitGroup(Integers(5^3));
 B0 := [Z!mG(g) * 5^(5*r) : r in [1,2,3], g in G];
 L5_0 := [EtaleAlgebra(phi0 - s * phioo) : s in B0];
 
-// Check that U5_0 is a valid upper bound for L5_0
-assert valid_upper_bound(U5_0, L5_0); //sufficient
-assert valid_upper_bound(L5_0, U5_0); //necessary
-printf "valid upper bound for S_{5,0}\n";
+// Check that U5_0 is a valid covering set for L5_0
+assert valid_covering_set(U5_0, L5_0); //sufficient
+assert valid_covering_set(L5_0, U5_0); //necessary
+printf "valid covering set for S_{5,0}\n";
 
 
 // Compute etale algebras for U5_1
@@ -148,12 +148,12 @@ L5_1 := [ E : L6 in L6s, L2 in L2s |
 	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L6,L2])];
 L5_1_sample := [EtaleAlgebra(phi0 - (1 + 5^2*s) * phioo) : s in [1,2]];
 
-// Check that U5_1 is a valid upper bound for L5_1
-assert valid_upper_bound(U5_1, L5_1);
-assert valid_upper_bound(L5_1, U5_1);
-assert valid_upper_bound(U5_1, L5_1_sample);
-assert valid_upper_bound(L5_1_sample, U5_1);
-printf "valid upper bound for S_{5,1}\n";
+// Check that U5_1 is a valid covering set for L5_1
+assert valid_covering_set(U5_1, L5_1);
+assert valid_covering_set(L5_1, U5_1);
+assert valid_covering_set(U5_1, L5_1_sample);
+assert valid_covering_set(L5_1_sample, U5_1);
+printf "valid covering set for S_{5,1}\n";
 
 
 // Compute etale algebras for U5_oo
@@ -161,12 +161,12 @@ L7s := [FieldOfFractions(L) : L in AllExtensions(Q5,7 : E := 7)];
 L5_oo := [ EtaleAlgebra([L7,Q5]) : L7 in L7s ];
 L5_oo_sample := [EtaleAlgebra(phi0 - 5^(-7)*s * phioo) : s in [1]];
 
-// Check that U5_oo is a valid upper bound for L5_oo
-assert valid_upper_bound(U5_oo, L5_oo);
-assert valid_upper_bound(L5_oo, U5_oo);
-assert valid_upper_bound(U5_oo, L5_oo_sample);
-assert valid_upper_bound(L5_oo_sample, U5_oo);
-printf "valid upper bound for S_{5,oo}\n\n";
+// Check that U5_oo is a valid covering set for L5_oo
+assert valid_covering_set(U5_oo, L5_oo);
+assert valid_covering_set(L5_oo, U5_oo);
+assert valid_covering_set(U5_oo, L5_oo_sample);
+assert valid_covering_set(L5_oo_sample, U5_oo);
+printf "valid covering set for S_{5,oo}\n\n";
 
 
 printf "\n==================================================================\n";
@@ -198,10 +198,10 @@ G,mG := UnitGroup(Integers(7^3));
 Brest := [Z!mG(g) : g in G | Z!mG(g) mod 7 ne 1];
 L7_rest := [EtaleAlgebra(phi0 - s * phioo) : s in Brest];
 
-// Check that U7_rest is a valid upper bound for L7_rest
-assert valid_upper_bound(U7_rest, L7_rest); //sufficient
-assert valid_upper_bound(L7_rest, U7_rest); //necessary
-printf "valid upper bound for S_{7,rest}\n";
+// Check that U7_rest is a valid covering set for L7_rest
+assert valid_covering_set(U7_rest, L7_rest); //sufficient
+assert valid_covering_set(L7_rest, U7_rest); //necessary
+printf "valid covering set for S_{7,rest}\n";
 
 
 // Compute etale algebras for U7_0
@@ -211,12 +211,12 @@ L7_0 := [ E : L5 in L5s, L2 in L2s |
 	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L5,L2,Q7])];
 L7_0_sample := [EtaleAlgebra(phi0 - 7^5*s * phioo) : s in [1]];
 
-// Check that U7_0 is a valid upper bound for L7_0
-assert valid_upper_bound(U7_0, L7_0);
-assert valid_upper_bound(L7_0, U7_0);
-assert valid_upper_bound(U7_0, L7_0_sample);
-assert valid_upper_bound(L7_0_sample, U7_0);
-printf "valid upper bound for S_{7,0}\n";
+// Check that U7_0 is a valid covering set for L7_0
+assert valid_covering_set(U7_0, L7_0);
+assert valid_covering_set(L7_0, U7_0);
+assert valid_covering_set(U7_0, L7_0_sample);
+assert valid_covering_set(L7_0_sample, U7_0);
+printf "valid covering set for S_{7,0}\n";
 
 
 // Compute etale algebras for U7_1
@@ -225,12 +225,12 @@ L7_1 := [ E : L8 in L8s |
 	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L8])];
 L7_1_sample := [EtaleAlgebra(phi0 - (1 + 7^2*s) * phioo) : s in [1]];
 
-// Check that U7_1 is a valid upper bound for L7_1
-assert valid_upper_bound(U7_1, L7_1);
-assert valid_upper_bound(L7_1, U7_1);
-assert valid_upper_bound(U7_1, L7_1_sample);
-assert valid_upper_bound(L7_1_sample, U7_1);
-printf "valid upper bound for S_{7,1}\n";
+// Check that U7_1 is a valid covering set for L7_1
+assert valid_covering_set(U7_1, L7_1);
+assert valid_covering_set(L7_1, U7_1);
+assert valid_covering_set(U7_1, L7_1_sample);
+assert valid_covering_set(L7_1_sample, U7_1);
+printf "valid covering set for S_{7,1}\n";
 
 
 // Compute parameter values for U7_oo
@@ -238,9 +238,9 @@ G,mG := UnitGroup(Integers(7^3));
 Boo := [7^(-7*r) * Z!mG(g) : r in [1,2,3], g in G];
 L7_oo := [EtaleAlgebra(phi0 - s * phioo) : s in Boo];
 
-// Check that U7_oo is a valid upper bound for L7_oo
-assert valid_upper_bound(U7_oo, L7_oo); //sufficient
-assert valid_upper_bound(L7_oo, U7_oo); //necessary
-printf "valid upper bound for S_{7,oo}\n";
+// Check that U7_oo is a valid covering set for L7_oo
+assert valid_covering_set(U7_oo, L7_oo); //sufficient
+assert valid_covering_set(L7_oo, U7_oo); //necessary
+printf "valid covering set for S_{7,oo}\n";
 
 printf "\ndone\n";
