@@ -13,7 +13,10 @@ K := QuadraticField(21);
 load "scripts/257/covering_sets_rel7.m";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Theorem 5.39.\n";
+printf "We perform the computations for Theorem 5.39. We verify that the\n";
+printf "local covering sets as defined in the file covering_sets_rel7.m\n";
+printf "(which correspond to the sets given in Theorem 5.39) are correct\n";
+printf "and are minimal.\n";
 printf "==================================================================\n\n";
 
 SetVerbose("AlgEtFam",1);

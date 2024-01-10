@@ -11,7 +11,10 @@ end function;
 load "scripts/257/covering_sets.m";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Theorem 5.7.\n";
+printf "We perform the computations for Theorem 5.6. We verify that the\n";
+printf "local covering sets as defined in the file covering_sets.m\n";
+printf "(which correspond to the sets given in Theorem 5.6) are correct\n";
+printf "and are minimal.\n";
 printf "==================================================================\n\n";
 
 SetVerbose("AlgEtFam",1);
