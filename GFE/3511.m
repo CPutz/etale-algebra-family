@@ -111,7 +111,7 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	if vabc eq 0 or vb gt 0 then
 		minvaly := vb eq 0 select 3 else vb;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(3)!vb);
-		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := 500);
+		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := 1000);
 		for i := 1 to #E2 do
 			SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 		end for;
@@ -119,13 +119,15 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 
 	if vabc eq 0 or vc gt 0 then
 		minvalz := vc eq 0 select 11 else vc;
+		//divide out a factor of 5^10 if possible for efficiency
 		if p eq 5 and minvalz ge 10 then
 			psi := -s * 5^(minvalz - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
 			minvalz := 0;
 		end if;
+
 		F3 := ReciprocalPolynomial(psi);
-		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!vc);
-		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := 500);
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!minvalz);
+		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := 1000);
 		for i := 1 to #E3 do
 			SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 		end for;

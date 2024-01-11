@@ -2,7 +2,7 @@
  * Isomorphism classes of families of etale algebras parametrized by one variable.
  */
 
-declare verbose AlgEtFam, 2;
+declare verbose AlgEtFam, 3;
 
 import "utils.m" : zip, prod;
 Q := Rationals();
@@ -161,7 +161,7 @@ Difference.}
 			ri := rs[i];
 			Fi := SwitchVariables(fi^ki - RtoRp(t)*ri);
 
-			vprintf AlgEtFam,2: "\nFactor %o = %o\n", i, Fi;
+			vprintf AlgEtFam,3: "\nFactor %o = %o\n", i, Fi;
 			//TODO: these discriminant and separant computations crash magma if Fi is not exact (i.e. in ROKpq)
 			//TODO: if the Precision is too low, the stability bound may become infinite. Try to detect when this happens
 			stab_i,mu_tau_i := StandardConditions(ROKp_ex!fi, ROKp_ex!ri, ki);
@@ -197,7 +197,7 @@ Difference.}
 		k := LCM([fi[2] : fi in fs]);
 		vprintf AlgEtFam,1: "around %o: common ramification index = %o\n", r[1], k;
 		v := Ceiling(k * Ceiling(bound / k) / vpi_Par);
-		
+
 		if Type(B) eq FldRat then
 			pB := Prime(ParameterSpace);
 		else
