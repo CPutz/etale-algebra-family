@@ -46,7 +46,7 @@ function disc_to_string(d);
 end function;
 
 load "scripts/357/results_hunter_raw.m";
-load "scripts/357/upperbounds.m";
+load "scripts/357/local_covering_sets.m";
 
 printf "computing isomorphism classes of number fields\n";
 Ks := [NumberField(f) : f in pols];

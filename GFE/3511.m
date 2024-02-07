@@ -105,7 +105,7 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	if vabc eq 0 or va gt 0 then
 		minvalx := va eq 0 select 5 else va;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
-		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := 5000);
+		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := 1000);
 	end if;
 
 	if vabc eq 0 or vb gt 0 then
@@ -152,6 +152,69 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	end for;
 
 	return Es;
+end intrinsic;
+
+intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::RngIntElt
+	: D := LocalFieldDatabase(),
+	  Precision := 500) -> SeqEnum
+{}
+	S<s> := PolynomialRing(Q);
+	R<t> := PolynomialRing(S);
+	phi := (3*t^2 + t + 1)^5 * (1 - 5*t);
+	psi := -s * t * (33 + 11*t + 3*t^2)^5 - 5^10;
+
+	if p eq 3 then
+		psi := Evaluate(psi, t/3);
+	end if;
+
+	va := Valuation(a,p);
+	vb := Valuation(b,p);
+	vc := Valuation(c,p);
+	vabc := Valuation(a*b*c,p);
+
+	E0s := [];
+	E1 := [];
+	E2 := [];
+	E3 := [];
+
+	if vabc eq 0 then
+		for a in [2..(p-1)] do
+			F0 := phi - (a + p*s);
+			E0 := EtaleAlgebraFamily(F0, p : D := D, Precision := Precision, CalcIso := false);
+			for i := 1 to #E0 do
+				SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
+			end for;
+			Append(~E0s, E0);
+		end for;
+	end if;
+
+	if vabc eq 0 or va gt 0 then
+		minvalx := va eq 0 select 5 else va;
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
+		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false);
+	end if;
+
+	if vabc eq 0 or vb gt 0 then
+		minvaly := vb eq 0 select 3 else vb;
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(3)!vb);
+		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false);
+	end if;
+
+	if vabc eq 0 or vc gt 0 then
+		minvalz := vc eq 0 select 11 else vc;
+		//divide out a factor of 5^10 if possible for efficiency
+		if p eq 5 and minvalz ge 10 then
+			psi := -s * 5^(minvalz - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
+			minvalz := 0;
+		end if;
+
+		F3 := ReciprocalPolynomial(psi);
+		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!minvalz);
+		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false);
+	end if;
+
+	Eis := (&cat E0s) cat E1 cat E2 cat E3;
+	return Eis;
 end intrinsic;
 
 /*intrinsic Etale3511Unramified(p::RngIntElt) -> SeqEnum
