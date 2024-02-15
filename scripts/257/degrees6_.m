@@ -103,7 +103,7 @@ printf "Valuation of possible local discriminants at 7: %o\n",
 
 
 printf "\nRuling out cubic subfields.\n";
-load "scripts/257/fields_cubic_unramified57.m";
+load "scripts/257/fields_cubic_unramified57.dat";
 L3 := make_data();
 printf "Possible candidates for cubic subfield: %o\n", L3;
 

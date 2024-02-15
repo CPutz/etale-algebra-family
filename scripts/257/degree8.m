@@ -130,7 +130,7 @@ printf "We perform the computations from Proposition 5.24.\n";
 printf "==================================================================\n\n";
 
 // LMFDB data
-load "scripts/257/fields_quartic_unramified257.m";
+load "scripts/257/fields_quartic_unramified257.dat";
 L4 := make_data();
 printf "\nThere exist %o quartic number fields unramfied outside 2, 5 and 7\n\n", #L4;
 

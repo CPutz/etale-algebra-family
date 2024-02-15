@@ -1,0 +1,78 @@
+
+// Number fields downloaded from the LMFDB on 12 January 2024.
+// Search link: https://www.lmfdb.org/NumberField/?degree=5&signature=%5B1,2%5D&ram_quantifier=subset&ram_primes=3,11
+// Query "{'degree': 5, 'r2': 2, 'disc_rad': {'$lte': 33}, 'num_ram': {'$lte': 2}, 'ramps': {'$containedin': [3, 11]}}" returned 2 fields, sorted by degree.
+
+// Each entry in the following data list has the form:
+//    [Label, Polynomial, Discriminant, Galois group, Class group]
+// For more details, see the definitions at the bottom of the file.
+
+// To create a list of fields, type "fields:= make_data();"
+
+
+columns := ["label", "coeffs", "disc", "galois_label", "class_group"];
+data := [
+[*"5.1.10673289.1", [-32, 4, 13, -5, -2, 1], 10673289, "5T4", [5]*],
+[*"5.1.10673289.2", [21, -30, 3, 7, -1, 1], 10673289, "5T4", [5]*]
+];
+RecFormat := recformat<label,coeffs,disc,galois_label,class_group,poly,field>;
+ZZx<x> := PolynomialRing(Integers());
+
+
+function create_record(row)
+    out := rec<RecFormat|label:=row[1],coeffs:=row[2],disc:=row[3],galois_label:=row[4],class_group:=row[5]>;
+    poly := ZZx!(out`coeffs);
+    out`poly := poly;
+    field<a> := NumberField(poly);
+    out`field := field;
+    return out;
+end function;
+
+function make_data()
+    return [create_record(row) : row in data];
+end function;
+
+
+// Label --
+//    Each (global) number field has a unique label of the form d.r.D.i where
+//    <ul>
+//    <li>\(d\) is the degree;
+//    <li>\(r\) is the real signature;  the full signature is therefore \([r,(d-r)/2]\);
+//    <li>\(D\) is the absolute value of the discriminant;
+//    <li>\(i\) is the index, counting from 1.  This is in case there is more than one
+//      field with the same signature and absolute value of the
+//      discriminant: for example <a href="/NumberField/4.0.1008.1">4.0.1008.1</a> and <a href="/NumberField/4.0.1008.2">4.0.1008.2</a>.
+//    </ul>
+//    The discriminant portion of the label can take the form \(a_1\) e \(\epsilon_1\) _ \(a_2\) e \(\epsilon_2\) _ \(\cdots\) _ \(a_k\) e \(\epsilon_k\) to mean the absolute value of the
+//    discriminant equals \(a_1^{\epsilon_1}a_2^{\epsilon_2}\cdots a_k^{\epsilon_k}\).  The separators are the letter e and the underscore symbol.
+
+
+//Polynomial (coeffs) --
+//    A **defining polynomial** of a number field $K$ is an irreducible polynomial $f\in\Q[x]$ such that $K\cong \mathbb{Q}(a)$, where $a$ is a root of $f(x)$. Equivalently, it is a polynomial $f\in \Q[x]$ such that $K \cong \Q[x]/(f)$.
+
+//    A root \(a \in K\) of the defining polynomial is a generator of \(K\).
+
+//    {# original author: john.jones #}
+
+
+//Galois group (galois_label) --
+//    Let $K$ be a finite degree $n$ separable extension of a field $F$, and $K^{gal}$ be its
+//    Galois (or normal) closure.
+//    The **Galois group** for $K/F$ is the automorphism group $\Aut(K^{gal}/F)$.
+
+//    This automorphism group acts on the $n$ embeddings $K\hookrightarrow K^{gal}$ via composition.  As a result, we get an injection $\Aut(K^{gal}/F)\hookrightarrow S_n$, which is well-defined up to the labelling of the $n$ embeddings, which corresponds to being well-defined up to conjugation in $S_n$.
+
+//    We use the notation $\Gal(K/F)$ for $\Aut(K/F)$ when $K=K^{gal}$.
+
+//    There is a naming convention for Galois groups up to degree $47$.
+
+
+
+
+
+//Class group (class_group) --
+//    The **ideal class group** of a number field $K$ with ring of integers $O_K$ is the group of equivalence classes of ideals, given by the quotient of the multiplicative group of all fractional ideals of $O_K$ by the subgroup of principal fractional ideals.
+
+//    Since $K$ is a number field, the ideal class group of $K$ is a finite abelian group, and so has the structure of a product of cyclic groups encoded by a finite list $[a_1,\dots,a_n]$, where the $a_i$ are positive integers with $a_i\mid a_{i+1}$ for $1\le i<n$.
+
+

@@ -28,7 +28,7 @@ assert forall { N : N in Nbhds |
 	N subset pAdicNbhd(X, K!1 + 3*2^2, K!2^5, 1) or N subset pAdicNbhd(X, K!1, 7*K!2^2, 2) or
 	(N subset Invert(pAdicNbhd(X, K!0, K!2^7, 1)) and not N subset Invert(pAdicNbhd(X, K!0, K!2^14, 1)))
 	where K := AmbientSpace(X) where X := Parent(N)};
-
+printf "Result verified for 2\n\n";
 
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 3\n";
@@ -46,6 +46,7 @@ K := AmbientSpace(X);
 assert forall { N : N in Nbhds |
 	N subset Invert(pAdicNbhd(X, K!0, K!3^7, 1))
 	where K := AmbientSpace(X) where X := Parent(N)};
+printf "Result verified for 3\n\n";
 
 
 printf "------------------------------------------------------------------\n";
@@ -64,6 +65,7 @@ K := AmbientSpace(X);
 assert forall { N : N in Nbhds |
 	N subset pAdicNbhd(X, K!0, K!5^5, 1)
 	where K := AmbientSpace(X) where X := Parent(N)};
+printf "Result verified for 5\n\n";
 
 
 printf "------------------------------------------------------------------\n";
@@ -83,6 +85,7 @@ assert forall { N : N in Nbhds |
 	(N subset pAdicNbhd(X, K!4, K!7, 1) and not N subset pAdicNbhd(X, K!32, K!49, 1)) or
 	N subset Invert(pAdicNbhd(X, K!0, K!7^7, 1))
 	where K := AmbientSpace(X) where X := Parent(N)};
+printf "Result verified for 27\n\n";
 
 
 printf "------------------------------------------------------------------\n";
@@ -101,6 +104,7 @@ K := AmbientSpace(X);
 assert forall { N : N in Nbhds |
 	N subset pAdicNbhd(X, K!7, K!11, 1)
 	where K := AmbientSpace(X) where X := Parent(N)};
+printf "Result verified for 11\n\n";
 
 
 printf "------------------------------------------------------------------\n";
@@ -119,3 +123,6 @@ K := AmbientSpace(X);
 assert forall { N : N in Nbhds |
 	N subset pAdicNbhd(X, K!177, K!197, 1)
 	where K := AmbientSpace(X) where X := Parent(N)};
+printf "Result verified for 197\n\n";
+
+printf "\ndone\n";

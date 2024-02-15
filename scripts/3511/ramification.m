@@ -109,3 +109,5 @@ end for;
 
 printf "\nResult:\n";
 print_rams("c", [3,5,11], rams_oo);
+
+printf "\ndone\n";

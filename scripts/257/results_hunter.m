@@ -48,6 +48,10 @@ end function;
 load "scripts/257/results_hunter_raw.m";
 load "scripts/257/covering_set.m";
 
+printf "\n==================================================================\n";
+printf "We perform the computations for Proposition 3.43.\n";
+printf "==================================================================\n\n";
+
 printf "computing isomorphism classes of number fields\n";
 Ks := [NumberField(f) : f in pols];
 Ks_iso := uptoiso(Ks);
@@ -66,3 +70,5 @@ for d in discs do
 		printf "%o, Primitive: %o, Obstruction: %o\n", Ko, is_primitive, obstruction;
 	end for;
 end for;
+
+printf "\ndone\n";

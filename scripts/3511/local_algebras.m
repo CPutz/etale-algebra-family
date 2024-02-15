@@ -142,4 +142,4 @@ assert valid_covering_set(U11_vb4, E11_vb4); //sufficient
 assert valid_covering_set(E11_vb4, U11_vb4); //necessary
 printf "valid and minimal covering set when v11(b) = 4\n\n";
 
-printf "done.\n";
+printf "done\n";

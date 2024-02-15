@@ -42,8 +42,8 @@ _,EtoCsigma := IsInvertible(CsigmatoE);
 
 //Descend Phi to E
 Phi := map<C -> P1 |
-	[CoordinateRing(C)!Homogenization(Evaluate(phi0, x1), x3),
-	 CoordinateRing(C)!Homogenization(Evaluate(phioo,x1), x3, 8)]>;
+    [CoordinateRing(C)!Homogenization(Evaluate(phi0, x1), x3),
+     CoordinateRing(C)!Homogenization(Evaluate(phioo,x1), x3, 8)]>;
 
 Phi1_st := (Evaluate(phioo,s)*Evaluate(phi0,t) + Evaluate(phioo,t)*Evaluate(phi0, s)) / 2;
 Phi2_st := Evaluate(phioo,t) * Evaluate(phioo,s);
@@ -52,8 +52,8 @@ IPhi2 := ideal< R | [Phi2_st, s + t - u, s*t - v] >;
 Phi1_uv := -50 * Homogenization(Evaluate(Basis(EliminationIdeal(IPhi1,{u,v}))[1], [0,0,x1,x2]), x3);
 Phi2_uv := -4 * Homogenization(Evaluate(Basis(EliminationIdeal(IPhi2,{u,v}))[1], [0,0,x1,x2]), x3, 8);
 PhiCsigma := map< Csigma -> P1 |
-	[CoordinateRing(Csigma)!Phi1_uv,
-	 CoordinateRing(Csigma)!Phi2_uv] >;
+    [CoordinateRing(Csigma)!Phi1_uv,
+     CoordinateRing(Csigma)!Phi2_uv] >;
 
 // PhiCsigma is the descended map of Phi to Csigma
 assert Phi eq CtoCsigma * PhiCsigma;
@@ -61,9 +61,9 @@ assert Phi eq CtoCsigma * PhiCsigma;
 printf "Phi descends to C/σ\n";
 
 //PhiE := Extend(Normalization(Expand(
-//	Maps(E, P1)!(EtoCsigma * PhiCsigma))));
+//  Maps(E, P1)!(EtoCsigma * PhiCsigma))));
 PhiE := map< E -> P1 |
-	[-1/210739200000*x1^2*x2^8 - 1151/752640000*x1^2*x2^7*x3 - 619/15052800000*x1*x2^8*x3 - 
+    [-1/210739200000*x1^2*x2^8 - 1151/752640000*x1^2*x2^7*x3 - 619/15052800000*x1*x2^8*x3 - 
     1/1505280000*x2^9*x3 - 6901/1228800*x1^2*x2^6*x3^2 - 109997/268800000*x1*x2^7*x3^2 -
     68407/2007040000*x2^8*x3^2 + 150607841/153600000*x1^2*x2^5*x3^3 + 
     69430211/122880000*x1*x2^6*x3^3 - 2706337/823200000*x2^7*x3^3 + 

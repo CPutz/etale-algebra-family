@@ -1,3 +1,5 @@
+// Octic number fields computed using a series of targeted Hunter searches.
+
 Q := Rationals();
 R<t> := PolynomialRing(Q);
 

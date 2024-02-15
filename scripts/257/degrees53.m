@@ -29,12 +29,12 @@ printf "==================================================================\n\n";
 load "scripts/257/covering_sets.m";
 
 // LMFDB data
-load "scripts/257/fields_cubic_unramified257.m";
+load "scripts/257/fields_cubic_unramified257.dat";
 L3 := make_data();
 printf "\nThere exist %o cubic number fields with signature (1,1) and unramfied outside 2, 5 and 7\n\n", #L3;
 
 // LMFDB data
-load "scripts/257/fields_quintic_unramified257.m";
+load "scripts/257/fields_quintic_unramified257.dat";
 L5 := make_data();
 printf "\nThere exist %o quintic number fields with signature (1,2) and unramfied outside 2, 5 and 7\n\n", #L5;
 
