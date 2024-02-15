@@ -1,2 +1,2 @@
+*.m linguist-detectable
 *.m linguist-language=Magma
-*.dat linguist-language=Magma
