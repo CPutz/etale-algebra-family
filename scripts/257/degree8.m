@@ -162,52 +162,5 @@ L8 := [K : K in quadratic_extensions(L,Support(2*5*7*OL)) |
 printf "There exists %o octic number fields satisfying all local conditions at 2, 3, 5 and 7,", #L8;
 printf "and having L as a quartic subfield: %o\n", L8;
 
-
-printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 5.26.\n";
-printf "==================================================================\n\n";
-
-load "scripts/257/covering.m";
-
-printf "Computing a full-rank subgroup of the Mordell-Weil group of E over %o\n", L;
-
-EL := BaseChange(E,L);
-_,G,GtoEL := PseudoMordellWeilGroup(EL);
-
-rankbound := RankBound(EL);
-//rankbound := 2;
-assert rankbound eq TorsionFreeRank(G);
-
-print "Found full-rank subgroup of E(L) (rank = %o)\n", TorsionFreeRank(G);
-
-gens := [GtoEL(g) : g in Generators(G)];
-sat23 := Saturation(Saturation([EL!p : p in gens], 2), 3);
-A := AbelianGroup([Order(g) : g in sat23]);
-AtoEL := map< A -> EL | x :-> &+[Eltseq(x)[i]*sat23[i] : i in [1..#sat23]] >;
-
-printf "Constructed subgroup which is saturated at 2 and 3.\n";
-
-printf "Performing elliptic curve Chabauty\n";
-
-PhiEL := map< EL -> P1 | DefiningEquations(PhiE) >;
-
-time V,R := Chabauty(AtoEL, PhiEL : IndexBound := 6);
-assert R lt Infinity();
-assert PrimeDivisors(R) subset {2,3};
-
-
-pts_EL := { AtoEL(v) : v in V };
-printf "The points in E(L) with rational image under Φ_E are %o\n", pts_EL;
-
-CL := BaseChange(C,L);
-CLtoEL := map< CL -> EL | DefiningEquations(CtoCsigma * CsigmatoE0 * E0toE) >;
-
-pts_CL := {@ @};
-for p in pts_EL do
-	S := Cluster(EL, p);
-	pts_CL join:= RationalPoints(Pullback(CLtoEL, S));
-end for;
-
-printf "The points in C(L) with rational image under ϕ are %o\n", pts_CL;
-
 printf "\ndone\n";
+quit;

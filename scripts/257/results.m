@@ -126,3 +126,4 @@ assert forall { N : N in Nbhds |
 printf "Result verified for 197\n\n";
 
 printf "\ndone\n";
+quit;

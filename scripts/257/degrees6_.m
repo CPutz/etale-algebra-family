@@ -180,3 +180,4 @@ for L in L2 do
 end for;
 
 print "\ndone\n";
+quit;

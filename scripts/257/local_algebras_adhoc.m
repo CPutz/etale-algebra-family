@@ -244,3 +244,4 @@ assert valid_covering_set(L7_oo, U7_oo); //necessary
 printf "valid covering set for S_{7,oo}\n";
 
 printf "\ndone\n";
+quit;

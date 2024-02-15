@@ -72,3 +72,4 @@ for d in discs do
 end for;
 
 printf "\ndone\n";
+quit;

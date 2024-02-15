@@ -58,3 +58,4 @@ assert valid_covering_set(E7, U7); //necessary
 printf "valid and minimal covering set the prime 7\n\n";
 
 printf "done\n";
+quit;
