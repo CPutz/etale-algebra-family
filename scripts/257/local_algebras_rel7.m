@@ -9,7 +9,7 @@ end function;
 
 K := QuadraticField(21);
 
-load "scripts/257/covering_sets_rel7.m";
+load "scripts/257/covering_sets_rel7.dat";
 
 printf "\n==================================================================\n";
 printf "We perform the computations for Theorem 5.39. We verify that the\n";

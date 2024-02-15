@@ -16,7 +16,7 @@ end function;
 // Proposition B.1
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition B.1.\n";
+printf "We perform the computations from Proposition A.1.\n";
 printf "==================================================================\n\n";
 
 Q2 := pAdicField(2,500);
@@ -38,8 +38,8 @@ U2_1 := [
 U2_oo := [
 	EtaleAlgebra(t^8 + 2*t^7 + 2),
 	EtaleAlgebra(t^8 + 2*t^7 + 6),
-	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [6,2]]),
-	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [3,3,1,1]]) ];
+	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [6,2]], Q2),
+	EtaleAlgebra([UnramifiedExtension(Q2,d) : d in [3,3,1,1]], Q2) ];
 
 
 // Compute parameter values for U2_1
@@ -93,7 +93,7 @@ printf "valid covering set for S_{2,oo}\n\n";
 // Proposition B.2
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition B.2.\n";
+printf "We perform the computations from Proposition A.2.\n";
 printf "==================================================================\n\n";
 
 Q5 := pAdicField(5,500);
@@ -170,7 +170,7 @@ printf "valid covering set for S_{5,oo}\n\n";
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition B.3.\n";
+printf "We perform the computations from Proposition A.3.\n";
 printf "==================================================================\n\n";
 
 Q7 := pAdicField(7,500);

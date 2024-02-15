@@ -7,7 +7,7 @@ function valid_covering_set(U,L);
 		exists {K : K in U | IsIsomorphic(E,K)}};
 end function;
 
-load "scripts/257/covering_sets.m";
+load "scripts/257/covering_sets.dat";
 
 printf "\n==================================================================\n";
 printf "We perform the computations for Theorem 5.6. We verify that the\n";
@@ -15,8 +15,6 @@ printf "local covering sets as defined in the file covering_sets.m\n";
 printf "(which correspond to the sets given in Theorem 5.6) are correct\n";
 printf "and are minimal.\n";
 printf "==================================================================\n\n";
-
-SetVerbose("AlgEtFam",1);
 
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 2\n";

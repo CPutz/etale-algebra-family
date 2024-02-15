@@ -1,6 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
-load "scripts/257/covering_sets.m";
+load "scripts/257/covering_sets.dat";
 
 function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);

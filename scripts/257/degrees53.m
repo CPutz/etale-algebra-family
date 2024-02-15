@@ -26,7 +26,7 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition 5.18.\n";
 printf "==================================================================\n\n";
 
-load "scripts/257/covering_sets.m";
+load "scripts/257/covering_sets.dat";
 
 // LMFDB data
 load "scripts/257/fields_cubic_unramified257.dat";

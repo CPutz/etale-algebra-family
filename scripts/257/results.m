@@ -1,7 +1,7 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-load "scripts/257/covering_set.m";
+load "scripts/257/covering_set.dat";
 
 printf "\n==================================================================\n";
 printf "We perform the computations from Theorem 5.29.\n";
@@ -85,7 +85,7 @@ assert forall { N : N in Nbhds |
 	(N subset pAdicNbhd(X, K!4, K!7, 1) and not N subset pAdicNbhd(X, K!32, K!49, 1)) or
 	N subset Invert(pAdicNbhd(X, K!0, K!7^7, 1))
 	where K := AmbientSpace(X) where X := Parent(N)};
-printf "Result verified for 27\n\n";
+printf "Result verified for 7\n\n";
 
 
 printf "------------------------------------------------------------------\n";

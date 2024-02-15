@@ -41,7 +41,7 @@ printf "\n------------------------------------------------------------------\n";
 printf "performing computations for v_p(a) > 0 (Table 6.9)\n";
 printf "------------------------------------------------------------------\n";
 
-/*rams_0 := [];
+rams_0 := [];
 for p in [3, 5, 11] do
 	rams := [];
 	printf "p = %o:", p;
@@ -82,7 +82,7 @@ for p in [3,5,11] do
 end for;
 
 printf "\nResult:\n";
-print_rams("b", [3,5,11], rams_1);*/
+print_rams("b", [3,5,11], rams_1);
 
 printf "\n------------------------------------------------------------------\n";
 printf "performing computations for v_p(c) > 0 (Table 6.11)\n";
@@ -111,3 +111,4 @@ printf "\nResult:\n";
 print_rams("c", [3,5,11], rams_oo);
 
 printf "\ndone\n";
+quit;

@@ -45,8 +45,8 @@ function disc_to_string(d);
 	return s;
 end function;
 
-load "scripts/257/results_hunter_raw.m";
-load "scripts/257/covering_set.m";
+load "scripts/257/results_hunter_raw.dat";
+load "scripts/257/covering_set.dat";
 
 printf "\n==================================================================\n";
 printf "We perform the computations for Proposition 3.43.\n";
