@@ -77,10 +77,6 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	phi := (3*t^2 + t + 1)^5 * (1 - 5*t);
 	psi := -s * t * (33 + 11*t + 3*t^2)^5 - 5^10;
 
-	if p eq 3 then
-		psi := Evaluate(psi, t/3);
-	end if;
-
 	va := Valuation(a,p);
 	vb := Valuation(b,p);
 	vc := Valuation(c,p);
@@ -94,7 +90,7 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	if vabc eq 0 then
 		for a in [2..(p-1)] do
 			F0 := phi - (a + p*s);
-			E0 := EtaleAlgebraFamily(F0, p : D := D);
+			E0 := EtaleAlgebraFamily(F0, p : D := D, BoundMethod := "Difference");
 			for i := 1 to #E0 do
 				SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
 			end for;
@@ -105,13 +101,13 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	if vabc eq 0 or va gt 0 then
 		minvalx := va eq 0 select 5 else va;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
-		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := 1000);
+		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := 1000, BoundMethod := "Difference");
 	end if;
 
 	if vabc eq 0 or vb gt 0 then
 		minvaly := vb eq 0 select 3 else vb;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(3)!vb);
-		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := 1000);
+		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := 1000, BoundMethod := "Difference");
 		for i := 1 to #E2 do
 			SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 		end for;
@@ -124,10 +120,14 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 			psi := -s * 5^(minvalz - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
 			minvalz := 0;
 		end if;
+		if p eq 3 then
+			psi := -s * 3^minvalz * t * (99 + 11*t + t^2)^5 - 3^6 * 5^10;
+			minvalz := 0;
+		end if;
 
 		F3 := ReciprocalPolynomial(psi);
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!minvalz);
-		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := 1000);
+		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := 1000, BoundMethod := "Difference");
 		for i := 1 to #E3 do
 			SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 		end for;
@@ -163,10 +163,6 @@ intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngI
 	phi := (3*t^2 + t + 1)^5 * (1 - 5*t);
 	psi := -s * t * (33 + 11*t + 3*t^2)^5 - 5^10;
 
-	if p eq 3 then
-		psi := Evaluate(psi, t/3);
-	end if;
-
 	va := Valuation(a,p);
 	vb := Valuation(b,p);
 	vc := Valuation(c,p);
@@ -180,7 +176,7 @@ intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngI
 	if vabc eq 0 then
 		for a in [2..(p-1)] do
 			F0 := phi - (a + p*s);
-			E0 := EtaleAlgebraFamily(F0, p : D := D, Precision := Precision, CalcIso := false);
+			E0 := EtaleAlgebraFamily(F0, p : D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
 			for i := 1 to #E0 do
 				SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
 			end for;
@@ -191,13 +187,13 @@ intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngI
 	if vabc eq 0 or va gt 0 then
 		minvalx := va eq 0 select 5 else va;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
-		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false);
+		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
 	end if;
 
 	if vabc eq 0 or vb gt 0 then
 		minvaly := vb eq 0 select 3 else vb;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(3)!vb);
-		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false);
+		E2 := EtaleAlgebraFamily(phi - (1 + s), p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
 	end if;
 
 	if vabc eq 0 or vc gt 0 then
@@ -207,10 +203,14 @@ intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngI
 			psi := -s * 5^(minvalz - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
 			minvalz := 0;
 		end if;
+		if p eq 3 and minvalz ge 6 then
+			psi := -s * 3^(minvalz - 6) * t * (99 + 11*t + t^2)^5 - 5^10;
+			minvalz := 0;
+		end if;
 
 		F3 := ReciprocalPolynomial(psi);
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!minvalz);
-		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false);
+		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
 	end if;
 
 	Eis := (&cat E0s) cat E1 cat E2 cat E3;

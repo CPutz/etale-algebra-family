@@ -211,7 +211,6 @@ Difference.}
 		Nbhds_oo cat:= [pAdicNbhd(ParameterSpace, B!r[1], (a@@phik) * pi_Par^v, k) : a in KmKk];
 	end for;
 
-	vprintf AlgEtFam,1: "subdividing nbhds\n";
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]) / vpi_Par;
 
 	//if K = Q then separant computations will be performed over Q instead of
@@ -254,6 +253,7 @@ Difference.}
 	Nbhds := [pAdicNbhd(ParameterSpace, 0, 1, 1)]; // The set containing O_K
 	Nbhds_end := []; // The neighborhoods that do not contain a root of the discriminant
 
+	vprintf AlgEtFam,1: "subdividing nbhds\n";
 	depth := 0;
 	repeat
 		Nbhds_new := [];
@@ -305,6 +305,7 @@ Difference.}
 	psi := Coercion(Kp, KpP);
 	SpP,StoSpP := ChangeRing(S, KpP, phi * psi);
 	RpP,RtoRpP := ChangeRing(R, SpP, StoSpP);
+	vprintf AlgEtFam,1: "constructing list of %o defining polynomials\n", #Nbhds;
 	pols := [Evaluate(SwitchVariables(RtoRpP(F)),OKp_ex!Kp!B!Representative(N)) : N in Nbhds];
 
 	if CalcIso then
@@ -312,6 +313,7 @@ Difference.}
 		E := FindIsomorphismClasses(pols : Data := Nbhds, Hint := Hint);
 		vprintf AlgEtFam,1: "%o isomorphism classes found among %o etale algebras\n", #E, #Nbhds;
 	else
+		vprintf AlgEtFam,1: "constructing list of %o etale algebras\n", #Nbhds;
 		E := [EtaleAlgebra(f) : f in pols];
 	end if;
 
