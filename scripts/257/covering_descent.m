@@ -148,7 +148,6 @@ printf "\n==================================================================\n";
 printf "We perform the computations from Proposition 4.19.\n";
 printf "==================================================================\n\n";
 
-QQ := Rationals();
 L<a> := NumberField(x^7 - 5);
 
 EL := BaseChange(E,L);
@@ -227,8 +226,8 @@ printf "Computing a full-rank subgroup of the Mordell-Weil group of E over %o\n"
 EL := BaseChange(E,L);
 _,G,GtoEL := PseudoMordellWeilGroup(EL);
 
-//rankbound := RankBound(EL);
-rankbound := 2;
+rankbound := RankBound(EL);
+//rankbound := 2;
 assert rankbound eq TorsionFreeRank(G);
 
 printf "Found full-rank subgroup of E(L) (rank = %o)\n", TorsionFreeRank(G);
@@ -253,7 +252,7 @@ pts_EL := { AtoEL(v) : v in V };
 printf "The points in E(L) with rational image under Φ_E are %o\n", pts_EL;
 
 assert forall { p : p in pts_EL |
-	(p[1] in Q and p[2] in Q and p[3] in Q) or
+	(p[1] in QQ and p[2] in QQ and p[3] in QQ) or
 	PhiEL(p) eq P1![0,1] };
 
 printf "All points of E(L) - E(Q) map to (0 : 1) under Φ_E.\n";

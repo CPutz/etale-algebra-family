@@ -40,7 +40,7 @@ printf "==================================================================\n\n";
 printf "\n------------------------------------------------------------------\n";
 printf "performing computations for v_p(a) > 0 (Table 6.9)\n";
 printf "------------------------------------------------------------------\n";
-
+/*
 rams_0 := [];
 for p in [3, 5, 11] do
 	rams := [];
@@ -71,7 +71,7 @@ rams_1 := [];
 for p in [3,5,11] do
 	rams := [];
 	printf "p = %o:", p;
-	for b := 1 to 5 do
+	for b := 1 to 6 do
 		Es := EtaleAlgebras3511CoeffRamification(p, 1, p^b, 1);
 		ram := { Valuation(Discriminant(E)) : E in Es };
 		Append(~rams, ram);
@@ -83,7 +83,7 @@ end for;
 
 printf "\nResult:\n";
 print_rams("b", [3,5,11], rams_1);
-
+*/
 printf "\n------------------------------------------------------------------\n";
 printf "performing computations for v_p(c) > 0 (Table 6.11)\n";
 printf "------------------------------------------------------------------\n\n";
@@ -93,13 +93,8 @@ for p in [3,5,11] do
 	rams := [];
 	printf "p = %o:", p;
 	for c := 1 to 11 do
-		//if p eq 3 and c lt 5 or p eq 5 and c lt 10 then
-		//	ram := {-1};
-		//else
-			time Es := EtaleAlgebras3511CoeffRamification(p, 1, 1, p^c : Precision := 1500);
-			ram := { Valuation(Discriminant(E)) : E in Es };
-			ram;
-		//end if;
+		Es := EtaleAlgebras3511CoeffRamification(p, 1, 1, p^c : Precision := 2500);
+		ram := { Valuation(Discriminant(E)) : E in Es };
 		Append(~rams, ram);
 		printf ".";
 	end for;

@@ -333,7 +333,6 @@ intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt) -> RngI
 	df := Derivative(f);
 	mu_f := MaxValuationInRootsOf(df,f);
 	tau_F := Valuation(K!k) + Valuation(Resultant(f,g)) * (k - 1) / n;
-
 	sigfg := Separant(f,g);
 
 	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;
@@ -352,7 +351,6 @@ intrinsic StandardConditions(f::RngUPolElt, g::RngUPolElt, k::RngIntElt, p::PlcN
 	df := Derivative(f);
 	mu_f := MaxValuationInRootsOf(df,f,p);
 	tau_F := Valuation(K!k,p) + Valuation(Resultant(f,g),p) * (k - 1) / n;
-
 	sigfg := Separant(f,g,p);
 
 	return Max([2 * k * (mu_f + tau_F), k * sigfg]), mu_f + tau_F;

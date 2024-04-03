@@ -57,3 +57,55 @@ the corresponding etale algebra.}
 
 	return [SimplifyToProduct(E : D := D) : E in Es];
 end intrinsic;
+
+intrinsic EtaleAlgebras357CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::RngIntElt
+	: Precision := 500) -> SeqEnum
+{}
+	S<s> := PolynomialRing(Rationals());
+	R<t> := PolynomialRing(S);
+	F := 15*t^7 - 35*t^6 + 21*t^5 - s;
+
+	va := Valuation(a,p);
+	vb := Valuation(b,p);
+	vc := Valuation(c,p);
+	vabc := Valuation(a*b*c,p);
+
+	E0s := [];
+	E1 := [];
+	E2 := [];
+	E3 := [];
+
+	if vabc eq 0 then
+		for a in [2..(p-1)] do
+			F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));
+			E0 := EtaleAlgebraFamily(F0, p);
+			Append(~E0s, E0);
+		end for;
+	end if;
+
+	if vabc eq 0 or va gt 0 then
+		minvalx := va eq 0 select 5 else va;
+		Par1 := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
+		E1 := EtaleAlgebraFamily(F, p :Precision := Precision,
+			CalcIso := false, ParameterSpace := Par1);
+	end if;
+
+	if vabc eq 0 or vb gt 0 then
+		minvaly := vb eq 0 select 3 else vb;
+		F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
+		Par2 := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(3)!vb);
+		E2 := EtaleAlgebraFamily(F2, p : Precision := Precision,
+			CalcIso := false, ParameterSpace := Par2);
+	end if;
+
+	if vabc eq 0 or vc gt 0 then
+		minvalz := vc eq 0 select 7 else vc;
+		F3 := ReciprocalPolynomial(s * (15*t^7 - 35*t^6 + 21*t^5) - 1);
+		Par3 := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(7)!vc);
+		E3 := EtaleAlgebraFamily(F3, p : Precision := Precision,
+			CalcIso := false, ParameterSpace := Par3);
+	end if;
+
+	Eis := (&cat E0s) cat E1 cat E2 cat E3;
+	return Eis;
+end intrinsic;

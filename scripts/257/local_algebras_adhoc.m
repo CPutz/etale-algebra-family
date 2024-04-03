@@ -16,7 +16,7 @@ end function;
 // Proposition B.1
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition A.1.\n";
+printf "We perform the computations from Proposition C.3.\n";
 printf "==================================================================\n\n";
 
 Q2 := pAdicField(2,500);
@@ -93,7 +93,7 @@ printf "valid covering set for S_{2,oo}\n\n";
 // Proposition B.2
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition A.2.\n";
+printf "We perform the computations from Proposition C.5.\n";
 printf "==================================================================\n\n";
 
 Q5 := pAdicField(5,500);
@@ -145,7 +145,7 @@ printf "valid covering set for S_{5,0}\n";
 L6s := [FieldOfFractions(L) : L in AllExtensions(Q5,6 : E := 6)];
 L2s := [FieldOfFractions(L) : L in AllExtensions(Q5,2 : E := 2)];
 L5_1 := [ E : L6 in L6s, L2 in L2s |
-	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L6,L2])];
+	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L6,L2],Q5)];
 L5_1_sample := [EtaleAlgebra(phi0 - (1 + 5^2*s) * phioo) : s in [1,2]];
 
 // Check that U5_1 is a valid covering set for L5_1
@@ -158,7 +158,7 @@ printf "valid covering set for S_{5,1}\n";
 
 // Compute etale algebras for U5_oo
 L7s := [FieldOfFractions(L) : L in AllExtensions(Q5,7 : E := 7)];
-L5_oo := [ EtaleAlgebra([L7,Q5]) : L7 in L7s ];
+L5_oo := [ EtaleAlgebra([L7,Q5],Q5) : L7 in L7s ];
 L5_oo_sample := [EtaleAlgebra(phi0 - 5^(-7)*s * phioo) : s in [1]];
 
 // Check that U5_oo is a valid covering set for L5_oo
@@ -170,7 +170,7 @@ printf "valid covering set for S_{5,oo}\n\n";
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition A.3.\n";
+printf "We perform the computations from Proposition C.7.\n";
 printf "==================================================================\n\n";
 
 Q7 := pAdicField(7,500);
@@ -208,7 +208,7 @@ printf "valid covering set for S_{7,rest}\n";
 L5s := [FieldOfFractions(L) : L in AllExtensions(Q7,5 : E := 5)];
 L2s := [FieldOfFractions(L) : L in AllExtensions(Q7,2 : E := 2)];
 L7_0 := [ E : L5 in L5s, L2 in L2s |
-	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L5,L2,Q7])];
+	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L5,L2,Q7],Q7)];
 L7_0_sample := [EtaleAlgebra(phi0 - 7^5*s * phioo) : s in [1]];
 
 // Check that U7_0 is a valid covering set for L7_0
@@ -222,7 +222,7 @@ printf "valid covering set for S_{7,0}\n";
 // Compute etale algebras for U7_1
 L8s := [FieldOfFractions(L) : L in AllExtensions(Q7,8 : E := 8)];
 L7_1 := [ E : L8 in L8s |
-	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L8])];
+	IsPower(-7 * Discriminant(E),2) where E := EtaleAlgebra([L8],Q7)];
 L7_1_sample := [EtaleAlgebra(phi0 - (1 + 7^2*s) * phioo) : s in [1]];
 
 // Check that U7_1 is a valid covering set for L7_1

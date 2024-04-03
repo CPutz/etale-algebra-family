@@ -142,56 +142,54 @@ more efficient way.}
 	return [<v, [E[2] : E in Es | E[1] eq v]> : v in vals];
 end intrinsic;
 
-
-function myheight(x);
-	m := Max([Abs(c) : c in Eltseq(x)]);
-	//m := Sqrt(&+[Abs(Evaluate(x,p))^2 : p in InfinitePlaces(Parent(x))]);
-	return m;
-end function;
-
-function myheight2(p);
-	return Max([myheight(c) : c in Eltseq(p)]);
-end function;
-
-intrinsic CoprimeRepresentative(coords::SeqEnum) -> SeqEnum
+intrinsic EtaleAlgebras257CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::RngIntElt
+	: Precision := 500) -> SeqEnum
 {}
-	K<a> := Parent(coords[1]);
-	denom := LCM([Denominator(Norm(c)) : c in coords]);
-	num := GCD([Numerator(Norm(c)) : c in coords]);
-	coords_new := coords;
-	"start factoring";
-	for p in Factorization(denom * num) do
-		"end factoring";
-		for P in Decomposition(K,p[1]) do
-			val := Min([Valuation(c,P[1]) : c in coords]);
-			if val ne 0 then
-				_,g := IsPrincipal(Ideal(P[1]));
-				coords_new := [g^(-val) * c : c in coords_new];
-			end if;
-		end for;
-	end for;
+	S<s> := PolynomialRing(Rationals());
+	R<t> := PolynomialRing(S);
+	F := 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - s*(4*t - 1);
 
-	//preferred representatives of OK*/(OK*)^2
-	u1 := -1;
-	u2 := a^5 + a^4 - a^3 - 2*a^2 - a - 1;
-	u3 := -8*a^6 - 17*a^5 - 14*a^4 + 5*a^3 + 30*a^2 + 39*a + 14;
-	u4 := -a^6 + 4*a^5 - a^4 - 5*a^3 + 3*a^2 + 8*a - 11;
-	Us := [u2^e2 * u3^e3 * u4^e4 : e2,e3,e4 in [-1..1]];
-	// Scale by units
-	h := Max([myheight(c) : c in coords_new]);
-	repeat
-		changed := false;
-		coords_new_tmp := coords_new;
-		for u in Us do
-			coords_new_new := [c / u : c in coords_new];
-			if  h gt Max([myheight(c) : c in coords_new_new]) then
-				h := Max([myheight(c) : c in coords_new_new]);
-				coords_new_tmp := coords_new_new;
-				changed := true;
-			end if;
-		end for;
-		coords_new := coords_new_tmp;
-	until not changed;
+	va := Valuation(a,p);
+	vb := Valuation(b,p);
+	vc := Valuation(c,p);
+	vabc := Valuation(a*b*c,p);
 
-	return coords_new;
+	E0s := [];
+	E1 := [];
+	E2 := [];
+	E3 := [];
+
+	if vabc eq 0 then
+		for a in [2..(p-1)] do
+			F0 := SwitchVariables(Evaluate(SwitchVariables(F), a + p*t));
+			E0 := EtaleAlgebraFamily(F0, p : Precision := Precision, CalcIso := false);
+			Append(~E0s, E0);
+		end for;
+	end if;
+
+	if vabc eq 0 or va gt 0 then
+		minvalx := va eq 0 select 5 else va;
+		Par1 := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
+		E1 := EtaleAlgebraFamily(F, p : Precision := Precision,
+			CalcIso := false, ParameterSpace := Par1);
+	end if;
+
+	if vabc eq 0 or vb gt 0 then
+		minvaly := vb eq 0 select 2 else vb;
+		F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
+		Par2 := pAdicNbhdSpace(Rationals(), p : MinVal := minvaly, CongrVal := Integers(2)!vb);
+		E2 := EtaleAlgebraFamily(F2, p : Precision := Precision,
+			CalcIso := false, ParameterSpace := Par2);
+	end if;
+
+	if vabc eq 0 or vc gt 0 then
+		minvalz := vc eq 0 select 7 else vc;
+		F3 := ReciprocalPolynomial(s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
+		Par3 := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(7)!vc);
+		E3 := EtaleAlgebraFamily(F3, p : Precision := Precision,
+			CalcIso := false, ParameterSpace := Par3);
+	end if;
+
+	Eis := (&cat E0s) cat E1 cat E2 cat E3;
+	return Eis;
 end intrinsic;

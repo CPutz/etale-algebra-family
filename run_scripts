@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for dir in scripts/*; do
+	if [ -d "${dir}" ]; then
+		for script in $dir/*.m; do
+			echo $script
+			magma -b $script > $(dirname "$script")/output/$(basename "$script").out
+		done
+	fi
+done

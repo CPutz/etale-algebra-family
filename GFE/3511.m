@@ -199,18 +199,47 @@ intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngI
 	if vabc eq 0 or vc gt 0 then
 		minvalz := vc eq 0 select 11 else vc;
 		//divide out a factor of 5^10 if possible for efficiency
-		if p eq 5 and minvalz ge 10 then
-			psi := -s * 5^(minvalz - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
-			minvalz := 0;
+		if p eq 5 then
+			if minvalz ge 10 then
+				psi := -s * 5^(minvalz - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
+				minvalz := 0;
+			else // vc lt 10
+				//first for 5^(vc+11)
+				psi := -s * 5^(minvalz + 11 - 10) * t * (33 + 11*t + 3*t^2)^5 - 1;
+				minvalz := 0;
+			end if;
 		end if;
-		if p eq 3 and minvalz ge 6 then
-			psi := -s * 3^(minvalz - 6) * t * (99 + 11*t + t^2)^5 - 5^10;
-			minvalz := 0;
+		if p eq 3 then
+			if minvalz ge 6 then
+				psi := -s * 3^(minvalz - 6) * t * (99 + 11*t + t^2)^5 - 5^10;
+				minvalz := 0;
+			else // vc lt 6
+				psi := -s * 3^(minvalz + 11 - 6) * t * (99 + 11*t + t^2)^5 - 5^10;
+				minvalz := 0;
+			end if;
 		end if;
 
 		F3 := ReciprocalPolynomial(psi);
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(11)!minvalz);
 		E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par, D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
+
+		//the remaining cases for p=3 and 0 < v_3(c) < 6
+		if p eq 3 and vc lt 6 and vc ne 0 then
+			for a in [1..2] do
+				F3a := -t * 3^vc * (33 + 11*t + 3*t^2)^5 - 5^10 * (a + 3*s);
+				E3a := EtaleAlgebraFamily(F3a, p : D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
+				E3 cat:= E3a;
+			end for;
+		end if;
+
+		//the remaining cases for p=5 and 0 < v_5(c) < 10
+		if p eq 5 and vc lt 10 and vc ne 0 then
+			for a in [1..4] do
+				F3a := -t * (33 + 11*t + 3*t^2)^5 - 5^(10 - vc) * (a + 5*s);
+				E3a := EtaleAlgebraFamily(F3a, p : D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
+				E3 cat:= E3a;
+			end for;
+		end if;
 	end if;
 
 	Eis := (&cat E0s) cat E1 cat E2 cat E3;
