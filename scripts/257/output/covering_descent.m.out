@@ -1,3 +1,7 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
 
 ==================================================================
 We construct the curves and maps from page 126.
@@ -6,5 +10,37 @@ We construct the curves and maps from page 126.
 The curve C has genus 3
 The quotient curve C/σ has genus 1
 It contains a non-singular point
+It is birational to the Elliptic Curve defined by y^2 = x^3 - 154*x^2 + 6125*x 
+over Rational Field
+Computing alternative equations for the map C/σ -> E
+Phi descends to C/σ
 
-[Interrupted]
+==================================================================
+We perform the computations from Proposition 4.18.
+==================================================================
+
+psi ⚬ pi is only undefined for (0,0) and points (s,t) with Phi(s,t) = 1.
+The Mordell-Weil group of E/Q is given by [ (0 : 1 : 0), (0 : 0 : 1) ]
+The points of E(Q) lift to (affine) C(L) only if L contain Q(sqrt{-91}).
+
+==================================================================
+We perform the computations from Proposition 4.19.
+==================================================================
+
+We have a full-rank subgroup of E(L)
+
+==================================================================
+We perform the computations from Proposition 4.20.
+==================================================================
+
+Performing elliptic curve Chabauty
+The points in E(L) with rational image under Φ_E are { (0 : 0 : 1), (0 : 1 : 0)
+}
+
+==================================================================
+We perform the computations from Proposition 4.23.
+==================================================================
+
+Computing a full-rank subgroup of the Mordell-Weil group of E over Number Field 
+with defining polynomial x^6 - 3*x^5 + 8*x^4 - 11*x^3 + 8*x^2 - 3*x + 1 over the
+Rational Field

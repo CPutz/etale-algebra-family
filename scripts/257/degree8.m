@@ -2,6 +2,10 @@
 AttachSpec("spec");
 load "scripts/257/covering_sets.dat";
 
+printf "--- Warning ---\n";
+printf "Page and theorem numbers mentioned below are currently not correct.\n";
+printf "---------------\n\n";
+
 function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);
 	C2 := Components(E2);
@@ -134,7 +138,7 @@ load "scripts/257/fields_quartic_unramified257.dat";
 L4 := make_data();
 printf "\nThere exist %o quartic number fields unramfied outside 2, 5 and 7\n\n", #L4;
 
-time L4_filter := [ L : L in L4 |
+L4_filter := [ L : L in L4 |
 	exists {E : E in quadratic_extensions_etale_algebras(EtaleAlgebra(L,3)) |
 		exists { E3 : E3 in U3 | IsIsomorphic(E,E3) } } and
 	exists {E : E in quadratic_extensions_etale_algebras(EtaleAlgebra(L,5)) |

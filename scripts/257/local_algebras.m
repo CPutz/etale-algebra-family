@@ -1,6 +1,10 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
+printf "--- Warning ---\n";
+printf "Page and theorem numbers mentioned below are currently not correct.\n";
+printf "---------------\n\n";
+
 // Returns whether L is contained in U up to isomorphsim
 function valid_covering_set(U,L);
 	return forall (E) {E : E in L |

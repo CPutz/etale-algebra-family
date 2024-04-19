@@ -1,6 +1,10 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
+printf "--- Warning ---\n";
+printf "Page and theorem numbers mentioned below are currently not correct.\n";
+printf "---------------\n\n";
+
 function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);
 	C2 := Components(E2);

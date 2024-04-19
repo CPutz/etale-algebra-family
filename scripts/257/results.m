@@ -1,6 +1,10 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
+printf "--- Warning ---\n";
+printf "Page and theorem numbers mentioned below are currently not correct.\n";
+printf "---------------\n\n";
+
 load "scripts/257/covering_set.dat";
 
 printf "\n==================================================================\n";
@@ -14,7 +18,7 @@ L8 := NumberField(F8);
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 2\n";
 printf "------------------------------------------------------------------\n\n";
-time E2 := EtaleAlgebras257(2 : Simplify := false, Neighbourhoods := true);
+E2 := EtaleAlgebras257(2 : Simplify := false, Neighbourhoods := true);
 
 L8_2 := EtaleAlgebra(L8,2);
 assert exists (K2) { K2 : K2 in E2 | IsIsomorphic(K2,L8_2) };
@@ -33,7 +37,7 @@ printf "Result verified for 2\n\n";
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 3\n";
 printf "------------------------------------------------------------------\n\n";
-time E3 := EtaleAlgebras257(3 : Simplify := false, Neighbourhoods := true);
+E3 := EtaleAlgebras257(3 : Simplify := false, Neighbourhoods := true);
 
 L8_3 := EtaleAlgebra(L8,3);
 assert exists (K3) { K3 : K3 in E3 | IsIsomorphic(K3,L8_3) };
@@ -52,7 +56,7 @@ printf "Result verified for 3\n\n";
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 5\n";
 printf "------------------------------------------------------------------\n\n";
-time E5 := EtaleAlgebras257(5 : Simplify := false, Neighbourhoods := true);
+E5 := EtaleAlgebras257(5 : Simplify := false, Neighbourhoods := true);
 
 L8_5 := EtaleAlgebra(L8,5);
 assert exists (K5) { K5 : K5 in E5 | IsIsomorphic(K5,L8_5) };
@@ -71,7 +75,7 @@ printf "Result verified for 5\n\n";
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 7\n";
 printf "------------------------------------------------------------------\n\n";
-time E7 := EtaleAlgebras257(7 : Simplify := false, Neighbourhoods := true);
+E7 := EtaleAlgebras257(7 : Simplify := false, Neighbourhoods := true);
 
 L8_7 := EtaleAlgebra(L8,7);
 assert exists (K7) { K7 : K7 in E7 | IsIsomorphic(K7,L8_7) };
@@ -91,7 +95,7 @@ printf "Result verified for 7\n\n";
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 11\n";
 printf "------------------------------------------------------------------\n\n";
-time E11 := EtaleAlgebras257(11 : Simplify := false, Neighbourhoods := true);
+E11 := EtaleAlgebras257(11 : Simplify := false, Neighbourhoods := true);
 
 L8_11 := EtaleAlgebra(L8,11);
 assert exists (K11) { K11 : K11 in E11 | IsIsomorphic(K11,L8_11) };
@@ -110,7 +114,7 @@ printf "Result verified for 11\n\n";
 printf "------------------------------------------------------------------\n";
 printf "performing computations for the prime 197\n";
 printf "------------------------------------------------------------------\n\n";
-time E197 := EtaleAlgebras257(197 : Simplify := false, Neighbourhoods := true);
+E197 := EtaleAlgebras257(197 : Simplify := false, Neighbourhoods := true);
 
 L8_197 := EtaleAlgebra(L8,197);
 assert exists (K197) { K197 : K197 in E197 | IsIsomorphic(K197,L8_197) };

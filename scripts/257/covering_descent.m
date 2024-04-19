@@ -1,5 +1,9 @@
 // Load this file from the main folder
 
+printf "--- Warning ---\n";
+printf "Page and theorem numbers mentioned below are currently not correct.\n";
+printf "---------------\n\n";
+
 printf "\n==================================================================\n";
 printf "We construct the curves and maps from page 126.\n";
 printf "==================================================================\n\n";
@@ -243,7 +247,7 @@ printf "Performing elliptic curve Chabauty\n";
 
 PhiEL := map< EL -> P1 | DefiningEquations(PhiE) >;
 
-time V,R := Chabauty(AtoEL, PhiEL : IndexBound := 6);
+V,R := Chabauty(AtoEL, PhiEL : IndexBound := 6);
 assert R lt Infinity();
 assert PrimeDivisors(R) subset {2,3};
 
@@ -285,7 +289,7 @@ printf "Performing elliptic curve Chabauty\n";
 
 PhiEL := map< EL -> P1 | DefiningEquations(PhiE) >;
 
-time V,R := Chabauty(AtoEL, PhiEL : IndexBound := 6);
+V,R := Chabauty(AtoEL, PhiEL : IndexBound := 6);
 assert R lt Infinity();
 assert PrimeDivisors(R) subset {2,3};
 
