@@ -1,0 +1,40 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+Loading "scripts/257/covering_sets_rel7.dat"
+
+==================================================================
+We perform the computations for Theorem 5.39. We verify that the
+local covering sets as defined in the file covering_sets_rel7.m
+(which correspond to the sets given in Theorem 5.39) are correct
+and are minimal.
+==================================================================
+
+------------------------------------------------------------------
+performing computations for the prime above 2
+------------------------------------------------------------------
+
+correct and minimal covering set at the prime above 2
+
+------------------------------------------------------------------
+performing computations for the prime above 3
+------------------------------------------------------------------
+
+valid and minimal covering set at the prime above 3
+
+------------------------------------------------------------------
+performing computations for the primes above 5
+------------------------------------------------------------------
+
+valid and minimal covering set at the first prime above 5
+
+valid and minimal covering set at the second prime above 5
+
+------------------------------------------------------------------
+performing computations for the prime above 7
+------------------------------------------------------------------
+
+valid and minimal covering set the prime 7
+
+done

@@ -12,7 +12,7 @@ function valid_covering_set(U,L);
 		exists {K : K in U | IsIsomorphic(E,K)}};
 end function;
 
-load "scripts/357/upperbounds.m";
+load "scripts/357/local_covering_sets.dat";
 
 printf "Performing calculations for p=2\n";
 E2 := EtaleAlgebras357(2);
@@ -37,3 +37,6 @@ E7 := EtaleAlgebras357(7);
 assert valid_covering_set(E7,U7);
 assert valid_covering_set(U7,E7);
 printf "valid local covering set for p=7\n\n";
+
+printf "done\n";
+quit;

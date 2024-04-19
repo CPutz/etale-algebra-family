@@ -1,0 +1,47 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+
+==================================================================
+We perform the computations from Proposition 5.18.
+==================================================================
+
+Loading "scripts/257/covering_sets.dat"
+Loading "scripts/257/fields_cubic_unramified257.dat"
+
+There exist 5 cubic number fields with signature (1,1) and unramfied outside 2, 
+5 and 7
+
+Loading "scripts/257/fields_quintic_unramified257.dat"
+
+There exist 375 quintic number fields with signature (1,2) and unramfied outside
+2, 5 and 7
+
+The following cubic number fields remain after checking local conditions at 2, 5
+and 7: [
+Number Field with defining polynomial x^3 + 2*x - 2 over the Rational Field
+]
+
+The following quintic number fields remain after checking local conditions at 2,
+5 and 7: [
+Number Field with defining polynomial x^5 - 112 over the Rational Field,
+Number Field with defining polynomial x^5 - 56 over the Rational Field,
+Number Field with defining polynomial x^5 - 28 over the Rational Field,
+Number Field with defining polynomial x^5 - 14 over the Rational Field
+]
+
+The following etale algebras remain after checking local conditions at 2, 5 and 
+7: [
+<Number Field with defining polynomial x^5 - 112 over the Rational Field, Number
+Field with defining polynomial x^3 + 2*x - 2 over the Rational Field>,
+<Number Field with defining polynomial x^5 - 56 over the Rational Field, Number 
+Field with defining polynomial x^3 + 2*x - 2 over the Rational Field>,
+<Number Field with defining polynomial x^5 - 28 over the Rational Field, Number 
+Field with defining polynomial x^3 + 2*x - 2 over the Rational Field>,
+<Number Field with defining polynomial x^5 - 14 over the Rational Field, Number 
+Field with defining polynomial x^3 + 2*x - 2 over the Rational Field>
+]
+
+
+done

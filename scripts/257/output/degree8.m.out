@@ -1,0 +1,43 @@
+Loading "scripts/257/covering_sets.dat"
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+
+==================================================================
+We perform the computations from Proposition 5.23.
+==================================================================
+
+There exists 1 quadratic number field satisfying all local conditions at 5 and 
+7: Quadratic Field with defining polynomial $.1^2 - 14 over the Rational Field
+None of the local algebras at 2 is an extension of Q(sqrt(14)).
+
+==================================================================
+We perform the computations from Proposition 5.24.
+==================================================================
+
+Loading "scripts/257/fields_quartic_unramified257.dat"
+
+There exist 274 quartic number fields unramfied outside 2, 5 and 7
+
+There exists 1 quartic number field satisfying all local conditions at 2, 3, 5 
+and 7: Number Field with defining polynomial x^4 - 2*x^3 - 2*x^2 - 4*x - 10 over
+the Rational Field
+
+==================================================================
+We perform the computations from Remark 5.25.
+==================================================================
+
+There exists 4 octic number fields satisfying all local conditions at 2, 3, 5 
+and 7,and having L as a quartic subfield: [
+Number Field with defining polynomial x^8 + 490*x^4 + 840*x^2 - 175 over the 
+Rational Field,
+Number Field with defining polynomial x^8 + 280*x^2 - 700 over the Rational 
+Field,
+Number Field with defining polynomial x^8 + 490*x^4 - 840*x^2 - 175 over the 
+Rational Field,
+Number Field with defining polynomial x^8 - 280*x^2 - 700 over the Rational 
+Field
+]
+
+done

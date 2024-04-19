@@ -20,19 +20,19 @@ the corresponding etale algebra.}
 		Append(~E0s, E0);
 	end for;
 
-	E1 := EtaleAlgebraFamily(F, p :
-		MinVal := 5, CongrVal := Integers(5)!0, Precision := 700);
+	Par1 := pAdicNbhdSpace(Rationals(), p : MinVal := 5, CongrVal := Integers(5)!0);
+	E1 := EtaleAlgebraFamily(F, p : ParameterSpace := Par1, Precision := 700);
 
 	F2 := SwitchVariables(Evaluate(SwitchVariables(F), 1 + t));
-	E2 := EtaleAlgebraFamily(F2, p :
-		MinVal := 3, CongrVal := Integers(3)!0, Precision := 500);
+	Par2 := pAdicNbhdSpace(Rationals(), p : MinVal := 3, CongrVal := Integers(3)!0);
+	E2 := EtaleAlgebraFamily(F2, p : ParameterSpace := Par2, Precision := 500);
 	for i := 1 to #E2 do
 		SetData(~E2[i], [1 + B : B in Data(E2[i])]);
 	end for;
 
 	F3 := ReciprocalPolynomial(s * (15*t^7 - 35*t^6 + 21*t^5) - 1);
-	E3 := EtaleAlgebraFamily(F3, p :
-		MinVal := 7, CongrVal := Integers(7)!0, Precision := 500);
+	Par3 := pAdicNbhdSpace(Rationals(), p : MinVal := 7, CongrVal := Integers(7)!0);
+	E3 := EtaleAlgebraFamily(F3, p : ParameterSpace := Par3, Precision := 500);
 	for i := 1 to #E3 do
 		SetData(~E3[i], [Invert(B) : B in Data(E3[i])]);
 	end for;

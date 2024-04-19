@@ -5,7 +5,7 @@ printf "--- Warning ---\n";
 printf "Page and theorem numbers mentioned below are currently not correct.\n";
 printf "---------------\n\n";
 
-load "scripts/257/covering_set.dat";
+load "scripts/257/covering_sets.dat";
 
 printf "\n==================================================================\n";
 printf "We perform the computations from Theorem 5.29.\n";
@@ -26,6 +26,11 @@ assert exists (K2) { K2 : K2 in E2 | IsIsomorphic(K2,L8_2) };
 Nbhds := Data(K2);
 X := Universe(Nbhds);
 K := AmbientSpace(X);
+
+{ N : N in Nbhds |
+	not (N subset pAdicNbhd(X, K!1 + 3*2^2, K!2^5, 1) or N subset pAdicNbhd(X, K!1, 7*K!2^2, 2) or
+	(N subset Invert(pAdicNbhd(X, K!0, K!2^7, 1)) and not N subset Invert(pAdicNbhd(X, K!0, K!2^14, 1))))
+	where K := AmbientSpace(X) where X := Parent(N)};
 
 //2 | y and (eta(x) = 13 mod 32 or z = 7 (mod 8))  or 2 || z
 assert forall { N : N in Nbhds |

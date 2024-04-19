@@ -1,0 +1,231 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+
+==================================================================
+We perform the computations from Proposition 5.11.
+==================================================================
+
+Loading "scripts/257/covering_sets.dat"
+Valuation of possible local discriminants at 2: { 0 }
+Valuation of possible local discriminants at 5: { 4, 6 }
+Valuation of possible local discriminants at 7: { 5 }
+
+Ruling out cubic subfields.
+Loading "scripts/257/fields_cubic_unramified57.dat"
+Possible candidates for cubic subfield: [
+Number Field with defining polynomial x^3 - x^2 - 2*x + 1 over the Rational 
+Field,
+Number Field with defining polynomial x^3 - x^2 + 2*x - 3 over the Rational 
+Field
+]
+Computing quadratic extensions and checking local conditions.
+Computing quadratic extensions and checking local conditions.
+Cubic subfields have been ruled out.
+
+Ruling out quadratic subfields.
+Possible candidates for quadratic subfield: [
+Number Field with defining polynomial x^2 - 5 over the Rational Field,
+Number Field with defining polynomial x^2 + 7 over the Rational Field,
+Number Field with defining polynomial x^2 + 35 over the Rational Field
+]
+Quadratic subfields have been ruled out.
+
+Computations for the primitive case.
+
+Case where K is isomorphic to M x Q x Q:
+K tensor Q_5 is isomorphic to: [
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^4 - 5 + O(5^500) over 
+5-adic field mod 5^500,
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 + 5 + O(5^500) over 
+5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^4 + 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 + 5 + O(5^500) over 
+5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^4 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^4 + 5 + O(5^500) over 
+5-adic field mod 5^500,
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500
+]
+]
+K tensor Q_7 is isomorphic to: [
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500,
+Totally ramified extension defined by the polynomial x^6 + 7 + O(7^500) over 
+7-adic field mod 7^500,
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500,
+Totally ramified extension defined by the polynomial x^6 + 
+2988644510369713305624322206756471370804995080174590880304102771007851571276181\
+3531277487268538244720882157002600630826107409307046526980110438259010755982872\
+2978204133598567544145937504800941545418032499657567025456260522295211888160693\
+0710265874062070219435430107895140932590130999914660209960909884754210869140837\
+5463788133961972353167124813289921216116056352560995586214831439124291149474013\
+656784344293036490770189223 + O(7^500) over 7-adic field mod 7^500,
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500,
+Totally ramified extension defined by the polynomial x^6 - 
+2988644510369713305624322206756471370804995080174590880304102771007851571276181\
+3531277487268538244720882157002600630826107409307046526980110438259010755982872\
+2978204133598567544145937504800941545418032499657567025456260522295211888160693\
+0710265874062070219435430107895140932590130999914660209960909884754210869140837\
+5463788133961972353167124813289921216116056352560995586214831439124291149474013\
+656784344293036490770189230 + O(7^500) over 7-adic field mod 7^500,
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500
+]
+]
+
+Case where K is isomorphic to M x L with L a quadratic number field:
+Possible candidates for L: [
+Number Field with defining polynomial x^2 - 5 over the Rational Field,
+Number Field with defining polynomial x^2 + 7 over the Rational Field,
+Number Field with defining polynomial x^2 + 35 over the Rational Field
+]
+
+Suppose L is isomorphic to Number Field with defining polynomial x^2 - 5 over 
+the Rational Field.
+Then we get an obstruction at the prime 7.
+
+Suppose L is isomorphic to Number Field with defining polynomial x^2 + 7 over 
+the Rational Field.
+Then we get an obstruction at the prime 5.
+
+Suppose L is isomorphic to Number Field with defining polynomial x^2 + 35 over 
+the Rational Field.
+Then K tensor Q_5 must be isomorphic to one of 5 etale algebras: [
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^4 - 5 + O(5^500) over 
+5-adic field mod 5^500,
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^5 + (20 + O(5^500))*x + 5
++ O(5^500) over 5-adic field mod 5^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^5 + (5 + O(5^500))*x + 5 
++ O(5^500) over 5-adic field mod 5^500
+],
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500,
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^4 + 5 + O(5^500) over 
+5-adic field mod 5^500,
+Unramified extension defined by the polynomial x + 4 + O(5^500) over 5-adic 
+field mod 5^500
+],
+Etale algebra defined by product of [
+Totally ramified extension defined by the polynomial x^2 - 
+7562163376560103768839553261253425355844356357128396204413775192732957678448133\
+1558435639247119899303498746010200782488954208869211557551863781966051450446651\
+0958907384446326343307104794730113496824755316059308777501911905627778819120534\
+1806284553060348309893089938915656778534826483556974806177461639467907483532468\
+276360095868002820569860223208465 + O(5^500) over 5-adic field mod 5^500,
+Totally ramified extension defined by the polynomial x^6 + 5 + O(5^500) over 
+5-adic field mod 5^500
+]
+],
+and K tensor Q_7 must be isomorphic to one of 1 etale algebras: [
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 6 + O(7^500) over 7-adic 
+field mod 7^500,
+Totally ramified extension defined by the polynomial x^2 + 
+2988644510369713305624322206756471370804995080174590880304102771007851571276181\
+3531277487268538244720882157002600630826107409307046526980110438259010755982872\
+2978204133598567544145937504800941545418032499657567025456260522295211888160693\
+0710265874062070219435430107895140932590130999914660209960909884754210869140837\
+5463788133961972353167124813289921216116056352560995586214831439124291149474013\
+656784344293036490770189230 + O(7^500) over 7-adic field mod 7^500,
+Totally ramified extension defined by the polynomial x^5 + 7 + O(7^500) over 
+7-adic field mod 7^500
+]
+].
+
+done
+

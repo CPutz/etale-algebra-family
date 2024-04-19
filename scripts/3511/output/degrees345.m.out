@@ -1,0 +1,24 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+Loading "scripts/3511/local_covering_sets.dat"
+
+==================================================================
+We perform the computations from Proposition 5.22.
+==================================================================
+
+Loading "scripts/3511/fields_cubic_unramified_3_11_sig_1_1.dat"
+No cubic number fields unramified outside 3 and 11 and with
+signature (1,1) satisfies the local conditions at 3 and 11.
+
+Loading "scripts/3511/fields_quartic_unramified_3_11_sig_0_2.dat"
+No quartic number fields unramified outside 3 and 11 and with
+signature (0,2) satisfies the local conditions at 3 and 11.
+
+Loading "scripts/3511/fields_quintic_unramified_3_11_sig_1_2.dat"
+No quartic number fields unramified outside 3 and 11, with
+signature (0,2), and with absolute discriminant <= 793881
+satisfies the local conditions at 11.
+
+done

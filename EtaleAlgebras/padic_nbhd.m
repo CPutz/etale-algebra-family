@@ -341,7 +341,7 @@ intrinsic 'subset'(N1::PadNbhdElt, N2::PadNbhdElt) -> BoolElt
 	end if;
 
 	c := (c1 - c2) / r2;
-	r := r1 div r2;
+	r := r1 / r2;
 	vc := Valuation(c,p);
 	vr := Valuation(r,p);
 

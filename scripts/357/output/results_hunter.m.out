@@ -1,0 +1,52 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+Loading "scripts/357/results_hunter_raw.dat"
+Loading "scripts/357/local_covering_sets.dat"
+computing isomorphism classes of number fields
+
+---------- Number fields with discriminant -3^6*5^4*7^7 ----------
+Number Field with defining polynomial x^7 - 28*x^4 - 63*x^3 + 126*x^2 + 637*x + 
+342 over the Rational Field, Obstruction: [ 3 ]
+Number Field with defining polynomial x^7 - 21*x^5 - 336*x^2 + 1120*x - 864 over
+the Rational Field, Obstruction: [ 5 ]
+
+---------- Number fields with discriminant -3^6*5^6*7^5 ----------
+Number Field with defining polynomial x^7 - 6075 over the Rational Field, 
+Obstruction: []
+Number Field with defining polynomial x^7 - 483*x^2 + 3955*x - 3945 over the 
+Rational Field, Obstruction: []
+
+---------- Number fields with discriminant -3^6*5^6*7^7 ----------
+Number Field with defining polynomial x^7 - 35*x^4 + 2331*x^2 + 1015*x + 720 
+over the Rational Field, Obstruction: [ 2, 5 ]
+Number Field with defining polynomial x^7 - 75 over the Rational Field, 
+Obstruction: []
+Number Field with defining polynomial x^7 - 15 over the Rational Field, 
+Obstruction: []
+Number Field with defining polynomial x^7 - 675 over the Rational Field, 
+Obstruction: []
+Number Field with defining polynomial x^7 - 135 over the Rational Field, 
+Obstruction: []
+Number Field with defining polynomial x^7 - 315*x^3 - 630*x^2 - 1575*x - 5535 
+over the Rational Field, Obstruction: [ 3 ]
+Number Field with defining polynomial x^7 + 315*x^3 - 1260*x^2 + 1575*x - 675 
+over the Rational Field, Obstruction: [ 5 ]
+Number Field with defining polynomial x^7 + 840*x^3 - 6342*x^2 + 20580*x - 30375
+over the Rational Field, Obstruction: [ 5 ]
+Number Field with defining polynomial x^7 - 105*x^4 - 315*x^3 + 4410*x^2 + 
+9450*x - 20385 over the Rational Field, Obstruction: [ 3 ]
+Number Field with defining polynomial x^7 - 45 over the Rational Field, 
+Obstruction: []
+Number Field with defining polynomial x^7 - 210*x^4 - 945*x^3 - 4158*x^2 - 
+7560*x - 11880 over the Rational Field, Obstruction: [ 2, 3 ]
+Number Field with defining polynomial x^7 - 70*x^4 + 147*x^2 + 1190*x - 300 over
+the Rational Field, Obstruction: [ 5 ]
+Number Field with defining polynomial x^7 - 70*x^4 - 105*x^3 + 630*x^2 + 2800*x 
+- 7800 over the Rational Field, Obstruction: [ 2, 3 ]
+Number Field with defining polynomial x^7 - 35*x^4 - 105*x^3 - 294*x^2 - 980*x -
+1200 over the Rational Field, Obstruction: [ 5 ]
+Number Field with defining polynomial x^7 - 280*x^4 + 1680*x^3 - 2016*x^2 + 
+4480*x - 1920 over the Rational Field, Obstruction: [ 2, 5 ]
+done

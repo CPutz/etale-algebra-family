@@ -1,0 +1,27 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+
+==================================================================
+We perform the computations from Proposition 5.12.
+==================================================================
+
+Loading "scripts/257/covering_sets.dat"
+Possible local algebra(s) at 2: [
+Etale algebra defined by product of [
+Unramified extension defined by the polynomial x^3 + x + 1 + O(2^500) over 
+2-adic field mod 2^500,
+Unramified extension defined by the polynomial x^3 + x + 1 + O(2^500) over 
+2-adic field mod 2^500,
+Unramified extension defined by the polynomial x + 1 + O(2^500) over 2-adic 
+field mod 2^500,
+Unramified extension defined by the polynomial x + 1 + O(2^500) over 2-adic 
+field mod 2^500
+]
+]
+Valuation of possible local discriminants at 2: { 0 }
+Valuation of possible local discriminants at 5: { 4, 6 }
+Valuation of possible local discriminants at 7: { 5, 7 }
+
+done

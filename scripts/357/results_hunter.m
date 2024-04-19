@@ -49,8 +49,8 @@ function disc_to_string(d);
 	return s;
 end function;
 
-load "scripts/357/results_hunter_raw.m";
-load "scripts/357/local_covering_sets.m";
+load "scripts/357/results_hunter_raw.dat";
+load "scripts/357/local_covering_sets.dat";
 
 printf "computing isomorphism classes of number fields\n";
 Ks := [NumberField(f) : f in pols];
@@ -69,3 +69,6 @@ for d in discs do
 		printf "%o, Obstruction: %o\n", Ko, obstruction;
 	end for;
 end for;
+
+printf "done\n";
+quit;

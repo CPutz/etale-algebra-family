@@ -1,0 +1,70 @@
+--- Warning ---
+Page and theorem numbers mentioned below are currently not correct.
+---------------
+
+Loading "scripts/3511/local_covering_sets.dat"
+
+==================================================================
+We perform the computations for Proposition 5.18. 
+==================================================================
+
+------------------------------------------------------------------
+performing computations for the prime 2
+------------------------------------------------------------------
+
+valid and minimal covering set at the prime 2
+
+
+==================================================================
+We perform the computations for Proposition 5.12. 
+==================================================================
+
+------------------------------------------------------------------
+performing computations for the prime 3
+------------------------------------------------------------------
+
+case v3(a) = 4
+valid and minimal covering set when v3(a) = 4
+
+case v3(a) = 6
+valid and minimal covering set when v3(a) = 6
+
+case v3(a) = 7
+valid and minimal covering set when v3(a) = 7
+
+case v3(a) = 8
+valid and minimal covering set when v3(a) = 8
+
+case v3(a) = 10
+valid and minimal covering set when v3(a) = 10
+
+case v3(a) = 9
+valid and minimal covering set when v3(a) = 9
+
+case v3(b) = 3
+valid and minimal covering set when v3(b) = 3
+
+case v3(c) = 6
+valid and minimal covering set when v3(c) = 6
+
+------------------------------------------------------------------
+performing computations for the prime 5
+------------------------------------------------------------------
+
+case v5(b) = 4
+valid and minimal covering set when v5(b) = 4
+
+case v5(c) = 10
+valid and minimal covering set when v5(c) = 10
+
+------------------------------------------------------------------
+performing computations for the prime 11
+------------------------------------------------------------------
+
+case v11(a) = 8
+valid and minimal covering set when v11(a) = 8
+
+case v11(b) = 4
+valid and minimal covering set when v11(b) = 4
+
+done
