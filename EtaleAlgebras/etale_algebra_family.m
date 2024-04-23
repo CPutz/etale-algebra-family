@@ -202,13 +202,15 @@ Difference.}
 
 		if Type(B) eq FldRat then
 			pB := Prime(ParameterSpace);
+			QpB := pAdicField(pB);
 		else
 			pB := Ideal(Prime(ParameterSpace));
+			QpB := Completion(pB);
 		end if;
 		// The group B_p*/(B_p*)^k (where B_p is the ambient space of the parameter space)
-		KmKk,phik := pSelmerGroup(k, {pB});
+		KmKk,phik := pSelmerGroup(k, QpB);
 
-		Nbhds_oo cat:= [pAdicNbhd(ParameterSpace, B!r[1], (a@@phik) * pi_Par^v, k) : a in KmKk];
+		Nbhds_oo cat:= [pAdicNbhd(ParameterSpace, B!r[1], B!(a@@phik) * pi_Par^v, k) : a in KmKk];
 	end for;
 
 	min_val_s := Min([Valuation(cs,p) : cs in Coefficients(ct - Evaluate(ct, 0)), ct in Coefficients(F)]) / vpi_Par;
