@@ -12,103 +12,103 @@ We perform the computations for Proposition 3.43.
 computing isomorphism classes of number fields
 
 ---------- Number fields with discriminant -2^12*5^4*7^7 ----------
-Number Field with defining polynomial t^8 + 14*t^6 + 21*t^4 - 196*t^2 - 200*t - 
+Number Field with defining polynomial x^8 + 14*x^6 + 21*x^4 - 196*x^2 - 200*x - 
 504 over the Rational Field, Primitive: true, Obstruction: [ 5 ]
-Number Field with defining polynomial t^8 + 4*t^7 + 560*t^4 + 2800*t^3 + 
-5600*t^2 + 1600*t - 2000 over the Rational Field, Primitive: false, Obstruction:
+Number Field with defining polynomial x^8 + 4*x^7 + 560*x^4 + 2800*x^3 + 
+5600*x^2 + 1600*x - 2000 over the Rational Field, Primitive: false, Obstruction:
 [ 3, 5 ]
-Number Field with defining polynomial t^8 + 2*t^7 + 14*t^6 + 168*t^5 + 210*t^4 +
-672*t^3 + 224*t^2 + 128*t + 256 over the Rational Field, Primitive: false, 
+Number Field with defining polynomial x^8 + 2*x^7 + 14*x^6 + 168*x^5 + 210*x^4 +
+672*x^3 + 224*x^2 + 128*x + 256 over the Rational Field, Primitive: false, 
 Obstruction: [ 5 ]
-Number Field with defining polynomial t^8 + 4*t^7 - 28*t^6 - 168*t^5 + 140*t^4 +
-1680*t^3 + 1120*t^2 - 1600*t + 2000 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 + 4*x^7 - 28*x^6 - 168*x^5 + 140*x^4 +
+1680*x^3 + 1120*x^2 - 1600*x + 2000 over the Rational Field, Primitive: true, 
 Obstruction: [ 2, 5 ]
-Number Field with defining polynomial t^8 + 2*t^7 + 28*t^6 - 56*t^5 - 385*t^4 - 
-1022*t^3 - 1554*t^2 - 516*t - 178 over the Rational Field, Primitive: false, 
+Number Field with defining polynomial x^8 + 2*x^7 + 28*x^6 - 56*x^5 - 385*x^4 - 
+1022*x^3 - 1554*x^2 - 516*x - 178 over the Rational Field, Primitive: false, 
 Obstruction: [ 5 ]
-Number Field with defining polynomial t^8 - 490*t^4 + 672*t^3 + 1680*t^2 + 
-2400*t + 665 over the Rational Field, Primitive: true, Obstruction: [ 2, 5 ]
+Number Field with defining polynomial x^8 - 490*x^4 + 672*x^3 + 1680*x^2 + 
+2400*x + 665 over the Rational Field, Primitive: true, Obstruction: [ 2, 5 ]
 
 ---------- Number fields with discriminant -2^12*5^6*7^5 ----------
-Number Field with defining polynomial t^8 - 1600*t + 2800 over the Rational 
+Number Field with defining polynomial x^8 - 1600*x + 2800 over the Rational 
 Field, Primitive: true, Obstruction: [ 5 ]
-Number Field with defining polynomial t^8 + 4*t^7 + 140*t^4 + 800*t + 400 over 
+Number Field with defining polynomial x^8 + 4*x^7 + 140*x^4 + 800*x + 400 over 
 the Rational Field, Primitive: true, Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 + 8*t^6 - 96*t^5 + 270*t^4 - 608*t^3 +
-520*t^2 + 576*t + 113 over the Rational Field, Primitive: true, Obstruction: [ 2
+Number Field with defining polynomial x^8 + 8*x^6 - 96*x^5 + 270*x^4 - 608*x^3 +
+520*x^2 + 576*x + 113 over the Rational Field, Primitive: true, Obstruction: [ 2
 ]
 
 ---------- Number fields with discriminant -2^12*5^6*7^7 ----------
-Number Field with defining polynomial t^8 + 4*t^7 + 42*t^6 + 112*t^5 + 595*t^4 +
-1008*t^3 + 1162*t^2 + 676*t - 24799 over the Rational Field, Primitive: false, 
+Number Field with defining polynomial x^8 + 4*x^7 + 42*x^6 + 112*x^5 + 595*x^4 +
+1008*x^3 + 1162*x^2 + 676*x - 24799 over the Rational Field, Primitive: false, 
 Obstruction: []
-Number Field with defining polynomial t^8 + 4*t^7 - 168*t^5 - 1820*t^4 - 
-5488*t^3 - 10752*t^2 - 10400*t - 6096 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 + 4*x^7 - 168*x^5 - 1820*x^4 - 
+5488*x^3 - 10752*x^2 - 10400*x - 6096 over the Rational Field, Primitive: true, 
 Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 + 4*t^7 + 140*t^5 + 350*t^4 - 196*t^3 
-- 784*t^2 - 780*t - 4415 over the Rational Field, Primitive: false, Obstruction:
+Number Field with defining polynomial x^8 + 4*x^7 + 140*x^5 + 350*x^4 - 196*x^3 
+- 784*x^2 - 780*x - 4415 over the Rational Field, Primitive: false, Obstruction:
 []
-Number Field with defining polynomial t^8 + 4*t^7 + 140*t^5 - 770*t^4 + 4284*t^3
-- 9744*t^2 + 5380*t - 915 over the Rational Field, Primitive: false, 
+Number Field with defining polynomial x^8 + 4*x^7 + 140*x^5 - 770*x^4 + 4284*x^3
+- 9744*x^2 + 5380*x - 915 over the Rational Field, Primitive: false, 
 Obstruction: [ 3 ]
-Number Field with defining polynomial t^8 + 4*t^7 - 224*t^3 - 896*t^2 - 1280*t -
+Number Field with defining polynomial x^8 + 4*x^7 - 224*x^3 - 896*x^2 - 1280*x -
 640 over the Rational Field, Primitive: true, Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 + 4*t^7 - 28*t^6 - 28*t^5 + 70*t^4 + 
-308*t^3 + 3052*t^2 - 5644*t + 7741 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 + 4*x^7 - 28*x^6 - 28*x^5 + 70*x^4 + 
+308*x^3 + 3052*x^2 - 5644*x + 7741 over the Rational Field, Primitive: true, 
 Obstruction: [ 5 ]
-Number Field with defining polynomial t^8 + 4*t^7 + 112*t^5 + 560*t^4 + 1120*t^3
-+ 4480*t^2 - 21920*t + 16480 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 + 4*x^7 + 112*x^5 + 560*x^4 + 1120*x^3
++ 4480*x^2 - 21920*x + 16480 over the Rational Field, Primitive: true, 
 Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 + 28*t^6 - 56*t^5 + 350*t^4 - 1456*t^3
-+ 2380*t^2 - 9688*t + 441 over the Rational Field, Primitive: true, Obstruction:
+Number Field with defining polynomial x^8 + 28*x^6 - 56*x^5 + 350*x^4 - 1456*x^3
++ 2380*x^2 - 9688*x + 441 over the Rational Field, Primitive: true, Obstruction:
 [ 2, 5 ]
-Number Field with defining polynomial t^8 - 70*t^5 - 1575*t^4 + 350*t^3 + 
-28350*t^2 - 10500*t + 1750 over the Rational Field, Primitive: false, 
+Number Field with defining polynomial x^8 - 70*x^5 - 1575*x^4 + 350*x^3 + 
+28350*x^2 - 10500*x + 1750 over the Rational Field, Primitive: false, 
 Obstruction: [ 3 ]
 
 ---------- Number fields with discriminant -2^14*5^4*7^7 ----------
-Number Field with defining polynomial t^8 + 2*t^7 - 280*t^4 - 1400*t^3 - 
-1400*t^2 + 800*t + 1250 over the Rational Field, Primitive: false, Obstruction: 
+Number Field with defining polynomial x^8 + 2*x^7 - 280*x^4 - 1400*x^3 - 
+1400*x^2 + 800*x + 1250 over the Rational Field, Primitive: false, Obstruction: 
 [ 5 ]
-Number Field with defining polynomial t^8 + 2*t^7 - 308*t^3 - 1596*t^2 - 3260*t 
+Number Field with defining polynomial x^8 + 2*x^7 - 308*x^3 - 1596*x^2 - 3260*x 
 - 2950 over the Rational Field, Primitive: false, Obstruction: [ 5 ]
-Number Field with defining polynomial t^8 + 2*t^7 + 28*t^6 - 56*t^5 + 560*t^4 + 
-588*t^3 - 1764*t^2 - 936*t + 1502 over the Rational Field, Primitive: false, 
+Number Field with defining polynomial x^8 + 2*x^7 + 28*x^6 - 56*x^5 + 560*x^4 + 
+588*x^3 - 1764*x^2 - 936*x + 1502 over the Rational Field, Primitive: false, 
 Obstruction: [ 3, 5 ]
 
 ---------- Number fields with discriminant -2^14*5^6*7^5 ----------
-Number Field with defining polynomial t^8 + 4*t^7 + 560*t^4 + 2800*t^3 + 
-4480*t^2 + 1600*t - 2000 over the Rational Field, Primitive: true, Obstruction: 
+Number Field with defining polynomial x^8 + 4*x^7 + 560*x^4 + 2800*x^3 + 
+4480*x^2 + 1600*x - 2000 over the Rational Field, Primitive: true, Obstruction: 
 [ 2 ]
 
 ---------- Number fields with discriminant -2^14*5^6*7^7 ----------
-Number Field with defining polynomial t^8 - 28*t^6 - 168*t^5 - 490*t^4 - 784*t^3
-- 700*t^2 - 8*t - 63 over the Rational Field, Primitive: true, Obstruction: [ 2 
+Number Field with defining polynomial x^8 - 28*x^6 - 168*x^5 - 490*x^4 - 784*x^3
+- 700*x^2 - 8*x - 63 over the Rational Field, Primitive: true, Obstruction: [ 2 
 ]
-Number Field with defining polynomial t^8 + 672*t^3 + 840*t^2 + 1120*t + 4900 
+Number Field with defining polynomial x^8 + 672*x^3 + 840*x^2 + 1120*x + 4900 
 over the Rational Field, Primitive: true, Obstruction: []
-Number Field with defining polynomial t^8 + 490*t^4 + 840*t^2 - 175 over the 
+Number Field with defining polynomial x^8 + 490*x^4 + 840*x^2 - 175 over the 
 Rational Field, Primitive: false, Obstruction: []
-Number Field with defining polynomial t^8 - 280*t^2 - 700 over the Rational 
+Number Field with defining polynomial x^8 - 280*x^2 - 700 over the Rational 
 Field, Primitive: false, Obstruction: []
-Number Field with defining polynomial t^8 + 4*t^7 - 56*t^6 - 280*t^5 + 672*t^3 +
-448*t^2 - 192*t - 320 over the Rational Field, Primitive: true, Obstruction: [ 2
+Number Field with defining polynomial x^8 + 4*x^7 - 56*x^6 - 280*x^5 + 672*x^3 +
+448*x^2 - 192*x - 320 over the Rational Field, Primitive: true, Obstruction: [ 2
 ]
-Number Field with defining polynomial t^8 + 4*t^7 - 56*t^6 - 504*t^5 - 1960*t^4 
-- 3024*t^3 + 2464*t^2 - 416*t + 16 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 + 4*x^7 - 56*x^6 - 504*x^5 - 1960*x^4 
+- 3024*x^3 + 2464*x^2 - 416*x + 16 over the Rational Field, Primitive: true, 
 Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 + 4*t^7 - 70*t^4 + 84*t^3 + 56*t^2 - 
-80*t + 345 over the Rational Field, Primitive: false, Obstruction: [ 3 ]
-Number Field with defining polynomial t^8 + 4*t^7 + 280*t^5 + 280*t^4 + 2800*t^2
-- 1600*t + 4800 over the Rational Field, Primitive: true, Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 - 28*t^6 - 112*t^5 - 210*t^4 + 
-4256*t^3 + 4340*t^2 + 21072*t - 31367 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 + 4*x^7 - 70*x^4 + 84*x^3 + 56*x^2 - 
+80*x + 345 over the Rational Field, Primitive: false, Obstruction: [ 3 ]
+Number Field with defining polynomial x^8 + 4*x^7 + 280*x^5 + 280*x^4 + 2800*x^2
+- 1600*x + 4800 over the Rational Field, Primitive: true, Obstruction: [ 2 ]
+Number Field with defining polynomial x^8 - 28*x^6 - 112*x^5 - 210*x^4 + 
+4256*x^3 + 4340*x^2 + 21072*x - 31367 over the Rational Field, Primitive: true, 
 Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 - 28*t^6 - 112*t^5 + 350*t^4 + 
-3808*t^3 + 12180*t^2 + 35216*t + 5929 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 - 28*x^6 - 112*x^5 + 350*x^4 + 
+3808*x^3 + 12180*x^2 + 35216*x + 5929 over the Rational Field, Primitive: true, 
 Obstruction: [ 2 ]
-Number Field with defining polynomial t^8 - 28*t^6 - 112*t^5 + 630*t^4 + 
-1568*t^3 - 2940*t^2 - 24944*t + 49329 over the Rational Field, Primitive: true, 
+Number Field with defining polynomial x^8 - 28*x^6 - 112*x^5 + 630*x^4 + 
+1568*x^3 - 2940*x^2 - 24944*x + 49329 over the Rational Field, Primitive: true, 
 Obstruction: [ 2 ]
 
 done

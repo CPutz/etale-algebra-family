@@ -27,11 +27,6 @@ Nbhds := Data(K2);
 X := Universe(Nbhds);
 K := AmbientSpace(X);
 
-{ N : N in Nbhds |
-	not (N subset pAdicNbhd(X, K!1 + 3*2^2, K!2^5, 1) or N subset pAdicNbhd(X, K!1, 7*K!2^2, 2) or
-	(N subset Invert(pAdicNbhd(X, K!0, K!2^7, 1)) and not N subset Invert(pAdicNbhd(X, K!0, K!2^14, 1))))
-	where K := AmbientSpace(X) where X := Parent(N)};
-
 //2 | y and (eta(x) = 13 mod 32 or z = 7 (mod 8))  or 2 || z
 assert forall { N : N in Nbhds |
 	N subset pAdicNbhd(X, K!1 + 3*2^2, K!2^5, 1) or N subset pAdicNbhd(X, K!1, 7*K!2^2, 2) or

@@ -46,12 +46,12 @@ printf "performing computations for v_p(a) > 0 (Table 6.9)\n";
 printf "------------------------------------------------------------------\n";
 
 rams_0 := [];
-for p in [3, 5, 11] do
+for p in [3,5,11] do
 	rams := [];
 	printf "p = %o:", p;
 	for a := 1 to 10 do
 		if p eq 11 and a mod 5 eq 3 then
-			prec := 2000;
+			prec := 3000;
 		else
 			prec := 800;
 		end if;

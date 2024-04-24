@@ -101,7 +101,12 @@ intrinsic EtaleAlgebras3511Coeff(p::RngIntElt, a::RngIntElt, b::RngIntElt, c::Rn
 	if vabc eq 0 or va gt 0 then
 		minvalx := va eq 0 select 5 else va;
 		Par := pAdicNbhdSpace(Rationals(), p : MinVal := minvalx, CongrVal := Integers(5)!va);
-		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := 1000, BoundMethod := "Difference");
+		if p eq 11 then
+			prec := 3000;
+		else
+			prec := 1000;
+		end if;
+		E1 := EtaleAlgebraFamily(phi - s, p : ParameterSpace := Par, D := D, Precision := prec, BoundMethod := "Difference");
 	end if;
 
 	if vabc eq 0 or vb gt 0 then
