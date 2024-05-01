@@ -1,8 +1,8 @@
 # etale-algebra-family
 
-This is a package in Magma for computing isomorphism classes of local étale algebras parametrized by one variable.
+This is a package in Magma for computing isomorphism classes of local étale algebras parametrized by one variable. This package accompanies the PhD thesis **[ref]**.
 
-More precisely, let $K$ be a number field and let $\mathfrak p$ be a finite place of $K$. Write $K_{\mathfrak p}$ for the completion of $K$ at $\mathfrak p$. Let $F\in \mathcal O_K[s,t]$ with $\deg_s(F) = 1$. Moreover, let $\mathcal A\subseteq\mathcal O_K$. This package provides an algorithm for computing the isomorphism classes of étale $\mathbb Z_3$-algebras attained by
+For a more precise description, let $K$ be a number field and let $\mathfrak p$ be a finite place of $K$. Write $K_{\mathfrak p}$ for the completion of $K$ at $\mathfrak p$. Let $F\in \mathcal O_K[s,t]$ with $\deg_s(F) = 1$. Moreover, let $\mathcal A\subseteq\mathcal O_K$. This package provides an algorithm for computing the isomorphism classes of étale $\mathbb Z_3$-algebras attained by
 $$K_{\mathfrak p}[t] / (F(s_0,t))$$
 where $s_0$ ranges over $\mathcal A$ (and for which $F(s_0,t)$ is separable).
 
@@ -45,7 +45,7 @@ O(3^50) over Unramified extension defined by a map over 3-adic field mod 3^50
 ]
 ```
 
-This shows that $\mathbb Z_3[t] / (t^3 - s_0(t-2))$ attains $14$ distinct isomorphism classes for $s_0\in\mathbb Z_3$ (for which $t^3 - s_0(t-2)$ is also separable). For instance, we have
+This output above shows that $\mathbb Z_3[t] / (t^3 - s_0(t-2))$ attains $14$ distinct isomorphism classes for $s_0\in\mathbb Z_3$ (for which $t^3 - s_0(t-2)$ is also separable). For instance, we have
 $$\mathbb Z_3[t] / (t^3 - s_0(t-2)) \cong \mathbb Z_3[t] / (t^3 + 2t + 1)$$
 if and only if $s_0\in 1 + 3\mathbb Z_3$ or $s_0\in 756 + 2187\mathbb Z_3$.
 
@@ -54,7 +54,7 @@ if and only if $s_0\in 1 + 3\mathbb Z_3$ or $s_0\in 756 + 2187\mathbb Z_3$.
 More code examples can be found in [examples](examples).
 
 
-## Package contents
+## Contents
 
 We give a quick description of the contents of this Magma package.
 
@@ -65,7 +65,7 @@ We give a quick description of the contents of this Magma package.
 	+ [separant.m](EtaleAlgebras/separant.m): Computing separants of polynomials over local fields, and other related expressions involving the roots of a polynomial over a local field.
 	+ [tschirnhaus.m](EtaleAlgebras/tschirnhaus.m): Computing Tschirnhaus transformations of defining polynomials of an étale algebra over a local field.
 	+ [utils.m](EtaleAlgebras/utils.m): Contains some miscellaneous functions.
-* [GFE](GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures.
+* [GFE](GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures. See **[ref]** for 
 	+ [257.m](GFE/257.m): Functions for the degree $8$ Belyi map corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
 	+ [257_relative.m](GFE/257_relative.m): Functions for the degree $7$ Belyi map (over $\mathbb{Q} {(}\sqrt{21}{)}$) corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
 	+ [3511.m](GFE/3511.m): Functions for the degree $11$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,11)$ (or permutations thereof).
