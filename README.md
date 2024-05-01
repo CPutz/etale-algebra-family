@@ -66,10 +66,10 @@ We give a quick description of the contents of this Magma package.
 	+ [tschirnhaus.m](EtaleAlgebras/tschirnhaus.m): Computing Tschirnhaus transformations of defining polynomials of an étale algebra over a local field.
 	+ [utils.m](EtaleAlgebras/utils.m): Contains some miscellaneous functions.
 * [GFE](GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures.
-	+ [257.m](GFE/257.m): Functions for the degree 8 Belyi map corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
-	+ [257_relative.m](GFE/257_relative.m): Functions for the degree 7 Belyi map (over $\mathbb Q(\sqrt{21})$) corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
-	+ [3511.m](GFE/3511.m): Functions for the degree 11 Belyi map corresponding to the generalized Fermat equation of signature $(3,5,11)$ (or permutations thereof).
-	+ [357.m](GFE/357.m): Functions for the degree 7 Belyi map corresponding to the generalized Fermat equation of signature $(3,5,7)$ (or permutations thereof).
+	+ [257.m](GFE/257.m): Functions for the degree $8$ Belyi map corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
+	+ [257_relative.m](GFE/257_relative.m): Functions for the degree $7$ Belyi map (over $\mathbb{Q}(\sqrt{21})$) corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
+	+ [3511.m](GFE/3511.m): Functions for the degree $11$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,11)$ (or permutations thereof).
+	+ [357.m](GFE/357.m): Functions for the degree $7$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,7)$ (or permutations thereof).
 * [LocalFields](LocalFields): Contains some useful functionality for finite extensions of $p$-adic fields.
 	+ [local_field_database.m](LocalField/local_field_database.m): Implements a data structure for pre-computed databases of $p$-adic fields. In particular, it contains LMFDB data for degree $8$ extensions of $\mathbb Q_2$ and degree $10$ extensions of $\mathbb Q_5$.
 	+ [subfields.m](LocalFields/subfields.m): Functions for computing the subfields of a $p$-adic field.
