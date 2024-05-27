@@ -1,6 +1,6 @@
 # etale-algebra-family
 
-This is a package in Magma for computing isomorphism classes of local étale algebras parametrized by one variable. This package accompanies the PhD thesis **[ref]**.
+This is a package in Magma for computing isomorphism classes of local étale algebras parametrized by one variable. This package accompanies the PhD thesis \[1\].
 
 For a more precise description, let $K$ be a number field and let $\mathfrak p$ be a finite place of $K$. Write $K_{\mathfrak p}$ for the completion of $K$ at $\mathfrak p$. Let $F\in \mathcal O_K[s,t]$ with $\deg_s(F) = 1$. Moreover, let $\mathcal A\subseteq\mathcal O_K$. This package provides an algorithm for computing the isomorphism classes of étale $\mathbb Z_3$-algebras attained by
 $$K_{\mathfrak p}[t] / (F(s_0,t))$$
@@ -61,11 +61,11 @@ We give a quick description of the contents of this Magma package.
 * [EtaleAlgebras](EtaleAlgebras): This folder contains the main functionality for working with étale algebras and polynomials over local fields. We give a quick description for every file.
 	+ [etale_algebra.m](EtaleAlgebras/etale_algebra.m): Implementation of étale algebras over a local field.
 	+ [etale_algebra_family.m](EtaleAlgebras/etale_algebra_family.m): Implements the main function `EtaleAlgebraFamily`, which can compute isomorphism classes of étale algebras parametrized by a one-variable family
-	+ [padic_nbhd.m](EtaleAlgebras/padic_nbhd.m): Implements p-adic parameter spaces.
+	+ [padic_nbhd.m](EtaleAlgebras/padic_nbhd.m): Implements $p$-adic parameter spaces.
 	+ [separant.m](EtaleAlgebras/separant.m): Computing separants of polynomials over local fields, and other related expressions involving the roots of a polynomial over a local field.
 	+ [tschirnhaus.m](EtaleAlgebras/tschirnhaus.m): Computing Tschirnhaus transformations of defining polynomials of an étale algebra over a local field.
 	+ [utils.m](EtaleAlgebras/utils.m): Contains some miscellaneous functions.
-* [GFE](GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures. See **[ref]** for 
+* [GFE](GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures. See \[1\] for 
 	+ [257.m](GFE/257.m): Functions for the degree $8$ Belyi map corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
 	+ [257_relative.m](GFE/257_relative.m): Functions for the degree $7$ Belyi map (over $\mathbb{Q} {(}\sqrt{21}{)}$) corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
 	+ [3511.m](GFE/3511.m): Functions for the degree $11$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,11)$ (or permutations thereof).
@@ -79,5 +79,5 @@ We give a quick description of the contents of this Magma package.
 
 ## References
 
-**[ref]**
+\[1\] Casper Putz. \`Enumeration of local and global étale algebras applied to generalized Fermat equations\`. PhD thesis. Vrije universiteit Amsterdam, 2024 - to be submitted
 
