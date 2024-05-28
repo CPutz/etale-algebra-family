@@ -51,30 +51,30 @@ if and only if $s_0\in 1 + 3\mathbb Z_3$ or $s_0\in 756 + 2187\mathbb Z_3$.
 
 **example with parameter space**
 
-More code examples can be found in [examples](https://github.com/CPutz/etale-algebra-family/tree/main/examples).
+More code examples can be found in [examples](https://github.com/CPutz/etale-algebra-family/tree/master/examples).
 
 
 ## Contents
 
 We give a quick description of the contents of this Magma package.
 
-* [EtaleAlgebras](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras): This folder contains the main functionality for working with étale algebras and polynomials over local fields. We give a quick description for every file.
-	+ [etale_algebra.m](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras/etale_algebra.m): Implementation of étale algebras over a local field.
-	+ [etale_algebra_family.m](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras/etale_algebra_family.m): Implements the main function `EtaleAlgebraFamily`, which can compute isomorphism classes of étale algebras parametrized by a one-variable family
-	+ [padic_nbhd.m](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras/padic_nbhd.m): Implements $p$-adic parameter spaces.
-	+ [separant.m](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras/separant.m): Computing separants of polynomials over local fields, and other related expressions involving the roots of a polynomial over a local field.
-	+ [tschirnhaus.m](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras/tschirnhaus.m): Computing Tschirnhaus transformations of defining polynomials of an étale algebra over a local field.
-	+ [utils.m](https://github.com/CPutz/etale-algebra-family/tree/main/EtaleAlgebras/utils.m): Contains some miscellaneous functions.
-* [GFE](https://github.com/CPutz/etale-algebra-family/tree/main/GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures. See \[1\] for 
-	+ [257.m](https://github.com/CPutz/etale-algebra-family/tree/main/GFE/257.m): Functions for the degree $8$ Belyi map corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
-	+ [257_relative.m](https://github.com/CPutz/etale-algebra-family/tree/main/GFE/257_relative.m): Functions for the degree $7$ Belyi map (over $\mathbb{Q} {(}\sqrt{21}{)}$) corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
-	+ [3511.m](https://github.com/CPutz/etale-algebra-family/tree/main/GFE/3511.m): Functions for the degree $11$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,11)$ (or permutations thereof).
-	+ [357.m](https://github.com/CPutz/etale-algebra-family/tree/main/GFE/357.m): Functions for the degree $7$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,7)$ (or permutations thereof).
-* [LocalFields](https://github.com/CPutz/etale-algebra-family/tree/main/LocalFields): Contains some useful functionality for finite extensions of $p$-adic fields.
-	+ [local_field_database.m](https://github.com/CPutz/etale-algebra-family/tree/main/LocalField/local_field_database.m): Implements a data structure for pre-computed databases of $p$-adic fields. In particular, it contains LMFDB data for degree $8$ extensions of $\mathbb Q_2$ and degree $10$ extensions of $\mathbb Q_5$.
-	+ [subfields.m](https://github.com/CPutz/etale-algebra-family/tree/main/LocalFields/subfields.m): Functions for computing the subfields of a $p$-adic field.
-* [examples](https://github.com/CPutz/etale-algebra-family/tree/main/examples): This folder contains some code examples using this package.
-* [scripts](https://github.com/CPutz/etale-algebra-family/tree/main/scripts): This folder contains various Magma scripts used for the computations in \[1\].
+* [EtaleAlgebras](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras): This folder contains the main functionality for working with étale algebras and polynomials over local fields. We give a quick description for every file.
+	+ [etale_algebra.m](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras/etale_algebra.m): Implementation of étale algebras over a local field.
+	+ [etale_algebra_family.m](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras/etale_algebra_family.m): Implements the main function `EtaleAlgebraFamily`, which can compute isomorphism classes of étale algebras parametrized by a one-variable family
+	+ [padic_nbhd.m](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras/padic_nbhd.m): Implements $p$-adic parameter spaces.
+	+ [separant.m](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras/separant.m): Computing separants of polynomials over local fields, and other related expressions involving the roots of a polynomial over a local field.
+	+ [tschirnhaus.m](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras/tschirnhaus.m): Computing Tschirnhaus transformations of defining polynomials of an étale algebra over a local field.
+	+ [utils.m](https://github.com/CPutz/etale-algebra-family/tree/master/EtaleAlgebras/utils.m): Contains some miscellaneous functions.
+* [GFE](https://github.com/CPutz/etale-algebra-family/tree/master/GFE): This folder contains functions for computing étale algebras arising from Belyi maps and generalized Fermat equations of various signatures. See \[1\] for 
+	+ [257.m](https://github.com/CPutz/etale-algebra-family/tree/master/GFE/257.m): Functions for the degree $8$ Belyi map corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
+	+ [257_relative.m](https://github.com/CPutz/etale-algebra-family/tree/master/GFE/257_relative.m): Functions for the degree $7$ Belyi map (over $\mathbb{Q} {(}\sqrt{21}{)}$) corresponding to the generalized Fermat equation of signature $(2,5,7)$ (or permutations thereof).
+	+ [3511.m](https://github.com/CPutz/etale-algebra-family/tree/master/GFE/3511.m): Functions for the degree $11$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,11)$ (or permutations thereof).
+	+ [357.m](https://github.com/CPutz/etale-algebra-family/tree/master/GFE/357.m): Functions for the degree $7$ Belyi map corresponding to the generalized Fermat equation of signature $(3,5,7)$ (or permutations thereof).
+* [LocalFields](https://github.com/CPutz/etale-algebra-family/tree/master/LocalFields): Contains some useful functionality for finite extensions of $p$-adic fields.
+	+ [local_field_database.m](https://github.com/CPutz/etale-algebra-family/tree/master/LocalField/local_field_database.m): Implements a data structure for pre-computed databases of $p$-adic fields. In particular, it contains LMFDB data for degree $8$ extensions of $\mathbb Q_2$ and degree $10$ extensions of $\mathbb Q_5$.
+	+ [subfields.m](https://github.com/CPutz/etale-algebra-family/tree/master/LocalFields/subfields.m): Functions for computing the subfields of a $p$-adic field.
+* [examples](https://github.com/CPutz/etale-algebra-family/tree/master/examples): This folder contains some code examples using this package.
+* [scripts](https://github.com/CPutz/etale-algebra-family/tree/master/scripts): This folder contains various Magma scripts used for the computations in \[1\].
 
 
 ## References
