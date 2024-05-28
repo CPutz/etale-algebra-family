@@ -141,7 +141,7 @@ for P in EQ do
 	for p in good_pts do
 		assert
 			Evaluate(x^2 - 7/20*x + 7/80, p[1] / p[3]) eq 0 and
-			Evaluate(x^2 - 7/20*x + 7/80, p[2] / p[3]) eq 0; 
+			Evaluate(x^2 - 7/20*x + 7/80, p[2] / p[3]) eq 0;
 	end for;
 end for;
 
