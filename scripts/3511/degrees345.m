@@ -1,10 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);
 	C2 := Components(E2);
@@ -32,7 +28,7 @@ U3 := &cat[U3_va4, U3_va6, U3_va_7_8_10, U3_va9, U3_vb3, U3_vc6];
 U11 := &cat[U11_va8, U11_vb4];
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 5.22.\n";
+printf "We perform the computations from Proposition 5.25.\n";
 printf "==================================================================\n\n";
 
 //load cubic number fields unramified outside 3 and 11 and of signature (1,1)

@@ -1,14 +1,10 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 load "scripts/257/covering_sets.dat";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Theorem 5.29.\n";
+printf "We perform the computations from Theorem 4.34.\n";
 printf "==================================================================\n\n";
 
 R<t> := PolynomialRing(Rationals());

@@ -1,11 +1,7 @@
 // Load this file from the main folder
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 printf "\n==================================================================\n";
-printf "We construct the curves and maps from page 126.\n";
+printf "We construct the curves and maps at the start of Section 4.3.2.\n";
 printf "==================================================================\n\n";
 
 QQ := Rationals();
@@ -149,24 +145,12 @@ printf "The points of E(Q) lift to (affine) C(L) only if L contain Q(sqrt{-91}).
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 4.19.\n";
+printf "We perform the computations from Proposition 4.20.\n";
 printf "==================================================================\n\n";
 
 L<a> := NumberField(x^7 - 5);
 
 EL := BaseChange(E,L);
-/*p1 := EL!E1toE(
-	E1(L)![4*a^6 - a^5 - 4*a^4 + 4*a^3 + 4*a^2 - 5*a + 6,
-		-15*a^6 - 12*a^5 + 24*a^4 - 6*a^3 - 51*a^2 + 25*a + 55,
-		1]);
-p2 := EL!E1toE(
-	E1(L)![33*a^6 + 4*a^5 + 34*a^4 - 19*a^3 + 3*a^2 + 22*a - 9,
-		119*a^6 - 28*a^5 + 56*a^4 - 91*a^3 + 77*a^2 + 154*a + 105,
-		a^5 + 5*a^4 - 2*a^2 + a - 4]);
-p3 := EL!E1toE(
-	E1(L)![-42*a^6 - 21*a^5 + 77*a^4 - 98*a^2 + 91*a + 133,
-		21*a^6 - 35*a^5 - 56*a^4 - 28*a^2 - 70*a + 70,
-		8*a^6 + 2*a^5 - 20*a^4 + 24*a^2 - 19*a - 32]);*/
 
 p1 := EL![
     1375 - 4625*a + 10625*a^2 - 10125*a^3 + 4275*a^4 + 400*a^5 - 1075*a^6,
@@ -183,9 +167,9 @@ p3 := EL![
 
 
 //rank_bound := RankBound(EL);
-rank_bound := 3;
-
-assert rank_bound eq 3;
+//assert rank_bound eq 3;
+S2 := TwoSelmerGroup(EL);
+assert Order(S2) eq 16; //implies rank <= 3
 
 gens := [p1,p2,p3];
 assert IsLinearlyIndependent(gens);
@@ -201,7 +185,7 @@ assert SequenceToSet(Saturation([EL!p : p in gens], 3)) eq SequenceToSet(gens);
 printf "The subgroup is saturated at 2 and 3\n";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 4.20.\n";
+printf "We perform the computations from Proposition 4.21.\n";
 printf "==================================================================\n\n";
 
 A := AbelianGroup([Order(g) : g in gens]);
@@ -221,7 +205,7 @@ assert pts_EL eq { EL![0,0,1], EL![0,1,0] };
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 4.23.\n";
+printf "We perform the computations from Proposition 4.24.\n";
 printf "==================================================================\n\n";
 
 M := NumberField(x^3 + 4*x^2 + 14*x + 70); //generates 25x^3 + 20x^2 + 14x + 14
@@ -265,7 +249,7 @@ assert forall { p : p in pts_EL |
 printf "All points of E(L) - E(Q) map to (0 : 1) under Φ_E.\n";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 4.30.\n";
+printf "We perform the computations from Proposition 4.31.\n";
 printf "==================================================================\n\n";
 
 L := NumberField(x^4 - 2*x^3 - 2*x^2 - 4*x - 10);

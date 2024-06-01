@@ -1,10 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 // Returns whether L is contained in U up to isomorphsim
 function valid_covering_set(U,L);
 	return forall (E) {E : E in L |
@@ -14,9 +10,9 @@ end function;
 load "scripts/257/covering_sets.dat";
 
 printf "\n==================================================================\n";
-printf "We perform the computations for Theorem 5.6. We verify that the\n";
+printf "We perform the computations for Theorem 4.6. We verify that the\n";
 printf "local covering sets as defined in the file covering_sets.m\n";
-printf "(which correspond to the sets given in Theorem 5.6) are correct\n";
+printf "(which correspond to the sets given in Theorem 4.6) are correct\n";
 printf "and are minimal.\n";
 printf "==================================================================\n\n";
 

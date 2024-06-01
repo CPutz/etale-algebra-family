@@ -1,10 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 Z := Integers();
 
 //the string length of the minimal polynomial of K
@@ -51,6 +47,10 @@ end function;
 
 load "scripts/357/results_hunter_raw.dat";
 load "scripts/357/local_covering_sets.dat";
+
+printf "\n==================================================================\n";
+printf "We perform the computations for Proposition 3.49. \n";
+printf "==================================================================\n\n";
 
 printf "computing isomorphism classes of number fields\n";
 Ks := [NumberField(f) : f in pols];

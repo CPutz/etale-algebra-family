@@ -1,10 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 function to_list(rs);
 	if rs eq [-1] then
 		return "?";
@@ -36,11 +32,11 @@ procedure print_rams(v, ps, rams);
 end procedure;
 
 printf "\n==================================================================\n";
-
+printf "We perform the computations from Table 6.3.\n";
 printf "==================================================================\n\n";
 
 printf "\n------------------------------------------------------------------\n";
-
+printf "performing computations for 1 <= v_p(a) <= 10 and p = 3,5,7\n";
 printf "------------------------------------------------------------------\n";
 
 rams_0 := [];
@@ -61,8 +57,8 @@ printf "\nResult:\n";
 print_rams("a", [3,5,7], rams_0);
 
 printf "\n------------------------------------------------------------------\n";
-
-printf "------------------------------------------------------------------\n\n";
+printf "performing computations for 1 <= v_p(b) <= 6 and p = 3,5,7\n";
+printf "------------------------------------------------------------------\n";
 
 rams_1 := [];
 for p in [3,5,7] do
@@ -82,8 +78,8 @@ printf "\nResult:\n";
 print_rams("b", [3,5,7], rams_1);
 
 printf "\n------------------------------------------------------------------\n";
-
-printf "------------------------------------------------------------------\n\n";
+printf "performing computations for 1 <= v_p(c) <= 9 and p = 3,5,7\n";
+printf "------------------------------------------------------------------\n";
 
 rams_oo := [];
 for p in [3,5,7] do

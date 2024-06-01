@@ -14,7 +14,7 @@ end function;
 load "scripts/3511/local_covering_sets.dat";
 
 printf "\n==================================================================\n";
-printf "We perform the computations for Proposition 5.18. \n";
+printf "We perform the computations for Proposition 5.20. \n";
 printf "==================================================================\n\n";
 
 printf "------------------------------------------------------------------\n";
@@ -28,7 +28,7 @@ printf "valid and minimal covering set at the prime 2\n\n";
 
 
 printf "\n==================================================================\n";
-printf "We perform the computations for Proposition 5.12. \n";
+printf "We perform the computations for Proposition 5.14. \n";
 printf "==================================================================\n\n";
 
 printf "------------------------------------------------------------------\n";

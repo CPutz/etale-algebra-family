@@ -182,9 +182,6 @@ intrinsic EtaleAlgebras3511CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngI
 		for a in [2..(p-1)] do
 			F0 := phi - (a + p*s);
 			E0 := EtaleAlgebraFamily(F0, p : D := D, Precision := Precision, CalcIso := false, BoundMethod := "Difference");
-			for i := 1 to #E0 do
-				SetData(~E0[i], [a + p * B : B in Data(E0[i])]);
-			end for;
 			Append(~E0s, E0);
 		end for;
 	end if;

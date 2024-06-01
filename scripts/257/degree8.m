@@ -2,10 +2,6 @@
 AttachSpec("spec");
 load "scripts/257/covering_sets.dat";
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 function contains_components_isomorphic_to(E1,E2);
 	C1 := Components(E1);
 	C2 := Components(E2);
@@ -93,7 +89,7 @@ function quadratic_extensions(K,P);
 end function;
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 5.23.\n";
+printf "We perform the computations from Proposition 4.28.\n";
 printf "==================================================================\n\n";
 
 // Shows that 5 must split in M
@@ -130,7 +126,7 @@ assert forall { E2 : E2 in U2 |
 printf "None of the local algebras at 2 is an extension of Q(sqrt(14)).\n";
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Proposition 5.24.\n";
+printf "We perform the computations from Proposition 4.29.\n";
 printf "==================================================================\n\n";
 
 // LMFDB data
@@ -153,7 +149,7 @@ L := L4_filter[1];
 printf "There exists 1 quartic number field satisfying all local conditions at 2, 3, 5 and 7: %o\n", L;
 
 printf "\n==================================================================\n";
-printf "We perform the computations from Remark 5.25.\n";
+printf "We perform the computations from Remark 4.30.\n";
 printf "==================================================================\n\n";
 
 OL := Integers(L);

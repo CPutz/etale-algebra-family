@@ -1,10 +1,6 @@
 // Load this file from the main folder
 AttachSpec("spec");
 
-printf "--- Warning ---\n";
-printf "Page and theorem numbers mentioned below are currently not correct.\n";
-printf "---------------\n\n";
-
 Z := Integers();
 Q := Rationals();
 _<x> := PolynomialRing(Q);
