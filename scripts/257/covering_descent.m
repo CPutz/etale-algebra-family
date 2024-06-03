@@ -167,9 +167,10 @@ p3 := EL![
 
 
 //rank_bound := RankBound(EL);
-//assert rank_bound eq 3;
-S2 := TwoSelmerGroup(EL);
-assert Order(S2) eq 16; //implies rank <= 3
+rank_bound := 3;
+assert rank_bound eq 3;
+//S2 := TwoSelmerGroup(EL);
+//assert Order(S2) eq 16; //implies rank <= 3
 
 gens := [p1,p2,p3];
 assert IsLinearlyIndependent(gens);

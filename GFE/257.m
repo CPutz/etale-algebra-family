@@ -184,10 +184,30 @@ intrinsic EtaleAlgebras257CoeffRamification(p::RngIntElt, a::RngIntElt, b::RngIn
 
 	if vabc eq 0 or vc gt 0 then
 		minvalz := vc eq 0 select 7 else vc;
-		F3 := ReciprocalPolynomial(s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1));
+		psi := s * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (4*t - 1);
+		if p eq 5 then
+			if vc ge 5 then
+				psi := s * 5^(minvalz - 5) * 4*t^5*(t^3 + 4*t^2 + 14*t + 70) - (4*t - 5);
+				minvalz := 0;
+			else //vc lt 5
+				psi := s * 5^(minvalz + 7 - 5) * 4*t^5*(t^3 + 4*t^2 + 14*t + 70) - (4*t - 5);
+				minvalz := 0;
+			end if;
+		end if;
+
+		F3 := ReciprocalPolynomial(psi);
 		Par3 := pAdicNbhdSpace(Rationals(), p : MinVal := minvalz, CongrVal := Integers(7)!vc);
 		E3 := EtaleAlgebraFamily(F3, p : Precision := Precision,
 			CalcIso := false, ParameterSpace := Par3);
+
+		//the remaining cases for p=5 and 0 < v_3(c) < 5
+		if p eq 5 and vc lt 5 and vc ne 0 then
+			for a in [1..4] do
+				F3a := 5^vc * 4*t^5*(25*t^3 + 20*t^2 + 14*t + 14) - (a + 5*s) * (4*t - 1);
+				E3a := EtaleAlgebraFamily(F3a, p : Precision := Precision, CalcIso := false, BoundMethod := "Difference");
+				E3 cat:= E3a;
+			end for;
+		end if;
 	end if;
 
 	Eis := (&cat E0s) cat E1 cat E2 cat E3;

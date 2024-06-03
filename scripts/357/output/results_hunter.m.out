@@ -1,9 +1,10 @@
---- Warning ---
-Page and theorem numbers mentioned below are currently not correct.
----------------
-
 Loading "scripts/357/results_hunter_raw.dat"
 Loading "scripts/357/local_covering_sets.dat"
+
+==================================================================
+We perform the computations for Proposition 3.49. 
+==================================================================
+
 computing isomorphism classes of number fields
 
 ---------- Number fields with discriminant -3^6*5^4*7^7 ----------

@@ -1,11 +1,7 @@
 Loading "scripts/257/covering_sets.dat"
---- Warning ---
-Page and theorem numbers mentioned below are currently not correct.
----------------
-
 
 ==================================================================
-We perform the computations from Proposition 5.23.
+We perform the computations from Proposition 4.28.
 ==================================================================
 
 There exists 1 quadratic number field satisfying all local conditions at 5 and 
@@ -13,7 +9,7 @@ There exists 1 quadratic number field satisfying all local conditions at 5 and
 None of the local algebras at 2 is an extension of Q(sqrt(14)).
 
 ==================================================================
-We perform the computations from Proposition 5.24.
+We perform the computations from Proposition 4.29.
 ==================================================================
 
 Loading "scripts/257/fields_quartic_unramified257.dat"
@@ -25,7 +21,7 @@ and 7: Number Field with defining polynomial x^4 - 2*x^3 - 2*x^2 - 4*x - 10 over
 the Rational Field
 
 ==================================================================
-We perform the computations from Remark 5.25.
+We perform the computations from Remark 4.30.
 ==================================================================
 
 There exists 4 octic number fields satisfying all local conditions at 2, 3, 5 

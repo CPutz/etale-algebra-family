@@ -14,10 +14,10 @@ function to_list(rs);
 end function;
 
 procedure print_rams(v, ps, rams, indices);
-	header := ["p", Sprintf("v_p(%o)", v)] cat [IntegerToString(a) : a in [1..#rams[1]]];
+	header := ["p", Sprintf("v_p(%o)", v)] cat [IntegerToString(a) : a in indices];
 	lines := [[IntegerToString(ps[i]), Sprintf("v_%o(d)", ps[i])] cat
 		[ to_list(Sort(SetToSequence(r))) : r in rams[i] ]
-		: i in indices];
+		: i in [1..#rams]];
 
 	max_length := Max(Max([#s : s in header]), Max([#s : s in l, l in lines]));
 	for l in [header] cat lines do

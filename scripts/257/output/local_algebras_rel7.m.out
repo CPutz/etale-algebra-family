@@ -1,13 +1,9 @@
---- Warning ---
-Page and theorem numbers mentioned below are currently not correct.
----------------
-
 Loading "scripts/257/covering_sets_rel7.dat"
 
 ==================================================================
-We perform the computations for Theorem 5.39. We verify that the
+We perform the computations for Theorem 4.42. We verify that the
 local covering sets as defined in the file covering_sets_rel7.m
-(which correspond to the sets given in Theorem 5.39) are correct
+(which correspond to the sets given in Theorem 4.42) are correct
 and are minimal.
 ==================================================================
 
