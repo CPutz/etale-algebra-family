@@ -9,7 +9,7 @@ where $s_0$ ranges over $\mathcal A$ (and for which $F(s_0,t)$ is separable).
 
 ## Usage
 
-To load this package in Magma, one attaches the `spec` file.
+This package is compatible with Magma `V2.28-8`. To load the package in Magma, one attaches the `spec` file.
 
 ```
 AttachSpec("spec");
@@ -79,5 +79,5 @@ We give a quick description of the contents of this Magma package.
 
 ## References
 
-\[1\] Casper Putz. \`Enumeration of local and global étale algebras applied to generalized Fermat equations\`. PhD thesis. Vrije universiteit Amsterdam, 2024 - to be submitted
+\[1\] Casper Putz. \`Enumeration of local and global étale algebras applied to generalized Fermat equations\`. PhD thesis. Vrije universiteit Amsterdam, 2024
 
