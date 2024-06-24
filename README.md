@@ -29,19 +29,23 @@ F := t^3 - s*(t - 2);
 time E := EtaleAlgebraFamily(F, 3);
 
 printf "Found %o isomorphism classes\n", #E;
-printf "The 5-th one is: %o\n", SimplifyToProduct(E[5]);
+printf "The 12-th one is: %o\n", SimplifyToProduct(E[12]);
 ```
 
 This produces the following output.
 
 ```
 Found 14 isomorphism classes
-The 5-th one is: Etale algebra defined by product of [
-Unramified extension defined by the polynomial x^3 + (2 + O(3^50))*x + 1 + 
-O(3^50) over Unramified extension defined by a map over 3-adic field mod 3^50
+The 12-th one is: Etale algebra defined by product of [
+Unramified extension defined by the polynomial x + 2 + O(3^50) over 
+Unramified extension defined by a map over 3-adic field mod 3^50,
+Totally ramified extension defined by the polynomial x^2 - 3 + O(3^50) over 
+Unramified extension defined by a map over 3-adic field mod 3^50
 ] with stable neighbourhoods [
-1 + 3 * OK,
-756 + 2187 * OK
+27 + 1594323 * (OK^2 - {0}),
+54 + 243 * OK,
+2214 + 6561 * OK,
+19710 + 59049 * OK
 ]
 ```
 
