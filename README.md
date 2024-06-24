@@ -16,7 +16,7 @@ AttachSpec("spec");
 ```
 
 Below, we give a simple example in Magma code. It computes the isomorphism classes attained by
-$$\mathbb Z_3[t] / (t^3 - s_0(t-2))$$
+$$\mathbb Q_3[t] / (t^3 - s_0(t-2))$$
 for $s_0\in\mathbb Z_3$.
 
 ```
@@ -45,8 +45,8 @@ O(3^50) over Unramified extension defined by a map over 3-adic field mod 3^50
 ]
 ```
 
-This output above shows that $\mathbb Z_3[t] / (t^3 - s_0(t-2))$ attains $14$ distinct isomorphism classes for $s_0\in\mathbb Z_3$ (for which $t^3 - s_0(t-2)$ is also separable). For instance, we have
-$$\mathbb Z_3[t] / (t^3 - s_0(t-2)) \cong \mathbb Z_3[t] / (t^3 + 2t + 1)$$
+This output above shows that $\mathbb Q_3[t] / (t^3 - s_0(t-2))$ attains $14$ distinct isomorphism classes for $s_0\in\mathbb Z_3$ (for which $t^3 - s_0(t-2)$ is also separable). For instance, we have
+$$\mathbb Q_3[t] / (t^3 - s_0(t-2)) \cong \mathbb Q_3[t] / (t^3 + 2t + 1)$$
 if and only if $s_0\in 1 + 3\mathbb Z_3$ or $s_0\in 756 + 2187\mathbb Z_3$.
 
 **example with parameter space**
