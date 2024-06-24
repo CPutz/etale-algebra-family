@@ -2,7 +2,7 @@
 
 This is a package in Magma for computing isomorphism classes of local étale algebras parametrized by one variable. This package accompanies the PhD thesis \[1\].
 
-For a more precise description, let $K$ be a number field and let $\mathfrak p$ be a finite place of $K$. Write $K_{\mathfrak p}$ for the completion of $K$ at $\mathfrak p$. Let $F\in \mathcal O_K[s,t]$ with $\deg_s(F) = 1$. Moreover, let $\mathcal A\subseteq\mathcal O_K$. This package provides an algorithm for computing the isomorphism classes of étale $\mathbb K_{\mathfrak p}$-algebras attained by
+For a more precise description, let $K$ be a number field and let $\mathfrak p$ be a finite place of $K$. Write $K_{\mathfrak p}$ for the completion of $K$ at $\mathfrak p$. Let $F\in \mathcal O_K[s,t]$ with $\deg_s(F) = 1$. Moreover, let $\mathcal A\subseteq\mathcal O_K$. This package provides an algorithm for computing the isomorphism classes of étale $K_{\mathfrak p}$-algebras attained by
 $$K_{\mathfrak p}[t] / (F(s_0,t))$$
 where $s_0$ ranges over $\mathcal A$ (and for which $F(s_0,t)$ is separable).
 
