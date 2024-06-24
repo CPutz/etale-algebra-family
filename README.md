@@ -51,7 +51,7 @@ Unramified extension defined by a map over 3-adic field mod 3^50
 
 This output above shows that $\mathbb Q_3[t] / (t^3 - s_0(t-2))$ attains $14$ distinct isomorphism classes for $s_0\in\mathbb Z_3$ (for which $t^3 - s_0(t-2)$ is also separable). For instance, we have
 $$\mathbb Q_3[t] / (t^3 - s_0(t-2)) \cong \mathbb Q_3(\sqrt{3}) \times \mathbb Q_3$$
-with $s_0\in\mathbb Z_3$ if and only if $s_0\in 2\cdot 3^3 + 3^5\mathbb Z_3$ or $s_0\in 3^3 + 3^7(\mathbb Z_3^2\setminus `\{0\}`)$.
+with $s_0\in\mathbb Z_3$ if and only if $s_0\in 2\cdot 3^3 + 3^5\mathbb Z_3$ or $`s_0\in 3^3 + 3^7(\mathbb Z_3^2\setminus \{0\})`$.
 
 More examples can be found in [examples](https://github.com/CPutz/etale-algebra-family/tree/master/examples).
 
