@@ -81,5 +81,5 @@ We give a quick description of the contents of this Magma package.
 
 ## References
 
-\[1\] Casper Putz. \`Enumeration of local and global étale algebras applied to generalized Fermat equations\`. PhD thesis. Vrije universiteit Amsterdam, 2024
+\[1\] Casper Putz. \`Enumeration of local and global étale algebras applied to generalized Fermat equations\`. PhD thesis. Vrije universiteit Amsterdam, 2024. [https://research.vu.nl/en/publications/enumeration-of-local-and-global-étale-algebras-applied-to-general](https://research.vu.nl/en/publications/enumeration-of-local-and-global-%C3%A9tale-algebras-applied-to-general)
 
